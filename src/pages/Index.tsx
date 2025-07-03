@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { FlightSearchForm, SearchFormData } from '@/components/FlightSearchForm';
 import { FlightCard } from '@/components/FlightCard';
@@ -12,7 +13,9 @@ export default function Index() {
 
   const [filters, setFilters] = useState<FilterOptions>({
     airlines: ['VJ', 'VNA'],
-    showCheapestOnly: true, // Default to true
+    showCheapestOnly: true,
+    directFlightsOnly: true,
+    show2pc: true,
     sortBy: 'price'
   });
 
@@ -29,6 +32,16 @@ export default function Index() {
 
       const allFlights = [...vietJetFlights, ...vietnamAirlinesFlights];
       setFlights(allFlights);
+
+      // Auto-adjust filters based on available flights
+      const hasDirectFlights = allFlights.some(f => f.departure.stops === 0);
+      const hasVfr2pc = allFlights.some(f => f.airline === 'VNA' && f.baggageType === 'VFR');
+
+      setFilters(prev => ({
+        ...prev,
+        directFlightsOnly: hasDirectFlights ? prev.directFlightsOnly : false,
+        show2pc: hasVfr2pc ? prev.show2pc : false
+      }));
     } catch (err: any) {
       setError(err.message || 'Đã xảy ra lỗi khi tìm kiếm chuyến bay.');
     } finally {
@@ -42,6 +55,19 @@ export default function Index() {
     // Filter by airlines
     if (filters.airlines.length > 0) {
       filtered = filtered.filter(flight => filters.airlines.includes(flight.airline));
+    }
+
+    // Filter for direct flights only
+    if (filters.directFlightsOnly) {
+      filtered = filtered.filter(flight => flight.departure.stops === 0);
+    }
+
+    // Filter for 2pc (VFR baggage type)
+    if (filters.show2pc) {
+      filtered = filtered.filter(flight => 
+        flight.airline === 'VJ' || 
+        (flight.airline === 'VNA' && flight.baggageType === 'VFR')
+      );
     }
 
     // Filter for cheapest only
@@ -78,6 +104,10 @@ export default function Index() {
 
   const filteredFlights = filterAndSortFlights(flights);
 
+  // Check if we have direct flights and VFR 2pc flights
+  const hasDirectFlights = flights.some(f => f.departure.stops === 0);
+  const hasVfr2pc = flights.some(f => f.airline === 'VNA' && f.baggageType === 'VFR');
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <header className="bg-white dark:bg-gray-800 shadow">
@@ -95,7 +125,12 @@ export default function Index() {
         <FlightSearchForm onSearch={handleSearch} loading={loading} />
         
         {flights.length > 0 && (
-          <FlightFilters filters={filters} onFiltersChange={setFilters} />
+          <FlightFilters 
+            filters={filters} 
+            onFiltersChange={setFilters}
+            hasDirectFlights={hasDirectFlights}
+            hasVfr2pc={hasVfr2pc}
+          />
         )}
 
         {loading && (

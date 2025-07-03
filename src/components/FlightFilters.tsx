@@ -8,15 +8,24 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 export interface FilterOptions {
   airlines: string[];
   showCheapestOnly: boolean;
+  directFlightsOnly: boolean;
+  show2pc: boolean;
   sortBy: 'price' | 'duration' | 'departure';
 }
 
 interface FlightFiltersProps {
   filters: FilterOptions;
   onFiltersChange: (filters: FilterOptions) => void;
+  hasDirectFlights: boolean;
+  hasVfr2pc: boolean;
 }
 
-export const FlightFilters: React.FC<FlightFiltersProps> = ({ filters, onFiltersChange }) => {
+export const FlightFilters: React.FC<FlightFiltersProps> = ({ 
+  filters, 
+  onFiltersChange, 
+  hasDirectFlights, 
+  hasVfr2pc 
+}) => {
   const handleAirlineChange = (airline: string, checked: boolean) => {
     const newAirlines = checked 
       ? [...filters.airlines, airline]
@@ -32,6 +41,20 @@ export const FlightFilters: React.FC<FlightFiltersProps> = ({ filters, onFilters
     onFiltersChange({
       ...filters,
       showCheapestOnly: checked
+    });
+  };
+
+  const handleDirectFlightsChange = (checked: boolean) => {
+    onFiltersChange({
+      ...filters,
+      directFlightsOnly: checked
+    });
+  };
+
+  const handle2pcChange = (checked: boolean) => {
+    onFiltersChange({
+      ...filters,
+      show2pc: checked
     });
   };
 
@@ -51,15 +74,39 @@ export const FlightFilters: React.FC<FlightFiltersProps> = ({ filters, onFilters
         {/* Cheapest Only Filter */}
         <div className="space-y-3">
           <Label className="text-base font-medium">Tùy chọn hiển thị</Label>
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="cheapest-only"
-              checked={filters.showCheapestOnly}
-              onCheckedChange={handleCheapestOnlyChange}
-            />
-            <Label htmlFor="cheapest-only" className="text-sm">
-              Chỉ hiển thị vé rẻ nhất (VJ & VNA)
-            </Label>
+          <div className="space-y-2">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="cheapest-only"
+                checked={filters.showCheapestOnly}
+                onCheckedChange={handleCheapestOnlyChange}
+              />
+              <Label htmlFor="cheapest-only" className="text-sm">
+                Chỉ hiển thị vé rẻ nhất (VJ & VNA)
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="direct-flights"
+                checked={filters.directFlightsOnly && hasDirectFlights}
+                onCheckedChange={handleDirectFlightsChange}
+                disabled={!hasDirectFlights}
+              />
+              <Label htmlFor="direct-flights" className="text-sm">
+                Bay thẳng
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="show-2pc"
+                checked={filters.show2pc && hasVfr2pc}
+                onCheckedChange={handle2pcChange}
+                disabled={!hasVfr2pc}
+              />
+              <Label htmlFor="show-2pc" className="text-sm">
+                2pc (VNA 46kg)
+              </Label>
+            </div>
           </div>
         </div>
 

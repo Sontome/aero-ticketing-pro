@@ -2,9 +2,11 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plane, Clock, Users } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Plane, Clock, Users, Copy } from 'lucide-react';
 import { Flight } from '@/services/flightApi';
 import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
 
 interface FlightCardProps {
   flight: Flight;
@@ -12,6 +14,7 @@ interface FlightCardProps {
 
 export const FlightCard: React.FC<FlightCardProps> = ({ flight }) => {
   const { profile } = useAuth();
+  const { toast } = useToast();
   const [adjustedPrice, setAdjustedPrice] = useState(flight.price);
 
   useEffect(() => {
@@ -56,6 +59,29 @@ export const FlightCard: React.FC<FlightCardProps> = ({ flight }) => {
     }
   };
 
+  const handleCopyFlight = () => {
+    const copyText = `${flight.departure.airport}-${flight.arrival.airport}
+${flight.departure.time}
+ngày ${formatDate(flight.departure.date)}${flight.return ? `
+${flight.return.departure.airport}-${flight.return.arrival.airport}
+${flight.return.departure.time}
+ngày ${formatDate(flight.return.departure.date)}` : ''}
+${getBaggageInfo()}, giá vé = ${formatPrice(adjustedPrice)}w`;
+
+    navigator.clipboard.writeText(copyText).then(() => {
+      toast({
+        title: "Đã copy thông tin chuyến bay",
+        description: "Thông tin chuyến bay đã được copy vào clipboard",
+      });
+    }).catch(() => {
+      toast({
+        title: "Lỗi copy",
+        description: "Không thể copy thông tin chuyến bay",
+        variant: "destructive",
+      });
+    });
+  };
+
   return (
     <Card className="hover:shadow-lg transition-shadow duration-200 mb-4">
       <CardContent className="p-6">
@@ -74,9 +100,22 @@ export const FlightCard: React.FC<FlightCardProps> = ({ flight }) => {
                 Còn {flight.availableSeats} ghế
               </div>
             </div>
-            <Badge variant={flight.airline === 'VJ' ? 'default' : 'secondary'}>
-              {flight.airline === 'VJ' ? 'VietJet' : 'Vietnam Airlines'}
-            </Badge>
+            <div className="flex items-center space-x-2">
+              <Badge 
+                variant={flight.airline === 'VJ' ? 'default' : 'secondary'}
+                className={flight.airline === 'VJ' ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600 text-white'}
+              >
+                {flight.airline === 'VJ' ? 'VietJet' : 'Vietnam Airlines'}
+              </Badge>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleCopyFlight}
+                className="p-2"
+              >
+                <Copy className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
 
           {/* Flight Details */}
