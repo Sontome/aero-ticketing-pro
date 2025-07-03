@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from 'react';
-import { Users, Settings, DollarSign, Mail, User } from 'lucide-react';
+import { Users, Settings, DollarSign, Mail, User, LogOut } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,6 +17,7 @@ interface Profile {
   full_name: string | null;
   role: string;
   price_markup: number;
+  status: string;
   created_at: string;
 }
 
@@ -30,6 +30,7 @@ export const AdminDashboard = () => {
     full_name: '',
     price_markup: 0,
     role: 'user',
+    status: 'active',
   });
 
   useEffect(() => {
@@ -66,6 +67,7 @@ export const AdminDashboard = () => {
       full_name: profile.full_name || '',
       price_markup: profile.price_markup || 0,
       role: profile.role,
+      status: profile.status,
     });
   };
 
@@ -79,6 +81,7 @@ export const AdminDashboard = () => {
           full_name: editForm.full_name,
           price_markup: editForm.price_markup,
           role: editForm.role,
+          status: editForm.status,
           updated_at: new Date().toISOString(),
         })
         .eq('id', editingProfile.id);
@@ -108,6 +111,19 @@ export const AdminDashboard = () => {
     ) : (
       <Badge variant="secondary">User</Badge>
     );
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'active':
+        return <Badge variant="default" className="bg-green-500 hover:bg-green-600">Active</Badge>;
+      case 'pending':
+        return <Badge variant="secondary" className="bg-yellow-500 hover:bg-yellow-600 text-white">Pending</Badge>;
+      case 'inactive':
+        return <Badge variant="outline" className="text-red-600 border-red-600">Inactive</Badge>;
+      default:
+        return <Badge variant="secondary">Unknown</Badge>;
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -143,6 +159,7 @@ export const AdminDashboard = () => {
               <Badge variant="destructive" className="mt-1">Admin</Badge>
             </div>
             <Button onClick={signOut} variant="outline">
+              <LogOut className="w-4 h-4 mr-2" />
               Đăng xuất
             </Button>
           </div>
@@ -206,6 +223,7 @@ export const AdminDashboard = () => {
                   <TableHead>Người dùng</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Vai trò</TableHead>
+                  <TableHead>Trạng thái</TableHead>
                   <TableHead>Price Markup (%)</TableHead>
                   <TableHead>Ngày tạo</TableHead>
                   <TableHead>Thao tác</TableHead>
@@ -229,6 +247,7 @@ export const AdminDashboard = () => {
                       </div>
                     </TableCell>
                     <TableCell>{getRoleBadge(profile.role)}</TableCell>
+                    <TableCell>{getStatusBadge(profile.status)}</TableCell>
                     <TableCell>
                       <span className="font-mono">
                         {profile.price_markup || 0}%
@@ -283,6 +302,19 @@ export const AdminDashboard = () => {
                               >
                                 <option value="user">User</option>
                                 <option value="admin">Admin</option>
+                              </select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="status">Trạng thái</Label>
+                              <select
+                                id="status"
+                                value={editForm.status}
+                                onChange={(e) => setEditForm(prev => ({ ...prev, status: e.target.value }))}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+                              >
+                                <option value="pending">Pending</option>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
                               </select>
                             </div>
                             <Button onClick={handleUpdateProfile} className="w-full">

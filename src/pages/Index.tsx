@@ -5,8 +5,11 @@ import { FlightCard } from '@/components/FlightCard';
 import { FlightFilters, FilterOptions } from '@/components/FlightFilters';
 import { fetchVietJetFlights, fetchVietnamAirlinesFlights, Flight } from '@/services/flightApi';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
+import { LogOut } from 'lucide-react';
 
 export default function Index() {
+  const { signOut, profile } = useAuth();
   const [flights, setFlights] = useState<Flight[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -158,6 +161,10 @@ export default function Index() {
 
   const filteredFlights = filterAndSortFlights(flights);
 
+  // Separate flights by airline for side-by-side display
+  const vjFlights = filteredFlights.filter(f => f.airline === 'VJ');
+  const vnaFlights = filteredFlights.filter(f => f.airline === 'VNA');
+
   // Check if we have direct flights and VFR 2pc flights
   const hasDirectFlights = flights.some(f => f.departure.stops === 0);
   const hasVfr2pc = flights.some(f => f.airline === 'VNA' && f.baggageType === 'VFR');
@@ -175,21 +182,32 @@ export default function Index() {
                 Tìm kiếm và so sánh giá vé máy bay từ các hãng hàng không khác nhau.
               </p>
             </div>
-            <div className="flex items-center space-x-2">
-              <span className="text-sm text-gray-600 dark:text-gray-400">Chế độ:</span>
-              <Button
-                variant={priceMode === 'Page' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setPriceMode('Page')}
-              >
-                Page
-              </Button>
-              <Button
-                variant={priceMode === 'Live' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setPriceMode('Live')}
-              >
-                Live
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-600 dark:text-gray-400">Chế độ:</span>
+                <Button
+                  variant={priceMode === 'Page' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setPriceMode('Page')}
+                >
+                  Page
+                </Button>
+                <Button
+                  variant={priceMode === 'Live' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setPriceMode('Live')}
+                >
+                  Live
+                </Button>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Xin chào, {profile?.full_name || profile?.email}
+                </p>
+              </div>
+              <Button onClick={signOut} variant="outline" size="sm">
+                <LogOut className="w-4 h-4 mr-2" />
+                Đăng xuất
               </Button>
             </div>
           </div>
@@ -222,10 +240,38 @@ export default function Index() {
 
         {filteredFlights.length > 0 && (
           <div className="space-y-4">
-            <div className="grid gap-4">
-              {filteredFlights.map((flight) => (
-                <FlightCard key={flight.id} flight={flight} priceMode={priceMode} />
-              ))}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* VietJet flights on the left */}
+              <div className="space-y-4">
+                {vjFlights.length > 0 && (
+                  <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded-lg">
+                    <h3 className="text-lg font-semibold text-red-600 dark:text-red-400 mb-3">
+                      VietJet ({vjFlights.length} chuyến bay)
+                    </h3>
+                    <div className="space-y-4">
+                      {vjFlights.map((flight) => (
+                        <FlightCard key={flight.id} flight={flight} priceMode={priceMode} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Vietnam Airlines flights on the right */}
+              <div className="space-y-4">
+                {vnaFlights.length > 0 && (
+                  <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+                    <h3 className="text-lg font-semibold text-blue-600 dark:text-blue-400 mb-3">
+                      Vietnam Airlines ({vnaFlights.length} chuyến bay)
+                    </h3>
+                    <div className="space-y-4">
+                      {vnaFlights.map((flight) => (
+                        <FlightCard key={flight.id} flight={flight} priceMode={priceMode} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
