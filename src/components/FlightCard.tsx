@@ -31,18 +31,10 @@ export const FlightCard: React.FC<FlightCardProps> = ({ flight, priceMode }) => 
       priceWithMarkup += vnaMarkup;
     }
     
-    // Apply price mode adjustments
-    const isRoundTrip = !!flight.return;
-    if (priceMode === 'Page') {
-      priceWithMarkup += isRoundTrip ? 20000 : 35000;
-    } else {
-      priceWithMarkup += isRoundTrip ? 10000 : 30000;
-    }
-    
     // Round to nearest hundred
     const roundedPrice = Math.round(priceWithMarkup / 100) * 100;
     setAdjustedPrice(roundedPrice);
-  }, [flight.price, flight.airline, profile?.price_vj, profile?.price_vna, priceMode, flight.return]);
+  }, [flight.price, flight.airline, profile?.price_vj, profile?.price_vna]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('ko-KR').format(price);
