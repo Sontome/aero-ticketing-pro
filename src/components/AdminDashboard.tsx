@@ -19,6 +19,8 @@ interface Profile {
   price_markup: number;
   price_vj: number;
   price_vna: number;
+  price_ow: number;
+  price_rt: number;
   status: string;
   created_at: string;
 }
@@ -33,6 +35,8 @@ export const AdminDashboard = () => {
     price_markup: 0,
     price_vj: 0,
     price_vna: 0,
+    price_ow: 0,
+    price_rt: 0,
     role: 'user',
     status: 'active',
   });
@@ -72,6 +76,8 @@ export const AdminDashboard = () => {
       price_markup: profile.price_markup || 0,
       price_vj: profile.price_vj || 0,
       price_vna: profile.price_vna || 0,
+      price_ow: profile.price_ow || 0,
+      price_rt: profile.price_rt || 0,
       role: profile.role,
       status: profile.status,
     });
@@ -88,6 +94,8 @@ export const AdminDashboard = () => {
           price_markup: editForm.price_markup,
           price_vj: editForm.price_vj,
           price_vna: editForm.price_vna,
+          price_ow: editForm.price_ow,
+          price_rt: editForm.price_rt,
           role: editForm.role,
           status: editForm.status,
           updated_at: new Date().toISOString(),
@@ -232,152 +240,190 @@ export const AdminDashboard = () => {
             <CardTitle>Danh sách người dùng</CardTitle>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Người dùng</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Vai trò</TableHead>
-                  <TableHead>Trạng thái</TableHead>
-                  <TableHead>Phí chung</TableHead>
-                  <TableHead>Phí VJ</TableHead>
-                  <TableHead>Phí VNA</TableHead>
-                  <TableHead>Ngày tạo</TableHead>
-                  <TableHead>Thao tác</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {profiles.map((profile) => (
-                  <TableRow key={profile.id}>
-                    <TableCell className="flex items-center space-x-2">
-                      <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
-                        <User className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                      </div>
-                      <span className="font-medium">
-                        {profile.full_name || 'Chưa cập nhật'}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-2">
-                        <Mail className="w-4 h-4 text-gray-400" />
-                        <span>{profile.email}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>{getRoleBadge(profile.role)}</TableCell>
-                    <TableCell>{getStatusBadge(profile.status)}</TableCell>
-                    <TableCell>
-                      <span className="font-mono">
-                        {formatCurrency(profile.price_markup || 0)}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <span className="font-mono">
-                        {formatCurrency(profile.price_vj || 0)}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <span className="font-mono">
-                        {formatCurrency(profile.price_vna || 0)}
-                      </span>
-                    </TableCell>
-                    <TableCell>{formatDate(profile.created_at)}</TableCell>
-                    <TableCell>
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleEditProfile(profile)}
-                          >
-                            Chỉnh sửa
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>Chỉnh sửa thông tin người dùng</DialogTitle>
-                          </DialogHeader>
-                          <div className="space-y-4">
-                            <div className="space-y-2">
-                              <Label htmlFor="full_name">Họ và tên</Label>
-                              <Input
-                                id="full_name"
-                                value={editForm.full_name}
-                                onChange={(e) => setEditForm(prev => ({ ...prev, full_name: e.target.value }))}
-                                placeholder="Nhập họ và tên"
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label htmlFor="price_markup">Phí cộng thêm chung (VND)</Label>
-                              <Input
-                                id="price_markup"
-                                type="number"
-                                value={editForm.price_markup}
-                                onChange={(e) => setEditForm(prev => ({ ...prev, price_markup: parseFloat(e.target.value) || 0 }))}
-                                placeholder="0"
-                                min="0"
-                                step="1000"
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label htmlFor="price_vj">Phí VietJet (VND)</Label>
-                              <Input
-                                id="price_vj"
-                                type="number"
-                                value={editForm.price_vj}
-                                onChange={(e) => setEditForm(prev => ({ ...prev, price_vj: parseFloat(e.target.value) || 0 }))}
-                                placeholder="0"
-                                min="0"
-                                step="1000"
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label htmlFor="price_vna">Phí Vietnam Airlines (VND)</Label>
-                              <Input
-                                id="price_vna"
-                                type="number"
-                                value={editForm.price_vna}
-                                onChange={(e) => setEditForm(prev => ({ ...prev, price_vna: parseFloat(e.target.value) || 0 }))}
-                                placeholder="0"
-                                min="0"
-                                step="1000"
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label htmlFor="role">Vai trò</Label>
-                              <select
-                                id="role"
-                                value={editForm.role}
-                                onChange={(e) => setEditForm(prev => ({ ...prev, role: e.target.value }))}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
-                              >
-                                <option value="user">User</option>
-                                <option value="admin">Admin</option>
-                              </select>
-                            </div>
-                            <div className="space-y-2">
-                              <Label htmlFor="status">Trạng thái</Label>
-                              <select
-                                id="status"
-                                value={editForm.status}
-                                onChange={(e) => setEditForm(prev => ({ ...prev, status: e.target.value }))}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
-                              >
-                                <option value="pending">Pending</option>
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
-                              </select>
-                            </div>
-                            <Button onClick={handleUpdateProfile} className="w-full">
-                              Cập nhật
-                            </Button>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-                    </TableCell>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Người dùng</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Vai trò</TableHead>
+                    <TableHead>Trạng thái</TableHead>
+                    <TableHead>Phí chung</TableHead>
+                    <TableHead>Phí VJ</TableHead>
+                    <TableHead>Phí VNA</TableHead>
+                    <TableHead>Phí 1 chiều</TableHead>
+                    <TableHead>Phí khứ hồi</TableHead>
+                    <TableHead>Ngày tạo</TableHead>
+                    <TableHead>Thao tác</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {profiles.map((profile) => (
+                    <TableRow key={profile.id}>
+                      <TableCell className="flex items-center space-x-2">
+                        <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                          <User className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <span className="font-medium">
+                          {profile.full_name || 'Chưa cập nhật'}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-2">
+                          <Mail className="w-4 h-4 text-gray-400" />
+                          <span>{profile.email}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>{getRoleBadge(profile.role)}</TableCell>
+                      <TableCell>{getStatusBadge(profile.status)}</TableCell>
+                      <TableCell>
+                        <span className="font-mono">
+                          {formatCurrency(profile.price_markup || 0)}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <span className="font-mono">
+                          {formatCurrency(profile.price_vj || 0)}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <span className="font-mono">
+                          {formatCurrency(profile.price_vna || 0)}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <span className="font-mono">
+                          {formatCurrency(profile.price_ow || 0)}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <span className="font-mono">
+                          {formatCurrency(profile.price_rt || 0)}
+                        </span>
+                      </TableCell>
+                      <TableCell>{formatDate(profile.created_at)}</TableCell>
+                      <TableCell>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEditProfile(profile)}
+                            >
+                              Chỉnh sửa
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-md">
+                            <DialogHeader>
+                              <DialogTitle>Chỉnh sửa thông tin người dùng</DialogTitle>
+                            </DialogHeader>
+                            <div className="space-y-4 max-h-96 overflow-y-auto">
+                              <div className="space-y-2">
+                                <Label htmlFor="full_name">Họ và tên</Label>
+                                <Input
+                                  id="full_name"
+                                  value={editForm.full_name}
+                                  onChange={(e) => setEditForm(prev => ({ ...prev, full_name: e.target.value }))}
+                                  placeholder="Nhập họ và tên"
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label htmlFor="price_markup">Phí cộng thêm chung (VND)</Label>
+                                <Input
+                                  id="price_markup"
+                                  type="number"
+                                  value={editForm.price_markup}
+                                  onChange={(e) => setEditForm(prev => ({ ...prev, price_markup: parseFloat(e.target.value) || 0 }))}
+                                  placeholder="0"
+                                  min="0"
+                                  step="1000"
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label htmlFor="price_vj">Phí VietJet (VND)</Label>
+                                <Input
+                                  id="price_vj"
+                                  type="number"
+                                  value={editForm.price_vj}
+                                  onChange={(e) => setEditForm(prev => ({ ...prev, price_vj: parseFloat(e.target.value) || 0 }))}
+                                  placeholder="0"
+                                  min="0"
+                                  step="1000"
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label htmlFor="price_vna">Phí Vietnam Airlines (VND)</Label>
+                                <Input
+                                  id="price_vna"
+                                  type="number"
+                                  value={editForm.price_vna}
+                                  onChange={(e) => setEditForm(prev => ({ ...prev, price_vna: parseFloat(e.target.value) || 0 }))}
+                                  placeholder="0"
+                                  min="0"
+                                  step="1000"
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label htmlFor="price_ow">Phí vé một chiều (VND)</Label>
+                                <Input
+                                  id="price_ow"
+                                  type="number"
+                                  value={editForm.price_ow}
+                                  onChange={(e) => setEditForm(prev => ({ ...prev, price_ow: parseFloat(e.target.value) || 0 }))}
+                                  placeholder="0"
+                                  min="0"
+                                  step="1000"
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label htmlFor="price_rt">Phí vé khứ hồi (VND)</Label>
+                                <Input
+                                  id="price_rt"
+                                  type="number"
+                                  value={editForm.price_rt}
+                                  onChange={(e) => setEditForm(prev => ({ ...prev, price_rt: parseFloat(e.target.value) || 0 }))}
+                                  placeholder="0"
+                                  min="0"
+                                  step="1000"
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label htmlFor="role">Vai trò</Label>
+                                <select
+                                  id="role"
+                                  value={editForm.role}
+                                  onChange={(e) => setEditForm(prev => ({ ...prev, role: e.target.value }))}
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+                                >
+                                  <option value="user">User</option>
+                                  <option value="admin">Admin</option>
+                                </select>
+                              </div>
+                              <div className="space-y-2">
+                                <Label htmlFor="status">Trạng thái</Label>
+                                <select
+                                  id="status"
+                                  value={editForm.status}
+                                  onChange={(e) => setEditForm(prev => ({ ...prev, status: e.target.value }))}
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+                                >
+                                  <option value="pending">Pending</option>
+                                  <option value="active">Active</option>
+                                  <option value="inactive">Inactive</option>
+                                </select>
+                              </div>
+                              <Button onClick={handleUpdateProfile} className="w-full">
+                                Cập nhật
+                              </Button>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
         </Card>
       </div>
