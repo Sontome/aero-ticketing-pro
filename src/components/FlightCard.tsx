@@ -52,7 +52,7 @@ export const FlightCard: React.FC<FlightCardProps> = ({ flight }) => {
     if (flight.airline === 'VJ') {
       return `DELUXE-${flight.ticketClass}`;
     } else {
-      return `${flight.outbound?.ticketClass || 'R'}-${flight.return?.ticketClass || 'R'}`;
+      return `${flight.ticketClass}-${flight.return?.ticketClass || 'R'}`;
     }
   };
 
