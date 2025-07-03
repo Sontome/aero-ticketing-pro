@@ -4,12 +4,14 @@ import { FlightSearchForm, SearchFormData } from '@/components/FlightSearchForm'
 import { FlightCard } from '@/components/FlightCard';
 import { FlightFilters, FilterOptions } from '@/components/FlightFilters';
 import { fetchVietJetFlights, fetchVietnamAirlinesFlights, Flight } from '@/services/flightApi';
+import { Button } from '@/components/ui/button';
 
 export default function Index() {
   const [flights, setFlights] = useState<Flight[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchPerformed, setSearchPerformed] = useState(false);
+  const [priceMode, setPriceMode] = useState<'Page' | 'Live'>('Page');
 
   const [filters, setFilters] = useState<FilterOptions>({
     airlines: ['VJ', 'VNA'],
@@ -42,32 +44,48 @@ export default function Index() {
     setLoading(true);
     setError(null);
     setSearchPerformed(true);
+    setFlights([]); // Clear previous results
 
     try {
-      const [vietJetFlights, vietnamAirlinesFlights] = await Promise.allSettled([
-        fetchVietJetFlights(searchData),
-        fetchVietnamAirlinesFlights(searchData),
+      // Start both API calls simultaneously
+      const vietJetPromise = fetchVietJetFlights(searchData);
+      const vietnamAirlinesPromise = fetchVietnamAirlinesFlights(searchData);
+
+      // Handle VietJet results as soon as they arrive
+      vietJetPromise.then((vietJetFlights) => {
+        if (vietJetFlights.length > 0) {
+          setFlights(prev => [...prev, ...vietJetFlights]);
+          playNotificationSound();
+        }
+      }).catch((error) => {
+        console.error('VietJet API error:', error);
+      });
+
+      // Handle Vietnam Airlines results as soon as they arrive
+      vietnamAirlinesPromise.then((vietnamAirlinesFlights) => {
+        if (vietnamAirlinesFlights.length > 0) {
+          setFlights(prev => [...prev, ...vietnamAirlinesFlights]);
+          setTimeout(() => playNotificationSound(), 200); // Slight delay for second notification
+        }
+      }).catch((error) => {
+        console.error('Vietnam Airlines API error:', error);
+      });
+
+      // Wait for both to complete to update filters and loading state
+      const [vietJetResult, vietnamAirlinesResult] = await Promise.allSettled([
+        vietJetPromise,
+        vietnamAirlinesPromise
       ]);
 
       let allFlights: Flight[] = [];
 
-      // Handle VietJet results
-      if (vietJetFlights.status === 'fulfilled') {
-        allFlights = [...allFlights, ...vietJetFlights.value];
-        if (vietJetFlights.value.length > 0) {
-          playNotificationSound();
-        }
+      if (vietJetResult.status === 'fulfilled') {
+        allFlights = [...allFlights, ...vietJetResult.value];
       }
 
-      // Handle Vietnam Airlines results
-      if (vietnamAirlinesFlights.status === 'fulfilled') {
-        allFlights = [...allFlights, ...vietnamAirlinesFlights.value];
-        if (vietnamAirlinesFlights.value.length > 0) {
-          setTimeout(() => playNotificationSound(), 200); // Slight delay for second notification
-        }
+      if (vietnamAirlinesResult.status === 'fulfilled') {
+        allFlights = [...allFlights, ...vietnamAirlinesResult.value];
       }
-
-      setFlights(allFlights);
 
       // Auto-adjust filters based on available flights
       const hasDirectFlights = allFlights.some(f => f.departure.stops === 0);
@@ -148,12 +166,33 @@ export default function Index() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <header className="bg-white dark:bg-gray-800 shadow">
         <div className="container mx-auto px-4 py-6">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Tìm kiếm chuyến bay
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Tìm kiếm và so sánh giá vé máy bay từ các hãng hàng không khác nhau.
-          </p>
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                Tìm kiếm chuyến bay
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400">
+                Tìm kiếm và so sánh giá vé máy bay từ các hãng hàng không khác nhau.
+              </p>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-gray-600 dark:text-gray-400">Chế độ:</span>
+              <Button
+                variant={priceMode === 'Page' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setPriceMode('Page')}
+              >
+                Page
+              </Button>
+              <Button
+                variant={priceMode === 'Live' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setPriceMode('Live')}
+              >
+                Live
+              </Button>
+            </div>
+          </div>
         </div>
       </header>
 
@@ -185,7 +224,7 @@ export default function Index() {
           <div className="space-y-4">
             <div className="grid gap-4">
               {filteredFlights.map((flight) => (
-                <FlightCard key={flight.id} flight={flight} />
+                <FlightCard key={flight.id} flight={flight} priceMode={priceMode} />
               ))}
             </div>
           </div>

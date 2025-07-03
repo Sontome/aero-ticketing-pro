@@ -10,9 +10,10 @@ import { useToast } from '@/hooks/use-toast';
 
 interface FlightCardProps {
   flight: Flight;
+  priceMode: 'Page' | 'Live';
 }
 
-export const FlightCard: React.FC<FlightCardProps> = ({ flight }) => {
+export const FlightCard: React.FC<FlightCardProps> = ({ flight, priceMode }) => {
   const { profile } = useAuth();
   const { toast } = useToast();
   const [adjustedPrice, setAdjustedPrice] = useState(flight.price);
@@ -20,9 +21,18 @@ export const FlightCard: React.FC<FlightCardProps> = ({ flight }) => {
   useEffect(() => {
     // Apply user's price markup
     const markup = profile?.price_markup || 0;
-    const priceWithMarkup = flight.price * (1 + markup / 100);
+    let priceWithMarkup = flight.price * (1 + markup / 100);
+    
+    // Apply price mode adjustments
+    const isRoundTrip = !!flight.return;
+    if (priceMode === 'Page') {
+      priceWithMarkup += isRoundTrip ? 20000 : 35000;
+    } else {
+      priceWithMarkup += isRoundTrip ? 10000 : 30000;
+    }
+    
     setAdjustedPrice(Math.round(priceWithMarkup));
-  }, [flight.price, profile?.price_markup]);
+  }, [flight.price, profile?.price_markup, priceMode, flight.return]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('ko-KR').format(price);
@@ -60,12 +70,10 @@ export const FlightCard: React.FC<FlightCardProps> = ({ flight }) => {
   };
 
   const handleCopyFlight = () => {
-    const copyText = `${flight.departure.airport}-${flight.arrival.airport}
-${flight.departure.time}
-ngày ${formatDate(flight.departure.date)}${flight.return ? `
-${flight.return.departure.airport}-${flight.return.arrival.airport}
-${flight.return.departure.time}
-ngày ${formatDate(flight.return.departure.date)}` : ''}
+    const outboundLine = `${flight.departure.airport}-${flight.arrival.airport} ${flight.departure.time} ngày ${formatDate(flight.departure.date)}`;
+    const returnLine = flight.return ? `${flight.return.departure.airport}-${flight.return.arrival.airport} ${flight.return.departure.time} ngày ${formatDate(flight.return.departure.date)}` : '';
+    
+    const copyText = `${outboundLine}${returnLine ? `\n${returnLine}` : ''}
 ${getBaggageInfo()}, giá vé = ${formatPrice(adjustedPrice)}w`;
 
     navigator.clipboard.writeText(copyText).then(() => {
