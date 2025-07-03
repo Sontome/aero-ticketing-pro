@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Plane, LogIn, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -11,27 +10,7 @@ import { AdminDashboard } from '@/components/AdminDashboard';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-
-interface Flight {
-  id: string;
-  airline: 'VJ' | 'VNA';
-  flightNumber: string;
-  departure: {
-    time: string;
-    airport: string;
-    city: string;
-  };
-  arrival: {
-    time: string;
-    airport: string;
-    city: string;
-  };
-  duration: string;
-  price: number;
-  currency: string;
-  aircraft: string;
-  availableSeats: number;
-}
+import { fetchVietJetFlights, fetchVietnamAirlinesFlights, Flight } from '@/services/flightApi';
 
 interface SearchFormData {
   from: string;
@@ -69,121 +48,6 @@ const Index = () => {
     stops: [],
   });
 
-  // Mock API functions for demonstration
-  const fetchVietJetFlights = async (searchData: SearchFormData): Promise<Flight[]> => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, Math.random() * 2000 + 1000));
-    
-    const mockFlights: Flight[] = [
-      {
-        id: 'vj-001',
-        airline: 'VJ',
-        flightNumber: 'VJ123',
-        departure: {
-          time: '06:30',
-          airport: searchData.from,
-          city: getCityName(searchData.from),
-        },
-        arrival: {
-          time: '08:45',
-          airport: searchData.to,
-          city: getCityName(searchData.to),
-        },
-        duration: '2h 15m',
-        price: 1500000,
-        currency: 'VND',
-        aircraft: 'Airbus A321',
-        availableSeats: 23,
-      },
-      {
-        id: 'vj-002',
-        airline: 'VJ',
-        flightNumber: 'VJ456',
-        departure: {
-          time: '14:20',
-          airport: searchData.from,
-          city: getCityName(searchData.from),
-        },
-        arrival: {
-          time: '16:35',
-          airport: searchData.to,
-          city: getCityName(searchData.to),
-        },
-        duration: '2h 15m',
-        price: 1350000,
-        currency: 'VND',
-        aircraft: 'Airbus A320',
-        availableSeats: 15,
-      },
-    ];
-
-    return mockFlights;
-  };
-
-  const fetchVietnamAirlinesFlights = async (searchData: SearchFormData): Promise<Flight[]> => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, Math.random() * 3000 + 1500));
-    
-    const mockFlights: Flight[] = [
-      {
-        id: 'vna-001',
-        airline: 'VNA',
-        flightNumber: 'VN212',
-        departure: {
-          time: '07:15',
-          airport: searchData.from,
-          city: getCityName(searchData.from),
-        },
-        arrival: {
-          time: '09:30',
-          airport: searchData.to,
-          city: getCityName(searchData.to),
-        },
-        duration: '2h 15m',
-        price: 1800000,
-        currency: 'VND',
-        aircraft: 'Boeing 787',
-        availableSeats: 45,
-      },
-      {
-        id: 'vna-002',
-        airline: 'VNA',
-        flightNumber: 'VN624',
-        departure: {
-          time: '19:45',
-          airport: searchData.from,
-          city: getCityName(searchData.from),
-        },
-        arrival: {
-          time: '22:00',
-          airport: searchData.to,
-          city: getCityName(searchData.to),
-        },
-        duration: '2h 15m',
-        price: 1950000,
-        currency: 'VND',
-        aircraft: 'Airbus A350',
-        availableSeats: 12,
-      },
-    ];
-
-    return mockFlights;
-  };
-
-  const getCityName = (code: string) => {
-    const cities: Record<string, string> = {
-      'HAN': 'Hà Nội',
-      'SGN': 'TP.HCM',
-      'DAD': 'Đà Nẵng',
-      'CXR': 'Nha Trang',
-      'DLI': 'Đà Lạt',
-      'PQC': 'Phú Quốc',
-      'VCA': 'Cần Thơ',
-      'HPH': 'Hải Phòng',
-    };
-    return cities[code] || code;
-  };
-
   const handleSearch = async (searchData: SearchFormData) => {
     console.log('Searching flights:', searchData);
     setLoading(true);
@@ -213,12 +77,28 @@ const Index = () => {
       console.log('VietJet flights loaded:', flights);
       setVjFlights(flights);
       return flights;
+    }).catch(error => {
+      console.error('VietJet API failed:', error);
+      toast({
+        variant: "destructive",
+        title: "Lỗi tải dữ liệu VietJet",
+        description: "Không thể tải dữ liệu từ VietJet Air",
+      });
+      return [];
     });
 
     const vnaPromise = fetchVietnamAirlinesFlights(searchData).then(flights => {
       console.log('Vietnam Airlines flights loaded:', flights);
       setVnaFlights(flights);
       return flights;
+    }).catch(error => {
+      console.error('Vietnam Airlines API failed:', error);
+      toast({
+        variant: "destructive",
+        title: "Lỗi tải dữ liệu Vietnam Airlines",
+        description: "Không thể tải dữ liệu từ Vietnam Airlines",
+      });
+      return [];
     });
 
     // Update results as each API responds
@@ -226,20 +106,20 @@ const Index = () => {
       const results = await Promise.allSettled([vjPromise, vnaPromise]);
       
       let allFlights: Flight[] = [];
-      results.forEach((result, index) => {
+      results.forEach((result) => {
         if (result.status === 'fulfilled') {
           allFlights = [...allFlights, ...result.value];
-        } else {
-          console.error(`API ${index === 0 ? 'VietJet' : 'Vietnam Airlines'} failed:`, result.reason);
-          toast({
-            variant: "destructive",
-            title: "Lỗi tải dữ liệu",
-            description: `Không thể tải dữ liệu từ ${index === 0 ? 'VietJet' : 'Vietnam Airlines'}`,
-          });
         }
       });
 
       setFlights(allFlights);
+      
+      if (allFlights.length === 0) {
+        toast({
+          title: "Không tìm thấy chuyến bay",
+          description: "Vui lòng thử lại với thông tin khác",
+        });
+      }
     } catch (error) {
       console.error('Search error:', error);
       toast({

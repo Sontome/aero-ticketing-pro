@@ -25,7 +25,7 @@ interface FlightSearchFormProps {
   loading: boolean;
 }
 
-const vietnamCities = [
+const airports = [
   { code: 'HAN', name: 'Hà Nội', fullName: 'Hà Nội (HAN)' },
   { code: 'SGN', name: 'TP.HCM', fullName: 'TP. Hồ Chí Minh (SGN)' },
   { code: 'DAD', name: 'Đà Nẵng', fullName: 'Đà Nẵng (DAD)' },
@@ -34,6 +34,9 @@ const vietnamCities = [
   { code: 'PQC', name: 'Phú Quốc', fullName: 'Phú Quốc (PQC)' },
   { code: 'VCA', name: 'Cần Thơ', fullName: 'Cần Thơ (VCA)' },
   { code: 'HPH', name: 'Hải Phòng', fullName: 'Hải Phòng (HPH)' },
+  { code: 'ICN', name: 'Seoul Incheon', fullName: 'Seoul Incheon (ICN)' },
+  { code: 'GMP', name: 'Seoul Gimpo', fullName: 'Seoul Gimpo (GMP)' },
+  { code: 'PUS', name: 'Busan', fullName: 'Busan (PUS)' },
 ];
 
 export const FlightSearchForm = ({ onSearch, loading }: FlightSearchFormProps) => {
@@ -43,7 +46,7 @@ export const FlightSearchForm = ({ onSearch, loading }: FlightSearchFormProps) =
     departureDate: undefined,
     returnDate: undefined,
     passengers: 1,
-    tripType: 'one_way',
+    tripType: 'round_trip', // Changed default to round trip
   });
 
   const [showReturnCalendar, setShowReturnCalendar] = useState(false);
@@ -95,9 +98,9 @@ export const FlightSearchForm = ({ onSearch, loading }: FlightSearchFormProps) =
                   <SelectValue placeholder="Chọn điểm đi" />
                 </SelectTrigger>
                 <SelectContent>
-                  {vietnamCities.map((city) => (
-                    <SelectItem key={city.code} value={city.code}>
-                      {city.fullName}
+                  {airports.map((airport) => (
+                    <SelectItem key={airport.code} value={airport.code}>
+                      {airport.fullName}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -128,9 +131,9 @@ export const FlightSearchForm = ({ onSearch, loading }: FlightSearchFormProps) =
                   <SelectValue placeholder="Chọn điểm đến" />
                 </SelectTrigger>
                 <SelectContent>
-                  {vietnamCities.map((city) => (
-                    <SelectItem key={city.code} value={city.code}>
-                      {city.fullName}
+                  {airports.map((airport) => (
+                    <SelectItem key={airport.code} value={airport.code}>
+                      {airport.fullName}
                     </SelectItem>
                   ))}
                 </SelectContent>
