@@ -19,18 +19,54 @@ export default function Index() {
     sortBy: 'price'
   });
 
+  const playNotificationSound = () => {
+    // Create a simple notification sound using Web Audio API
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.value = 800;
+    oscillator.type = 'sine';
+    
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.5);
+  };
+
   const handleSearch = async (searchData: SearchFormData) => {
     setLoading(true);
     setError(null);
     setSearchPerformed(true);
 
     try {
-      const [vietJetFlights, vietnamAirlinesFlights] = await Promise.all([
+      const [vietJetFlights, vietnamAirlinesFlights] = await Promise.allSettled([
         fetchVietJetFlights(searchData),
         fetchVietnamAirlinesFlights(searchData),
       ]);
 
-      const allFlights = [...vietJetFlights, ...vietnamAirlinesFlights];
+      let allFlights: Flight[] = [];
+
+      // Handle VietJet results
+      if (vietJetFlights.status === 'fulfilled') {
+        allFlights = [...allFlights, ...vietJetFlights.value];
+        if (vietJetFlights.value.length > 0) {
+          playNotificationSound();
+        }
+      }
+
+      // Handle Vietnam Airlines results
+      if (vietnamAirlinesFlights.status === 'fulfilled') {
+        allFlights = [...allFlights, ...vietnamAirlinesFlights.value];
+        if (vietnamAirlinesFlights.value.length > 0) {
+          setTimeout(() => playNotificationSound(), 200); // Slight delay for second notification
+        }
+      }
+
       setFlights(allFlights);
 
       // Auto-adjust filters based on available flights
@@ -147,11 +183,6 @@ export default function Index() {
 
         {filteredFlights.length > 0 && (
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Kết quả tìm kiếm ({filteredFlights.length} chuyến bay)
-              </h2>
-            </div>
             <div className="grid gap-4">
               {filteredFlights.map((flight) => (
                 <FlightCard key={flight.id} flight={flight} />

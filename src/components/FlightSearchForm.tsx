@@ -49,9 +49,29 @@ export const FlightSearchForm: React.FC<FlightSearchFormProps> = ({ onSearch, lo
     tripType: 'round_trip', // Default to round trip
   });
 
+  const [departureDateOpen, setDepartureDateOpen] = useState(false);
+  const [returnDateOpen, setReturnDateOpen] = useState(false);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSearch(formData);
+  };
+
+  const handleDepartureDateSelect = (date: Date | undefined) => {
+    setFormData(prev => ({ ...prev, departureDate: date }));
+    setDepartureDateOpen(false);
+    
+    // If round trip and departure date is selected, open return date picker
+    if (formData.tripType === 'round_trip' && date) {
+      setTimeout(() => {
+        setReturnDateOpen(true);
+      }, 100);
+    }
+  };
+
+  const handleReturnDateSelect = (date: Date | undefined) => {
+    setFormData(prev => ({ ...prev, returnDate: date }));
+    setReturnDateOpen(false);
   };
 
   return (
@@ -83,7 +103,7 @@ export const FlightSearchForm: React.FC<FlightSearchFormProps> = ({ onSearch, lo
           </label>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* From Airport */}
           <div className="space-y-2">
             <Label htmlFor="from">Nơi đi</Label>
@@ -121,7 +141,7 @@ export const FlightSearchForm: React.FC<FlightSearchFormProps> = ({ onSearch, lo
           {/* Departure Date */}
           <div className="space-y-2">
             <Label>Ngày đi</Label>
-            <Popover>
+            <Popover open={departureDateOpen} onOpenChange={setDepartureDateOpen}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
@@ -142,19 +162,23 @@ export const FlightSearchForm: React.FC<FlightSearchFormProps> = ({ onSearch, lo
                 <Calendar
                   mode="single"
                   selected={formData.departureDate}
-                  onSelect={(date) => setFormData(prev => ({ ...prev, departureDate: date }))}
+                  onSelect={handleDepartureDateSelect}
                   disabled={(date) => date < new Date()}
                   initialFocus
                 />
               </PopoverContent>
             </Popover>
           </div>
+        </div>
 
-          {/* Return Date */}
-          {formData.tripType === 'round_trip' && (
+        {/* Return Date */}
+        {formData.tripType === 'round_trip' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div></div>
+            <div></div>
             <div className="space-y-2">
               <Label>Ngày về</Label>
-              <Popover>
+              <Popover open={returnDateOpen} onOpenChange={setReturnDateOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
@@ -175,31 +199,15 @@ export const FlightSearchForm: React.FC<FlightSearchFormProps> = ({ onSearch, lo
                   <Calendar
                     mode="single"
                     selected={formData.returnDate}
-                    onSelect={(date) => setFormData(prev => ({ ...prev, returnDate: date }))}
+                    onSelect={handleReturnDateSelect}
                     disabled={(date) => date < (formData.departureDate || new Date())}
                     initialFocus
                   />
                 </PopoverContent>
               </Popover>
             </div>
-          )}
-        </div>
-
-        {/* Passengers */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="passengers">Số hành khách</Label>
-            <Input
-              id="passengers"
-              type="number"
-              min="1"
-              max="9"
-              value={formData.passengers}
-              onChange={(e) => setFormData(prev => ({ ...prev, passengers: parseInt(e.target.value) || 1 }))}
-              className="w-full"
-            />
           </div>
-        </div>
+        )}
 
         <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={loading}>
           <Plane className="mr-2 h-4 w-4" />

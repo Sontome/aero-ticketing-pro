@@ -82,8 +82,10 @@ ${getBaggageInfo()}, giá vé = ${formatPrice(adjustedPrice)}w`;
     });
   };
 
+  const isADT = flight.airline === 'VNA' && flight.baggageType === 'ADT';
+
   return (
-    <Card className="hover:shadow-lg transition-shadow duration-200 mb-4">
+    <Card className={`hover:shadow-lg transition-shadow duration-200 mb-4 ${isADT ? 'border-red-500 border-2' : ''}`}>
       <CardContent className="p-6">
         <div className="flex flex-col space-y-4">
           {/* Price and Main Info */}
@@ -92,7 +94,7 @@ ${getBaggageInfo()}, giá vé = ${formatPrice(adjustedPrice)}w`;
               <div className="text-2xl font-bold text-blue-600 mb-1">
                 {formatPrice(adjustedPrice)} KRW
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">
+              <div className={`text-sm ${isADT ? 'text-red-600 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}>
                 Khứ hồi: {getTicketClass()} - {getFlightType()}
               </div>
               <div className="flex items-center text-sm text-gray-500 mt-1">
@@ -124,11 +126,11 @@ ${getBaggageInfo()}, giá vé = ${formatPrice(adjustedPrice)}w`;
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center space-x-2">
                 <Plane className="w-4 h-4 text-blue-500" />
-                <span className="font-medium">
+                <span className={`font-medium ${isADT ? 'text-red-600' : ''}`}>
                   {flight.departure.airport}-{flight.arrival.airport}
                 </span>
-                <span>{flight.departure.time}</span>
-                <span>ngày {formatDate(flight.departure.date)}</span>
+                <span className={isADT ? 'text-red-600' : ''}>{flight.departure.time}</span>
+                <span className={isADT ? 'text-red-600' : ''}>ngày {formatDate(flight.departure.date)}</span>
               </div>
             </div>
 
@@ -137,18 +139,18 @@ ${getBaggageInfo()}, giá vé = ${formatPrice(adjustedPrice)}w`;
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center space-x-2">
                   <Plane className="w-4 h-4 text-blue-500 transform rotate-180" />
-                  <span className="font-medium">
+                  <span className={`font-medium ${isADT ? 'text-red-600' : ''}`}>
                     {flight.return.departure.airport}-{flight.return.arrival.airport}
                   </span>
-                  <span>{flight.return.departure.time}</span>
-                  <span>ngày {formatDate(flight.return.departure.date)}</span>
+                  <span className={isADT ? 'text-red-600' : ''}>{flight.return.departure.time}</span>
+                  <span className={isADT ? 'text-red-600' : ''}>ngày {formatDate(flight.return.departure.date)}</span>
                 </div>
               </div>
             )}
           </div>
 
           {/* Baggage and Price Info */}
-          <div className="border-t pt-4 text-sm text-gray-600 dark:text-gray-400">
+          <div className={`border-t pt-4 text-sm ${isADT ? 'text-red-600 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}>
             <div>{getBaggageInfo()}, giá vé = {formatPrice(adjustedPrice)}w</div>
           </div>
         </div>
