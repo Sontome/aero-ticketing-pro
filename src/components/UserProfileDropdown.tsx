@@ -45,7 +45,13 @@ export const UserProfileDropdown = () => {
               {profile?.email}
             </span>
             <span className="text-xs text-blue-600 font-semibold">
-              Giá cộng thêm: {formatPriceMarkup(profile?.price_markup)}
+              Phí chung: {formatPriceMarkup(profile?.price_markup)}
+            </span>
+            <span className="text-xs text-red-600 font-semibold">
+              Phí VietJet: {formatPriceMarkup(profile?.price_vj)}
+            </span>
+            <span className="text-xs text-blue-600 font-semibold">
+              Phí VNA: {formatPriceMarkup(profile?.price_vna)}
             </span>
           </div>
         </DropdownMenuItem>

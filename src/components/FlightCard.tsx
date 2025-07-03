@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -19,9 +18,18 @@ export const FlightCard: React.FC<FlightCardProps> = ({ flight, priceMode }) => 
   const [adjustedPrice, setAdjustedPrice] = useState(flight.price);
 
   useEffect(() => {
-    // Apply user's fixed price markup (not percentage anymore)
-    const markup = profile?.price_markup || 0;
-    let priceWithMarkup = flight.price + markup;
+    // Apply airline-specific markup
+    const vjMarkup = profile?.price_vj || 0;
+    const vnaMarkup = profile?.price_vna || 0;
+    
+    let priceWithMarkup = flight.price;
+    
+    // Add airline-specific markup
+    if (flight.airline === 'VJ') {
+      priceWithMarkup += vjMarkup;
+    } else if (flight.airline === 'VNA') {
+      priceWithMarkup += vnaMarkup;
+    }
     
     // Apply price mode adjustments
     const isRoundTrip = !!flight.return;
@@ -34,7 +42,7 @@ export const FlightCard: React.FC<FlightCardProps> = ({ flight, priceMode }) => 
     // Round to nearest hundred
     const roundedPrice = Math.round(priceWithMarkup / 100) * 100;
     setAdjustedPrice(roundedPrice);
-  }, [flight.price, profile?.price_markup, priceMode, flight.return]);
+  }, [flight.price, flight.airline, profile?.price_vj, profile?.price_vna, priceMode, flight.return]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('ko-KR').format(price);

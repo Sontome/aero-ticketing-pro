@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Users, Settings, DollarSign, Mail, User, LogOut } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,6 +17,8 @@ interface Profile {
   full_name: string | null;
   role: string;
   price_markup: number;
+  price_vj: number;
+  price_vna: number;
   status: string;
   created_at: string;
 }
@@ -30,6 +31,8 @@ export const AdminDashboard = () => {
   const [editForm, setEditForm] = useState({
     full_name: '',
     price_markup: 0,
+    price_vj: 0,
+    price_vna: 0,
     role: 'user',
     status: 'active',
   });
@@ -67,6 +70,8 @@ export const AdminDashboard = () => {
     setEditForm({
       full_name: profile.full_name || '',
       price_markup: profile.price_markup || 0,
+      price_vj: profile.price_vj || 0,
+      price_vna: profile.price_vna || 0,
       role: profile.role,
       status: profile.status,
     });
@@ -81,6 +86,8 @@ export const AdminDashboard = () => {
         .update({
           full_name: editForm.full_name,
           price_markup: editForm.price_markup,
+          price_vj: editForm.price_vj,
+          price_vna: editForm.price_vna,
           role: editForm.role,
           status: editForm.status,
           updated_at: new Date().toISOString(),
@@ -232,7 +239,9 @@ export const AdminDashboard = () => {
                   <TableHead>Email</TableHead>
                   <TableHead>Vai trò</TableHead>
                   <TableHead>Trạng thái</TableHead>
-                  <TableHead>Phí cộng thêm</TableHead>
+                  <TableHead>Phí chung</TableHead>
+                  <TableHead>Phí VJ</TableHead>
+                  <TableHead>Phí VNA</TableHead>
                   <TableHead>Ngày tạo</TableHead>
                   <TableHead>Thao tác</TableHead>
                 </TableRow>
@@ -259,6 +268,16 @@ export const AdminDashboard = () => {
                     <TableCell>
                       <span className="font-mono">
                         {formatCurrency(profile.price_markup || 0)}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="font-mono">
+                        {formatCurrency(profile.price_vj || 0)}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="font-mono">
+                        {formatCurrency(profile.price_vna || 0)}
                       </span>
                     </TableCell>
                     <TableCell>{formatDate(profile.created_at)}</TableCell>
@@ -288,12 +307,36 @@ export const AdminDashboard = () => {
                               />
                             </div>
                             <div className="space-y-2">
-                              <Label htmlFor="price_markup">Phí cộng thêm (VND)</Label>
+                              <Label htmlFor="price_markup">Phí cộng thêm chung (VND)</Label>
                               <Input
                                 id="price_markup"
                                 type="number"
                                 value={editForm.price_markup}
                                 onChange={(e) => setEditForm(prev => ({ ...prev, price_markup: parseFloat(e.target.value) || 0 }))}
+                                placeholder="0"
+                                min="0"
+                                step="1000"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="price_vj">Phí VietJet (VND)</Label>
+                              <Input
+                                id="price_vj"
+                                type="number"
+                                value={editForm.price_vj}
+                                onChange={(e) => setEditForm(prev => ({ ...prev, price_vj: parseFloat(e.target.value) || 0 }))}
+                                placeholder="0"
+                                min="0"
+                                step="1000"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="price_vna">Phí Vietnam Airlines (VND)</Label>
+                              <Input
+                                id="price_vna"
+                                type="number"
+                                value={editForm.price_vna}
+                                onChange={(e) => setEditForm(prev => ({ ...prev, price_vna: parseFloat(e.target.value) || 0 }))}
                                 placeholder="0"
                                 min="0"
                                 step="1000"

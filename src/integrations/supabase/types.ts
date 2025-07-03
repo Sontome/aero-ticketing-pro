@@ -16,6 +16,8 @@ export type Database = {
           full_name: string | null
           id: string
           price_markup: number | null
+          price_vj: number | null
+          price_vna: number | null
           role: string | null
           status: string | null
           updated_at: string | null
@@ -26,6 +28,8 @@ export type Database = {
           full_name?: string | null
           id: string
           price_markup?: number | null
+          price_vj?: number | null
+          price_vna?: number | null
           role?: string | null
           status?: string | null
           updated_at?: string | null
@@ -36,6 +40,8 @@ export type Database = {
           full_name?: string | null
           id?: string
           price_markup?: number | null
+          price_vj?: number | null
+          price_vna?: number | null
           role?: string | null
           status?: string | null
           updated_at?: string | null
