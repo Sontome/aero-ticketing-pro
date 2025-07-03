@@ -19,9 +19,9 @@ export const FlightCard: React.FC<FlightCardProps> = ({ flight, priceMode }) => 
   const [adjustedPrice, setAdjustedPrice] = useState(flight.price);
 
   useEffect(() => {
-    // Apply user's price markup
+    // Apply user's fixed price markup (not percentage anymore)
     const markup = profile?.price_markup || 0;
-    let priceWithMarkup = flight.price * (1 + markup / 100);
+    let priceWithMarkup = flight.price + markup;
     
     // Apply price mode adjustments
     const isRoundTrip = !!flight.return;
@@ -31,7 +31,9 @@ export const FlightCard: React.FC<FlightCardProps> = ({ flight, priceMode }) => 
       priceWithMarkup += isRoundTrip ? 10000 : 30000;
     }
     
-    setAdjustedPrice(Math.round(priceWithMarkup));
+    // Round to nearest hundred
+    const roundedPrice = Math.round(priceWithMarkup / 100) * 100;
+    setAdjustedPrice(roundedPrice);
   }, [flight.price, profile?.price_markup, priceMode, flight.return]);
 
   const formatPrice = (price: number) => {
@@ -93,19 +95,19 @@ ${getBaggageInfo()}, giá vé = ${formatPrice(adjustedPrice)}w`;
   const isADT = flight.airline === 'VNA' && flight.baggageType === 'ADT';
 
   return (
-    <Card className={`hover:shadow-lg transition-shadow duration-200 mb-4 ${isADT ? 'border-red-500 border-2' : ''}`}>
+    <Card className={`hover:shadow-lg transition-all duration-300 mb-4 opacity-0 animate-fade-in ${isADT ? 'border-red-500 border-2' : ''}`}>
       <CardContent className="p-6">
         <div className="flex flex-col space-y-4">
           {/* Price and Main Info */}
           <div className="flex justify-between items-start">
             <div>
-              <div className="text-2xl font-bold text-blue-600 mb-1">
+              <div className="text-2xl font-bold text-blue-600 mb-1 transition-colors duration-200">
                 {formatPrice(adjustedPrice)} KRW
               </div>
-              <div className={`text-sm ${isADT ? 'text-red-600 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}>
+              <div className={`text-sm transition-colors duration-200 ${isADT ? 'text-red-600 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}>
                 Khứ hồi: {getTicketClass()} - {getFlightType()}
               </div>
-              <div className="flex items-center text-sm text-gray-500 mt-1">
+              <div className="flex items-center text-sm text-gray-500 mt-1 transition-colors duration-200">
                 <Users className="w-4 h-4 mr-1" />
                 Còn {flight.availableSeats} ghế
               </div>
@@ -113,7 +115,7 @@ ${getBaggageInfo()}, giá vé = ${formatPrice(adjustedPrice)}w`;
             <div className="flex items-center space-x-2">
               <Badge 
                 variant={flight.airline === 'VJ' ? 'default' : 'secondary'}
-                className={flight.airline === 'VJ' ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600 text-white'}
+                className={`transition-all duration-200 ${flight.airline === 'VJ' ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
               >
                 {flight.airline === 'VJ' ? 'VietJet' : 'Vietnam Airlines'}
               </Badge>
@@ -121,7 +123,7 @@ ${getBaggageInfo()}, giá vé = ${formatPrice(adjustedPrice)}w`;
                 variant="outline"
                 size="sm"
                 onClick={handleCopyFlight}
-                className="p-2"
+                className="p-2 transition-all duration-200 hover:scale-105"
               >
                 <Copy className="w-4 h-4" />
               </Button>
@@ -131,34 +133,34 @@ ${getBaggageInfo()}, giá vé = ${formatPrice(adjustedPrice)}w`;
           {/* Flight Details */}
           <div className="space-y-2">
             {/* Outbound Flight */}
-            <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center justify-between text-sm transition-all duration-200">
               <div className="flex items-center space-x-2">
-                <Plane className="w-4 h-4 text-blue-500" />
-                <span className={`font-medium ${isADT ? 'text-red-600' : ''}`}>
+                <Plane className="w-4 h-4 text-blue-500 transition-colors duration-200" />
+                <span className={`font-medium transition-colors duration-200 ${isADT ? 'text-red-600' : ''}`}>
                   {flight.departure.airport}-{flight.arrival.airport}
                 </span>
-                <span className={isADT ? 'text-red-600' : ''}>{flight.departure.time}</span>
-                <span className={isADT ? 'text-red-600' : ''}>ngày {formatDate(flight.departure.date)}</span>
+                <span className={`transition-colors duration-200 ${isADT ? 'text-red-600' : ''}`}>{flight.departure.time}</span>
+                <span className={`transition-colors duration-200 ${isADT ? 'text-red-600' : ''}`}>ngày {formatDate(flight.departure.date)}</span>
               </div>
             </div>
 
             {/* Return Flight (if applicable) */}
             {flight.return && (
-              <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center justify-between text-sm transition-all duration-200">
                 <div className="flex items-center space-x-2">
-                  <Plane className="w-4 h-4 text-blue-500 transform rotate-180" />
-                  <span className={`font-medium ${isADT ? 'text-red-600' : ''}`}>
+                  <Plane className="w-4 h-4 text-blue-500 transform rotate-180 transition-all duration-200" />
+                  <span className={`font-medium transition-colors duration-200 ${isADT ? 'text-red-600' : ''}`}>
                     {flight.return.departure.airport}-{flight.return.arrival.airport}
                   </span>
-                  <span className={isADT ? 'text-red-600' : ''}>{flight.return.departure.time}</span>
-                  <span className={isADT ? 'text-red-600' : ''}>ngày {formatDate(flight.return.departure.date)}</span>
+                  <span className={`transition-colors duration-200 ${isADT ? 'text-red-600' : ''}`}>{flight.return.departure.time}</span>
+                  <span className={`transition-colors duration-200 ${isADT ? 'text-red-600' : ''}`}>ngày {formatDate(flight.return.departure.date)}</span>
                 </div>
               </div>
             )}
           </div>
 
           {/* Baggage and Price Info */}
-          <div className={`border-t pt-4 text-sm ${isADT ? 'text-red-600 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}>
+          <div className={`border-t pt-4 text-sm transition-all duration-200 ${isADT ? 'text-red-600 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}>
             <div>{getBaggageInfo()}, giá vé = {formatPrice(adjustedPrice)}w</div>
           </div>
         </div>

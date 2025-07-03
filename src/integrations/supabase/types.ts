@@ -80,7 +80,21 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      profiles_roles: {
+        Row: {
+          id: string | null
+          role: string | null
+        }
+        Insert: {
+          id?: string | null
+          role?: string | null
+        }
+        Update: {
+          id?: string | null
+          role?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
