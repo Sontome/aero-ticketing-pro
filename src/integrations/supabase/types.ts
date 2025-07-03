@@ -17,6 +17,7 @@ export type Database = {
           id: string
           price_markup: number | null
           role: string | null
+          status: string | null
           updated_at: string | null
         }
         Insert: {
@@ -26,6 +27,7 @@ export type Database = {
           id: string
           price_markup?: number | null
           role?: string | null
+          status?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -35,6 +37,7 @@ export type Database = {
           id?: string
           price_markup?: number | null
           role?: string | null
+          status?: string | null
           updated_at?: string | null
         }
         Relationships: []
