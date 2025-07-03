@@ -89,26 +89,3 @@ enable_signup = true
 double_confirm_changes = true
 # If enabled, users need to confirm their email address before signing in.
 enable_confirmations = false
-
-# Uncomment to customize the additional data attached to the JWT token
-# [auth.jwt]
-# default_group = "authenticated"
-# [auth.jwt.claims]
-# role = "authenticated"
-
-# Use pre-defined map of claims
-# [auth.jwt]
-# [auth.jwt.claims]
-# role = { path = "user_metadata.role" }
-
-[edge_functions]
-enabled = true
-# Configure one of the supported request policies: `oneshot`, `per_worker`.
-# Use `oneshot` for hot-reloading, or `per_worker` for load testing.
-inspector_port = 8083
-# Change default timeout (in ms)
-# request_timeout = 10000
-
-[analytics]
-enabled = false
-
