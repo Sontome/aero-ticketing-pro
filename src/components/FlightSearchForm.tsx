@@ -1,17 +1,16 @@
 
-import { useState } from 'react';
-import { Calendar, MapPin, Users, ArrowRightLeft, Search } from 'lucide-react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { CalendarIcon, Plane } from 'lucide-react';
 import { format } from 'date-fns';
-import { vi } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
 
-interface SearchFormData {
+export interface SearchFormData {
   from: string;
   to: string;
   departureDate: Date | undefined;
@@ -25,230 +24,187 @@ interface FlightSearchFormProps {
   loading: boolean;
 }
 
+// Reordered airports with Korean airports at top
 const airports = [
-  { code: 'HAN', name: 'Hà Nội', fullName: 'Hà Nội (HAN)' },
-  { code: 'SGN', name: 'TP.HCM', fullName: 'TP. Hồ Chí Minh (SGN)' },
-  { code: 'DAD', name: 'Đà Nẵng', fullName: 'Đà Nẵng (DAD)' },
-  { code: 'CXR', name: 'Nha Trang', fullName: 'Nha Trang (CXR)' },
-  { code: 'DLI', name: 'Đà Lạt', fullName: 'Đà Lạt (DLI)' },
-  { code: 'PQC', name: 'Phú Quốc', fullName: 'Phú Quốc (PQC)' },
-  { code: 'VCA', name: 'Cần Thơ', fullName: 'Cần Thơ (VCA)' },
-  { code: 'HPH', name: 'Hải Phòng', fullName: 'Hải Phòng (HPH)' },
-  { code: 'ICN', name: 'Seoul Incheon', fullName: 'Seoul Incheon (ICN)' },
-  { code: 'GMP', name: 'Seoul Gimpo', fullName: 'Seoul Gimpo (GMP)' },
-  { code: 'PUS', name: 'Busan', fullName: 'Busan (PUS)' },
+  { code: 'ICN', name: 'Seoul Incheon', city: 'Seoul' },
+  { code: 'PUS', name: 'Busan', city: 'Busan' },
+  { code: 'HAN', name: 'Hà Nội', city: 'Hà Nội' },
+  { code: 'SGN', name: 'TP.HCM', city: 'TP.HCM' },
+  { code: 'DAD', name: 'Đà Nẵng', city: 'Đà Nẵng' },
+  { code: 'CXR', name: 'Nha Trang', city: 'Nha Trang' },
+  { code: 'DLI', name: 'Đà Lạt', city: 'Đà Lạt' },
+  { code: 'PQC', name: 'Phú Quốc', city: 'Phú Quốc' },
+  { code: 'VCA', name: 'Cần Thơ', city: 'Cần Thơ' },
+  { code: 'HPH', name: 'Hải Phòng', city: 'Hải Phòng' },
+  { code: 'GMP', name: 'Seoul Gimpo', city: 'Seoul' },
 ];
 
-export const FlightSearchForm = ({ onSearch, loading }: FlightSearchFormProps) => {
+export const FlightSearchForm: React.FC<FlightSearchFormProps> = ({ onSearch, loading }) => {
   const [formData, setFormData] = useState<SearchFormData>({
-    from: '',
-    to: '',
+    from: 'ICN', // Default to ICN
+    to: 'HAN', // Default to HAN
     departureDate: undefined,
     returnDate: undefined,
     passengers: 1,
-    tripType: 'round_trip', // Changed default to round trip
+    tripType: 'round_trip', // Default to round trip
   });
-
-  const [showReturnCalendar, setShowReturnCalendar] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.from && formData.to && formData.departureDate) {
-      onSearch(formData);
-    }
-  };
-
-  const swapCities = () => {
-    setFormData(prev => ({
-      ...prev,
-      from: prev.to,
-      to: prev.from,
-    }));
-  };
-
-  const handleDepartureDateSelect = (date: Date | undefined) => {
-    setFormData(prev => ({ ...prev, departureDate: date }));
-    if (date && formData.tripType === 'round_trip') {
-      setShowReturnCalendar(true);
-    }
+    onSearch(formData);
   };
 
   return (
-    <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-md rounded-2xl shadow-2xl p-8 border border-white/20 dark:border-gray-700/20">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8">
       <form onSubmit={handleSubmit} className="space-y-6">
-        <Tabs
-          value={formData.tripType}
-          onValueChange={(value) => setFormData(prev => ({ ...prev, tripType: value as 'one_way' | 'round_trip' }))}
-          className="w-full"
-        >
-          <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="one_way">Một chiều</TabsTrigger>
-            <TabsTrigger value="round_trip">Khứ hồi</TabsTrigger>
-          </TabsList>
+        {/* Trip Type Selector */}
+        <div className="flex space-x-4">
+          <label className="flex items-center space-x-2 cursor-pointer">
+            <input
+              type="radio"
+              name="tripType"
+              value="round_trip"
+              checked={formData.tripType === 'round_trip'}
+              onChange={(e) => setFormData(prev => ({ ...prev, tripType: e.target.value as 'round_trip' }))}
+              className="text-blue-600"
+            />
+            <span className="text-gray-700 dark:text-gray-300">Khứ hồi</span>
+          </label>
+          <label className="flex items-center space-x-2 cursor-pointer">
+            <input
+              type="radio"
+              name="tripType"
+              value="one_way"
+              checked={formData.tripType === 'one_way'}
+              onChange={(e) => setFormData(prev => ({ ...prev, tripType: e.target.value as 'one_way' }))}
+              className="text-blue-600"
+            />
+            <span className="text-gray-700 dark:text-gray-300">Một chiều</span>
+          </label>
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            {/* From City */}
-            <div className="space-y-2 lg:col-span-1">
-              <Label htmlFor="from" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                <MapPin className="inline w-4 h-4 mr-1" />
-                Từ
-              </Label>
-              <Select value={formData.from} onValueChange={(value) => setFormData(prev => ({ ...prev, from: value }))}>
-                <SelectTrigger className="h-12">
-                  <SelectValue placeholder="Chọn điểm đi" />
-                </SelectTrigger>
-                <SelectContent>
-                  {airports.map((airport) => (
-                    <SelectItem key={airport.code} value={airport.code}>
-                      {airport.fullName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* From Airport */}
+          <div className="space-y-2">
+            <Label htmlFor="from">Nơi đi</Label>
+            <Select value={formData.from} onValueChange={(value) => setFormData(prev => ({ ...prev, from: value }))}>
+              <SelectTrigger>
+                <SelectValue placeholder="Chọn sân bay đi" />
+              </SelectTrigger>
+              <SelectContent>
+                {airports.map((airport) => (
+                  <SelectItem key={airport.code} value={airport.code}>
+                    {airport.code} - {airport.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-            {/* Swap Button */}
-            <div className="flex items-end justify-center lg:col-span-0">
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                onClick={swapCities}
-                className="h-12 w-12 rounded-full border-2 border-blue-200 hover:border-blue-400 hover:bg-blue-50 dark:border-blue-700 dark:hover:border-blue-500 dark:hover:bg-blue-900/20"
-              >
-                <ArrowRightLeft className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-              </Button>
-            </div>
+          {/* To Airport */}
+          <div className="space-y-2">
+            <Label htmlFor="to">Nơi đến</Label>
+            <Select value={formData.to} onValueChange={(value) => setFormData(prev => ({ ...prev, to: value }))}>
+              <SelectTrigger>
+                <SelectValue placeholder="Chọn sân bay đến" />
+              </SelectTrigger>
+              <SelectContent>
+                {airports.map((airport) => (
+                  <SelectItem key={airport.code} value={airport.code}>
+                    {airport.code} - {airport.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-            {/* To City */}
-            <div className="space-y-2 lg:col-span-1">
-              <Label htmlFor="to" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                <MapPin className="inline w-4 h-4 mr-1" />
-                Đến
-              </Label>
-              <Select value={formData.to} onValueChange={(value) => setFormData(prev => ({ ...prev, to: value }))}>
-                <SelectTrigger className="h-12">
-                  <SelectValue placeholder="Chọn điểm đến" />
-                </SelectTrigger>
-                <SelectContent>
-                  {airports.map((airport) => (
-                    <SelectItem key={airport.code} value={airport.code}>
-                      {airport.fullName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          {/* Departure Date */}
+          <div className="space-y-2">
+            <Label>Ngày đi</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !formData.departureDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {formData.departureDate ? (
+                    format(formData.departureDate, "dd/MM/yyyy")
+                  ) : (
+                    <span>Chọn ngày</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={formData.departureDate}
+                  onSelect={(date) => setFormData(prev => ({ ...prev, departureDate: date }))}
+                  disabled={(date) => date < new Date()}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
 
-            {/* Departure Date */}
+          {/* Return Date */}
+          {formData.tripType === 'round_trip' && (
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                <Calendar className="inline w-4 h-4 mr-1" />
-                Ngày đi
-              </Label>
+              <Label>Ngày về</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    className="h-12 w-full justify-start text-left font-normal"
-                  >
-                    {formData.departureDate ? (
-                      format(formData.departureDate, 'dd/MM/yyyy', { locale: vi })
-                    ) : (
-                      <span className="text-muted-foreground">Chọn ngày</span>
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !formData.returnDate && "text-muted-foreground"
                     )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <CalendarComponent
-                    mode="single"
-                    selected={formData.departureDate}
-                    onSelect={handleDepartureDateSelect}
-                    disabled={(date) => date < new Date()}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            {/* Return Date */}
-            <TabsContent value="round_trip" className="space-y-2 mt-0">
-              <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                <Calendar className="inline w-4 h-4 mr-1" />
-                Ngày về
-              </Label>
-              <Popover open={showReturnCalendar} onOpenChange={setShowReturnCalendar}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="h-12 w-full justify-start text-left font-normal"
                   >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
                     {formData.returnDate ? (
-                      format(formData.returnDate, 'dd/MM/yyyy', { locale: vi })
+                      format(formData.returnDate, "dd/MM/yyyy")
                     ) : (
-                      <span className="text-muted-foreground">Chọn ngày về</span>
+                      <span>Chọn ngày</span>
                     )}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
-                  <CalendarComponent
+                  <Calendar
                     mode="single"
                     selected={formData.returnDate}
-                    onSelect={(date) => {
-                      setFormData(prev => ({ ...prev, returnDate: date }));
-                      setShowReturnCalendar(false);
-                    }}
+                    onSelect={(date) => setFormData(prev => ({ ...prev, returnDate: date }))}
                     disabled={(date) => date < (formData.departureDate || new Date())}
                     initialFocus
                   />
                 </PopoverContent>
               </Popover>
-            </TabsContent>
-          </div>
-
-          {/* Passengers */}
-          <div className="flex items-center space-x-4">
-            <div className="space-y-2 flex-1 max-w-xs">
-              <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                <Users className="inline w-4 h-4 mr-1" />
-                Số hành khách
-              </Label>
-              <Select
-                value={formData.passengers.toString()}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, passengers: parseInt(value) }))}
-              >
-                <SelectTrigger className="h-12">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
-                    <SelectItem key={num} value={num.toString()}>
-                      {num} người
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
+          )}
+        </div>
 
-            <Button
-              type="submit"
-              disabled={loading || !formData.from || !formData.to || !formData.departureDate}
-              className="h-12 px-8 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg disabled:opacity-50"
-            >
-              {loading ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Đang tìm...
-                </>
-              ) : (
-                <>
-                  <Search className="w-4 h-4 mr-2" />
-                  Tìm chuyến bay
-                </>
-              )}
-            </Button>
+        {/* Passengers */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="passengers">Số hành khách</Label>
+            <Input
+              id="passengers"
+              type="number"
+              min="1"
+              max="9"
+              value={formData.passengers}
+              onChange={(e) => setFormData(prev => ({ ...prev, passengers: parseInt(e.target.value) || 1 }))}
+              className="w-full"
+            />
           </div>
-        </Tabs>
+        </div>
+
+        <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={loading}>
+          <Plane className="mr-2 h-4 w-4" />
+          {loading ? 'Đang tìm kiếm...' : 'Tìm chuyến bay'}
+        </Button>
       </form>
     </div>
   );

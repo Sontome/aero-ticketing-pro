@@ -116,11 +116,30 @@ export interface Flight {
     time: string;
     airport: string;
     city: string;
+    date: string;
+    stops: number;
   };
   arrival: {
     time: string;
     airport: string;
     city: string;
+    date: string;
+  };
+  return?: {
+    departure: {
+      time: string;
+      airport: string;
+      city: string;
+      date: string;
+      stops: number;
+    };
+    arrival: {
+      time: string;
+      airport: string;
+      city: string;
+      date: string;
+    };
+    ticketClass: string;
   };
   duration: string;
   price: number;
@@ -128,6 +147,8 @@ export interface Flight {
   aircraft: string;
   availableSeats: number;
   bookingKey?: string;
+  ticketClass: string;
+  baggageType: string;
 }
 
 const formatDate = (date: Date): string => {
@@ -206,18 +227,39 @@ export const fetchVietJetFlights = async (searchData: SearchFormData): Promise<F
         time: flight['chiều đi'].giờ_cất_cánh,
         airport: flight['chiều đi'].nơi_đi,
         city: getCityName(flight['chiều đi'].nơi_đi),
+        date: flight['chiều đi'].ngày_cất_cánh,
+        stops: parseInt(flight['chiều đi'].số_điểm_dừng),
       },
       arrival: {
         time: flight['chiều đi'].giờ_hạ_cánh,
         airport: flight['chiều đi'].nơi_đến,
         city: getCityName(flight['chiều đi'].nơi_đến),
+        date: flight['chiều đi'].ngày_hạ_cánh,
       },
+      return: flight['chiều về'] ? {
+        departure: {
+          time: flight['chiều về'].giờ_cất_cánh,
+          airport: flight['chiều về'].nơi_đi,
+          city: getCityName(flight['chiều về'].nơi_đi),
+          date: flight['chiều về'].ngày_cất_cánh,
+          stops: parseInt(flight['chiều về'].số_điểm_dừng),
+        },
+        arrival: {
+          time: flight['chiều về'].giờ_hạ_cánh,
+          airport: flight['chiều về'].nơi_đến,
+          city: getCityName(flight['chiều về'].nơi_đến),
+          date: flight['chiều về'].ngày_hạ_cánh,
+        },
+        ticketClass: flight['chiều về'].loại_vé,
+      } : undefined,
       duration: formatDuration(flight['chiều đi'].thời_gian_bay),
       price: parseInt(flight.thông_tin_chung.giá_vé),
       currency: 'VND',
       aircraft: 'Airbus A320',
       availableSeats: parseInt(flight.thông_tin_chung.số_ghế_còn),
       bookingKey: flight['chiều đi'].BookingKey,
+      ticketClass: flight['chiều đi'].loại_vé,
+      baggageType: flight.thông_tin_chung.hành_lý_vna,
     }));
   } catch (error) {
     console.error('VietJet API error:', error);
@@ -278,17 +320,38 @@ export const fetchVietnamAirlinesFlights = async (searchData: SearchFormData): P
         time: flight.chiều_đi.giờ_cất_cánh,
         airport: flight.chiều_đi.nơi_đi,
         city: getCityName(flight.chiều_đi.nơi_đi),
+        date: flight.chiều_đi.ngày_cất_cánh,
+        stops: parseInt(flight.chiều_đi.số_điểm_dừng),
       },
       arrival: {
         time: flight.chiều_đi.giờ_hạ_cánh,
         airport: flight.chiều_đi.nơi_đến,
         city: getCityName(flight.chiều_đi.nơi_đến),
+        date: flight.chiều_đi.ngày_hạ_cánh,
       },
+      return: flight.chiều_về ? {
+        departure: {
+          time: flight.chiều_về.giờ_cất_cánh,
+          airport: flight.chiều_về.nơi_đi,
+          city: getCityName(flight.chiều_về.nơi_đi),
+          date: flight.chiều_về.ngày_cất_cánh,
+          stops: parseInt(flight.chiều_về.số_điểm_dừng),
+        },
+        arrival: {
+          time: flight.chiều_về.giờ_hạ_cánh,
+          airport: flight.chiều_về.nơi_đến,
+          city: getCityName(flight.chiều_về.nơi_đến),
+          date: flight.chiều_về.ngày_hạ_cánh,
+        },
+        ticketClass: flight.chiều_về.loại_vé,
+      } : undefined,
       duration: formatDuration(flight.chiều_đi.thời_gian_bay),
       price: parseInt(flight.thông_tin_chung.giá_vé),
       currency: 'VND',
       aircraft: 'Boeing 787',
       availableSeats: parseInt(flight.thông_tin_chung.số_ghế_còn),
+      ticketClass: flight.chiều_đi.loại_vé,
+      baggageType: flight.thông_tin_chung.hành_lý_vna,
     }));
   } catch (error) {
     console.error('Vietnam Airlines API error:', error);

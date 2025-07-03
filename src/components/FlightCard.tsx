@@ -1,129 +1,117 @@
 
-import { Clock, Plane, MapPin } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-
-interface Flight {
-  id: string;
-  airline: 'VJ' | 'VNA';
-  flightNumber: string;
-  departure: {
-    time: string;
-    airport: string;
-    city: string;
-  };
-  arrival: {
-    time: string;
-    airport: string;
-    city: string;
-  };
-  duration: string;
-  price: number;
-  currency: string;
-  aircraft: string;
-  availableSeats: number;
-}
+import { Plane, Clock, Users } from 'lucide-react';
+import { Flight } from '@/services/flightApi';
+import { useAuth } from '@/hooks/useAuth';
 
 interface FlightCardProps {
   flight: Flight;
-  priceMarkup?: number;
-  onSelect: (flight: Flight) => void;
 }
 
-export const FlightCard = ({ flight, priceMarkup = 0, onSelect }: FlightCardProps) => {
-  const finalPrice = Math.round(flight.price * (1 + priceMarkup / 100));
-  
-  const airlineColors = {
-    VJ: {
-      bg: 'bg-green-50 dark:bg-green-900/20',
-      border: 'border-green-200 dark:border-green-700',
-      text: 'text-green-700 dark:text-green-300',
-      badge: 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100'
-    },
-    VNA: {
-      bg: 'bg-blue-50 dark:bg-blue-900/20',
-      border: 'border-blue-200 dark:border-blue-700',
-      text: 'text-blue-700 dark:text-blue-300',
-      badge: 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100'
+export const FlightCard: React.FC<FlightCardProps> = ({ flight }) => {
+  const { profile } = useAuth();
+  const [adjustedPrice, setAdjustedPrice] = useState(flight.price);
+
+  useEffect(() => {
+    // Apply user's price markup
+    const markup = profile?.price_markup || 0;
+    const priceWithMarkup = flight.price * (1 + markup / 100);
+    setAdjustedPrice(Math.round(priceWithMarkup));
+  }, [flight.price, profile?.price_markup]);
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('ko-KR').format(price);
+  };
+
+  const formatDate = (dateStr: string) => {
+    const [day, month, year] = dateStr.split('/');
+    return `${day}/${month}`;
+  };
+
+  const getFlightType = () => {
+    const isDirect = flight.departure.stops === 0;
+    return isDirect ? 'Bay thẳng' : `${flight.departure.stops} điểm dừng`;
+  };
+
+  const getBaggageInfo = () => {
+    if (flight.airline === 'VJ') {
+      return 'Vietjet 7kg xách tay, 20kg ký gửi';
+    } else {
+      // VNA baggage based on hành_lý_vna field
+      if (flight.baggageType === 'ADT') {
+        return 'VNairlines 10kg xách tay, 23kg ký gửi';
+      } else {
+        return 'VNairlines 10kg xách tay, 46kg ký gửi';
+      }
     }
   };
 
-  const colors = airlineColors[flight.airline];
+  const getTicketClass = () => {
+    if (flight.airline === 'VJ') {
+      return `DELUXE-${flight.ticketClass}`;
+    } else {
+      return `${flight.outbound?.ticketClass || 'R'}-${flight.return?.ticketClass || 'R'}`;
+    }
+  };
 
   return (
-    <Card className={`${colors.bg} ${colors.border} hover:shadow-lg transition-all duration-200 cursor-pointer`}>
+    <Card className="hover:shadow-lg transition-shadow duration-200 mb-4">
       <CardContent className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-3">
-            <Badge className={colors.badge}>
-              {flight.airline === 'VJ' ? 'VietJet Air' : 'Vietnam Airlines'}
-            </Badge>
-            <span className="text-sm text-gray-600 dark:text-gray-400">
-              {flight.flightNumber}
-            </span>
-          </div>
-          <div className="text-right">
-            <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-              {finalPrice.toLocaleString('vi-VN')} {flight.currency}
+        <div className="flex flex-col space-y-4">
+          {/* Price and Main Info */}
+          <div className="flex justify-between items-start">
+            <div>
+              <div className="text-2xl font-bold text-blue-600 mb-1">
+                {formatPrice(adjustedPrice)} KRW
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                Khứ hồi: {getTicketClass()} - {getFlightType()}
+              </div>
+              <div className="flex items-center text-sm text-gray-500 mt-1">
+                <Users className="w-4 h-4 mr-1" />
+                Còn {flight.availableSeats} ghế
+              </div>
             </div>
-            {priceMarkup > 0 && (
-              <div className="text-xs text-gray-500 line-through">
-                {flight.price.toLocaleString('vi-VN')} {flight.currency}
+            <Badge variant={flight.airline === 'VJ' ? 'default' : 'secondary'}>
+              {flight.airline === 'VJ' ? 'VietJet' : 'Vietnam Airlines'}
+            </Badge>
+          </div>
+
+          {/* Flight Details */}
+          <div className="space-y-2">
+            {/* Outbound Flight */}
+            <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center space-x-2">
+                <Plane className="w-4 h-4 text-blue-500" />
+                <span className="font-medium">
+                  {flight.departure.airport}-{flight.arrival.airport}
+                </span>
+                <span>{flight.departure.time}</span>
+                <span>ngày {formatDate(flight.departure.date)}</span>
+              </div>
+            </div>
+
+            {/* Return Flight (if applicable) */}
+            {flight.return && (
+              <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center space-x-2">
+                  <Plane className="w-4 h-4 text-blue-500 transform rotate-180" />
+                  <span className="font-medium">
+                    {flight.return.departure.airport}-{flight.return.arrival.airport}
+                  </span>
+                  <span>{flight.return.departure.time}</span>
+                  <span>ngày {formatDate(flight.return.departure.date)}</span>
+                </div>
               </div>
             )}
           </div>
-        </div>
 
-        <div className="grid grid-cols-3 gap-4 items-center mb-4">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-              {flight.departure.time}
-            </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">
-              {flight.departure.airport}
-            </div>
-            <div className="text-xs text-gray-500 dark:text-gray-500">
-              {flight.departure.city}
-            </div>
+          {/* Baggage and Price Info */}
+          <div className="border-t pt-4 text-sm text-gray-600 dark:text-gray-400">
+            <div>{getBaggageInfo()}, giá vé = {formatPrice(adjustedPrice)}w</div>
           </div>
-
-          <div className="text-center">
-            <div className="flex items-center justify-center mb-1">
-              <div className="h-px bg-gray-300 dark:bg-gray-600 flex-1"></div>
-              <Plane className="w-4 h-4 mx-2 text-gray-400 transform rotate-90" />
-              <div className="h-px bg-gray-300 dark:bg-gray-600 flex-1"></div>
-            </div>
-            <div className="text-xs text-gray-500 dark:text-gray-500 flex items-center justify-center">
-              <Clock className="w-3 h-3 mr-1" />
-              {flight.duration}
-            </div>
-          </div>
-
-          <div className="text-center">
-            <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-              {flight.arrival.time}
-            </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">
-              {flight.arrival.airport}
-            </div>
-            <div className="text-xs text-gray-500 dark:text-gray-500">
-              {flight.arrival.city}
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
-            <span>{flight.aircraft}</span>
-            <span>{flight.availableSeats} chỗ trống</span>
-          </div>
-          <Button
-            onClick={() => onSelect(flight)}
-            className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-2"
-          >
-            Chọn chuyến bay
-          </Button>
         </div>
       </CardContent>
     </Card>
