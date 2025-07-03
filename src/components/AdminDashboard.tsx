@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Users, Settings, DollarSign, Mail, User, LogOut } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -130,6 +131,13 @@ export const AdminDashboard = () => {
     return new Date(dateString).toLocaleDateString('vi-VN');
   };
 
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(amount);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center">
@@ -197,15 +205,15 @@ export const AdminDashboard = () => {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Markup trung bình</CardTitle>
+              <CardTitle className="text-sm font-medium">Phí cộng thêm trung bình</CardTitle>
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {Math.round(profiles.reduce((sum, p) => sum + (p.price_markup || 0), 0) / profiles.length || 0)}%
+                {formatCurrency(Math.round(profiles.reduce((sum, p) => sum + (p.price_markup || 0), 0) / profiles.length || 0))}
               </div>
               <p className="text-xs text-muted-foreground">
-                Phần trăm cộng thêm giá
+                Giá trị cộng thêm trung bình
               </p>
             </CardContent>
           </Card>
@@ -224,7 +232,7 @@ export const AdminDashboard = () => {
                   <TableHead>Email</TableHead>
                   <TableHead>Vai trò</TableHead>
                   <TableHead>Trạng thái</TableHead>
-                  <TableHead>Price Markup (%)</TableHead>
+                  <TableHead>Phí cộng thêm</TableHead>
                   <TableHead>Ngày tạo</TableHead>
                   <TableHead>Thao tác</TableHead>
                 </TableRow>
@@ -250,7 +258,7 @@ export const AdminDashboard = () => {
                     <TableCell>{getStatusBadge(profile.status)}</TableCell>
                     <TableCell>
                       <span className="font-mono">
-                        {profile.price_markup || 0}%
+                        {formatCurrency(profile.price_markup || 0)}
                       </span>
                     </TableCell>
                     <TableCell>{formatDate(profile.created_at)}</TableCell>
@@ -280,7 +288,7 @@ export const AdminDashboard = () => {
                               />
                             </div>
                             <div className="space-y-2">
-                              <Label htmlFor="price_markup">Price Markup (%)</Label>
+                              <Label htmlFor="price_markup">Phí cộng thêm (VND)</Label>
                               <Input
                                 id="price_markup"
                                 type="number"
@@ -288,8 +296,7 @@ export const AdminDashboard = () => {
                                 onChange={(e) => setEditForm(prev => ({ ...prev, price_markup: parseFloat(e.target.value) || 0 }))}
                                 placeholder="0"
                                 min="0"
-                                max="100"
-                                step="0.1"
+                                step="1000"
                               />
                             </div>
                             <div className="space-y-2">

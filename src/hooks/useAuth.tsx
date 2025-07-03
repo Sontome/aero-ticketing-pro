@@ -102,10 +102,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signOut = async () => {
+    // Clear all local storage related to auth
+    localStorage.removeItem('sb-imxesrkdgciojihloufi-auth-token');
+    localStorage.clear();
+    
+    // Sign out from Supabase
     await supabase.auth.signOut();
+    
+    // Clear all state
     setUser(null);
     setSession(null);
     setProfile(null);
+    
+    // Force page reload to clear any cached data
+    window.location.reload();
   };
 
   const value = {
