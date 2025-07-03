@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { FlightSearchForm, SearchFormData } from '@/components/FlightSearchForm';
 import { FlightCard } from '@/components/FlightCard';
@@ -173,7 +174,7 @@ export default function Index() {
           <div className="flex justify-between items-center">
             <div className="transition-all duration-200">
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Tìm kiếm chuyến bay
+                Hàn Việt Air
               </h1>
               <p className="text-gray-600 dark:text-gray-400">
                 Tìm kiếm và so sánh giá vé máy bay từ các hãng hàng không khác nhau.
