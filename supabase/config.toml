@@ -85,6 +85,8 @@ enable_signup = true
 [auth.email]
 # Allow/disallow new user signups via email to your project.
 enable_signup = true
+# Allow/disallow email logins to your project.
+enable_logins = true
 # If enabled, a user will be required to confirm any email change on both the old, and new email addresses. If disabled, only the new email is required to confirm.
 double_confirm_changes = true
 # If enabled, users need to confirm their email address before signing in.
