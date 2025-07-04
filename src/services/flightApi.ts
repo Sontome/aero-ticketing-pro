@@ -139,6 +139,7 @@ export interface Flight {
       date: string;
     };
     ticketClass: string;
+    stops: number;
     stopInfo?: {
       stop1: string;
       waitTime: string;
@@ -258,6 +259,7 @@ export const fetchVietJetFlights = async (searchData: SearchFormData): Promise<F
           date: flight['chiều về'].ngày_hạ_cánh,
         },
         ticketClass: flight['chiều về'].loại_vé,
+        stops: parseInt(flight['chiều về'].số_điểm_dừng),
         stopInfo: flight['chiều về'].điểm_dừng_1 ? {
           stop1: flight['chiều về'].điểm_dừng_1,
           waitTime: flight['chiều về'].thời_gian_chờ,
@@ -359,6 +361,7 @@ export const fetchVietnamAirlinesFlights = async (searchData: SearchFormData): P
           date: flight.chiều_về.ngày_hạ_cánh,
         },
         ticketClass: flight.chiều_về.loại_vé,
+        stops: parseInt(flight.chiều_về.số_điểm_dừng),
         stopInfo: flight.chiều_về.điểm_dừng_1 ? {
           stop1: flight.chiều_về.điểm_dừng_1,
           waitTime: flight.chiều_về.thời_gian_chờ,
