@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -78,7 +77,12 @@ export const FlightCard: React.FC<FlightCardProps> = ({ flight, priceMode }) => 
     if (flight.airline === 'VJ') {
       return `DELUXE-${flight.ticketClass}`;
     } else {
-      return `${flight.ticketClass}-${flight.return?.ticketClass || 'R'}`;
+      // For VNA, if it's one-way, only show the departure ticket class
+      if (!flight.return) {
+        return flight.ticketClass;
+      }
+      // For round trip, show both
+      return `${flight.ticketClass}-${flight.return.ticketClass}`;
     }
   };
 
