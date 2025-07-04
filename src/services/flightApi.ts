@@ -168,17 +168,32 @@ const formatDate = (date: Date): string => {
 
 const getCityName = (code: string): string => {
   const cities: Record<string, string> = {
+    // Korean airports
+    'ICN': 'Incheon',
+    'PUS': 'Busan',
+    'TAE': 'Daegu',
+    // Vietnamese airports
     'HAN': 'Hà Nội',
-    'SGN': 'TP.HCM',
+    'SGN': 'Hồ Chí Minh',
     'DAD': 'Đà Nẵng',
+    'HPH': 'Hải Phòng',
+    'VCA': 'Cần Thơ',
     'CXR': 'Nha Trang',
     'DLI': 'Đà Lạt',
+    'VDH': 'Đồng Hới',
+    'BMV': 'Buôn Ma Thuột',
+    'VII': 'Vinh',
+    'UIH': 'Quy Nhơn',
+    'THD': 'Thanh Hóa',
     'PQC': 'Phú Quốc',
-    'VCA': 'Cần Thơ',
-    'HPH': 'Hải Phòng',
-    'ICN': 'Seoul Incheon',
-    'GMP': 'Seoul Gimpo',
-    'PUS': 'Busan',
+    'PXU': 'Pleiku',
+    'HUI': 'Huế',
+    'VCL': 'Tam Kỳ',
+    'CAH': 'Cà Mau',
+    'DIN': 'Điện Biên',
+    'VKG': 'Rạch Giá',
+    'TBB': 'Tuy Hòa',
+    'VDO': 'Vân Đồn',
   };
   return cities[code] || code;
 };

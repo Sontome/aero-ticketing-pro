@@ -24,19 +24,36 @@ interface FlightSearchFormProps {
   loading: boolean;
 }
 
-// Reordered airports with Korean airports at top
-const airports = [
-  { code: 'ICN', name: 'Seoul Incheon', city: 'Seoul' },
+// Korean airports
+const koreanAirports = [
+  { code: 'ICN', name: 'Incheon', city: 'Seoul' },
   { code: 'PUS', name: 'Busan', city: 'Busan' },
+  { code: 'TAE', name: 'Daegu', city: 'Daegu' },
+];
+
+// Vietnamese airports
+const vietnameseAirports = [
   { code: 'HAN', name: 'Hà Nội', city: 'Hà Nội' },
-  { code: 'SGN', name: 'TP.HCM', city: 'TP.HCM' },
+  { code: 'SGN', name: 'Hồ Chí Minh', city: 'Hồ Chí Minh' },
   { code: 'DAD', name: 'Đà Nẵng', city: 'Đà Nẵng' },
-  { code: 'CXR', name: 'Nha Trang', city: 'Nha Trang' },
-  { code: 'DLI', name: 'Đà Lạt', city: 'Đà Lạt' },
-  { code: 'PQC', name: 'Phú Quốc', city: 'Phú Quốc' },
-  { code: 'VCA', name: 'Cần Thơ', city: 'Cần Thơ' },
   { code: 'HPH', name: 'Hải Phòng', city: 'Hải Phòng' },
-  { code: 'GMP', name: 'Seoul Gimpo', city: 'Seoul' },
+  { code: 'VCA', name: 'Cần Thơ', city: 'Cần Thơ' },
+  { code: 'CXR', name: 'Nha Trang (Cam Ranh)', city: 'Nha Trang' },
+  { code: 'DLI', name: 'Đà Lạt', city: 'Đà Lạt' },
+  { code: 'VDH', name: 'Đồng Hới', city: 'Đồng Hới' },
+  { code: 'BMV', name: 'Buôn Ma Thuột', city: 'Buôn Ma Thuột' },
+  { code: 'VII', name: 'Vinh', city: 'Vinh' },
+  { code: 'UIH', name: 'Quy Nhơn (Phù Cát)', city: 'Quy Nhơn' },
+  { code: 'THD', name: 'Thanh Hóa (Thọ Xuân)', city: 'Thanh Hóa' },
+  { code: 'PQC', name: 'Phú Quốc', city: 'Phú Quốc' },
+  { code: 'PXU', name: 'Pleiku', city: 'Pleiku' },
+  { code: 'HUI', name: 'Huế (Phú Bài)', city: 'Huế' },
+  { code: 'VCL', name: 'Tam Kỳ (Chu Lai)', city: 'Tam Kỳ' },
+  { code: 'CAH', name: 'Cà Mau', city: 'Cà Mau' },
+  { code: 'DIN', name: 'Điện Biên', city: 'Điện Biên' },
+  { code: 'VKG', name: 'Rạch Giá', city: 'Rạch Giá' },
+  { code: 'TBB', name: 'Tuy Hòa (Phú Yên)', city: 'Tuy Hòa' },
+  { code: 'VDO', name: 'Vân Đồn (Quảng Ninh)', city: 'Vân Đồn' },
 ];
 
 export const FlightSearchForm: React.FC<FlightSearchFormProps> = ({ onSearch, loading }) => {
@@ -74,6 +91,43 @@ export const FlightSearchForm: React.FC<FlightSearchFormProps> = ({ onSearch, lo
     setReturnDateOpen(false);
   };
 
+  // Check if departure airport is Korean
+  const isFromKorean = koreanAirports.some(airport => airport.code === formData.from);
+  
+  // Get available destination airports based on departure selection
+  const getAvailableDestinations = () => {
+    if (isFromKorean) {
+      // If departure is Korean, show Vietnamese airports
+      return vietnameseAirports;
+    } else {
+      // If departure is Vietnamese, show Korean airports
+      return koreanAirports;
+    }
+  };
+
+  // Get available departure airports (all airports)
+  const getAllAirports = () => {
+    return [...koreanAirports, ...vietnameseAirports];
+  };
+
+  const handleFromChange = (value: string) => {
+    setFormData(prev => {
+      const newFormData = { ...prev, from: value };
+      
+      // Check if the new departure is Korean or Vietnamese
+      const newIsFromKorean = koreanAirports.some(airport => airport.code === value);
+      const availableDestinations = newIsFromKorean ? vietnameseAirports : koreanAirports;
+      
+      // If current destination is not available for the new departure, reset to default
+      const isCurrentDestinationAvailable = availableDestinations.some(airport => airport.code === prev.to);
+      if (!isCurrentDestinationAvailable) {
+        newFormData.to = newIsFromKorean ? 'HAN' : 'ICN';
+      }
+      
+      return newFormData;
+    });
+  };
+
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8">
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -107,12 +161,12 @@ export const FlightSearchForm: React.FC<FlightSearchFormProps> = ({ onSearch, lo
           {/* From Airport */}
           <div className="space-y-2">
             <Label htmlFor="from">Nơi đi</Label>
-            <Select value={formData.from} onValueChange={(value) => setFormData(prev => ({ ...prev, from: value }))}>
+            <Select value={formData.from} onValueChange={handleFromChange}>
               <SelectTrigger>
                 <SelectValue placeholder="Chọn sân bay đi" />
               </SelectTrigger>
               <SelectContent>
-                {airports.map((airport) => (
+                {getAllAirports().map((airport) => (
                   <SelectItem key={airport.code} value={airport.code}>
                     {airport.code} - {airport.name}
                   </SelectItem>
@@ -129,7 +183,7 @@ export const FlightSearchForm: React.FC<FlightSearchFormProps> = ({ onSearch, lo
                 <SelectValue placeholder="Chọn sân bay đến" />
               </SelectTrigger>
               <SelectContent>
-                {airports.map((airport) => (
+                {getAvailableDestinations().map((airport) => (
                   <SelectItem key={airport.code} value={airport.code}>
                     {airport.code} - {airport.name}
                   </SelectItem>
