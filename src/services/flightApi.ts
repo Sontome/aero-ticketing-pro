@@ -1,4 +1,3 @@
-
 interface SearchFormData {
   from: string;
   to: string;
@@ -140,6 +139,10 @@ export interface Flight {
       date: string;
     };
     ticketClass: string;
+    stopInfo?: {
+      stop1: string;
+      waitTime: string;
+    };
   };
   duration: string;
   price: number;
@@ -149,6 +152,10 @@ export interface Flight {
   bookingKey?: string;
   ticketClass: string;
   baggageType: string;
+  stopInfo?: {
+    stop1: string;
+    waitTime: string;
+  };
 }
 
 const formatDate = (date: Date): string => {
@@ -251,6 +258,10 @@ export const fetchVietJetFlights = async (searchData: SearchFormData): Promise<F
           date: flight['chiều về'].ngày_hạ_cánh,
         },
         ticketClass: flight['chiều về'].loại_vé,
+        stopInfo: flight['chiều về'].điểm_dừng_1 ? {
+          stop1: flight['chiều về'].điểm_dừng_1,
+          waitTime: flight['chiều về'].thời_gian_chờ,
+        } : undefined,
       } : undefined,
       duration: formatDuration(flight['chiều đi'].thời_gian_bay),
       price: parseInt(flight.thông_tin_chung.giá_vé),
@@ -260,6 +271,10 @@ export const fetchVietJetFlights = async (searchData: SearchFormData): Promise<F
       bookingKey: flight['chiều đi'].BookingKey,
       ticketClass: flight['chiều đi'].loại_vé,
       baggageType: flight.thông_tin_chung.hành_lý_vna,
+      stopInfo: flight['chiều đi'].điểm_dừng_1 ? {
+        stop1: flight['chiều đi'].điểm_dừng_1,
+        waitTime: flight['chiều đi'].thời_gian_chờ,
+      } : undefined,
     }));
   } catch (error) {
     console.error('VietJet API error:', error);
@@ -344,6 +359,10 @@ export const fetchVietnamAirlinesFlights = async (searchData: SearchFormData): P
           date: flight.chiều_về.ngày_hạ_cánh,
         },
         ticketClass: flight.chiều_về.loại_vé,
+        stopInfo: flight.chiều_về.điểm_dừng_1 ? {
+          stop1: flight.chiều_về.điểm_dừng_1,
+          waitTime: flight.chiều_về.thời_gian_chờ,
+        } : undefined,
       } : undefined,
       duration: formatDuration(flight.chiều_đi.thời_gian_bay),
       price: parseInt(flight.thông_tin_chung.giá_vé),
@@ -352,6 +371,10 @@ export const fetchVietnamAirlinesFlights = async (searchData: SearchFormData): P
       availableSeats: parseInt(flight.thông_tin_chung.số_ghế_còn),
       ticketClass: flight.chiều_đi.loại_vé,
       baggageType: flight.thông_tin_chung.hành_lý_vna,
+      stopInfo: flight.chiều_đi.điểm_dừng_1 ? {
+        stop1: flight.chiều_đi.điểm_dừng_1,
+        waitTime: flight.chiều_đi.thời_gian_chờ,
+      } : undefined,
     }));
   } catch (error) {
     console.error('Vietnam Airlines API error:', error);
