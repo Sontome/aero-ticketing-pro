@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -81,9 +82,33 @@ export const FlightCard: React.FC<FlightCardProps> = ({ flight, priceMode }) => 
     }
   };
 
+  const getTripTypeLabel = () => {
+    return flight.return ? 'Khứ hồi' : 'Một chiều';
+  };
+
+  const formatFlightWithStops = (flightLeg: any, isReturn = false) => {
+    const departureInfo = isReturn ? flight.return?.departure : flight.departure;
+    const arrivalInfo = isReturn ? flight.return?.arrival : flight.arrival;
+    
+    if (!departureInfo || !arrivalInfo) return '';
+    
+    let flightInfo = `${departureInfo.airport}-${arrivalInfo.airport} ${departureInfo.time} ngày ${formatDate(departureInfo.date)}`;
+    
+    // Add stop information if flight has stops
+    if (departureInfo.stops > 0) {
+      // Get stop info from the original flight data
+      const stopInfo = isReturn ? flight.return?.stopInfo : flight.stopInfo;
+      if (stopInfo?.stop1 && stopInfo?.waitTime) {
+        flightInfo += ` (${stopInfo.stop1} : chờ ${stopInfo.waitTime} p)`;
+      }
+    }
+    
+    return flightInfo;
+  };
+
   const handleCopyFlight = () => {
-    const outboundLine = `${flight.departure.airport}-${flight.arrival.airport} ${flight.departure.time} ngày ${formatDate(flight.departure.date)}`;
-    const returnLine = flight.return ? `${flight.return.departure.airport}-${flight.return.arrival.airport} ${flight.return.departure.time} ngày ${formatDate(flight.return.departure.date)}` : '';
+    const outboundLine = formatFlightWithStops(flight.departure, false);
+    const returnLine = flight.return ? formatFlightWithStops(flight.return, true) : '';
     
     const copyText = `${outboundLine}${returnLine ? `\n${returnLine}` : ''}
 ${getBaggageInfo()}, giá vé = ${formatPrice(adjustedPrice)}w`;
@@ -115,7 +140,7 @@ ${getBaggageInfo()}, giá vé = ${formatPrice(adjustedPrice)}w`;
                 {formatPrice(adjustedPrice)} KRW
               </div>
               <div className={`text-sm transition-colors duration-200 ${isADT ? 'text-red-600 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}>
-                Khứ hồi: {getTicketClass()} - {getFlightType()}
+                {getTripTypeLabel()}: {getTicketClass()} - {getFlightType()}
               </div>
               <div className="flex items-center text-sm text-gray-500 mt-1 transition-colors duration-200">
                 <Users className="w-4 h-4 mr-1" />
@@ -151,6 +176,11 @@ ${getBaggageInfo()}, giá vé = ${formatPrice(adjustedPrice)}w`;
                 </span>
                 <span className={`transition-colors duration-200 ${isADT ? 'text-red-600' : ''}`}>{flight.departure.time}</span>
                 <span className={`transition-colors duration-200 ${isADT ? 'text-red-600' : ''}`}>ngày {formatDate(flight.departure.date)}</span>
+                {flight.departure.stops > 0 && flight.stopInfo?.stop1 && flight.stopInfo?.waitTime && (
+                  <span className="text-red-600 font-medium">
+                    ({flight.stopInfo.stop1} : chờ {flight.stopInfo.waitTime} p)
+                  </span>
+                )}
               </div>
             </div>
 
@@ -164,6 +194,11 @@ ${getBaggageInfo()}, giá vé = ${formatPrice(adjustedPrice)}w`;
                   </span>
                   <span className={`transition-colors duration-200 ${isADT ? 'text-red-600' : ''}`}>{flight.return.departure.time}</span>
                   <span className={`transition-colors duration-200 ${isADT ? 'text-red-600' : ''}`}>ngày {formatDate(flight.return.departure.date)}</span>
+                  {flight.return.stops > 0 && flight.return.stopInfo?.stop1 && flight.return.stopInfo?.waitTime && (
+                    <span className="text-red-600 font-medium">
+                      ({flight.return.stopInfo.stop1} : chờ {flight.return.stopInfo.waitTime} p)
+                    </span>
+                  )}
                 </div>
               </div>
             )}
