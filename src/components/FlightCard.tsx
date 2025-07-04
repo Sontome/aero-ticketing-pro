@@ -76,12 +76,12 @@ export const FlightCard: React.FC<FlightCardProps> = ({ flight, priceMode }) => 
 
   const getTicketClass = () => {
     if (flight.airline === 'VJ') {
-      // For VietJet, if it's one-way, only show departure ticket class with DELUXE prefix
+      // For VietJet, if it's one-way, only show departure ticket class
       if (!flight.return) {
-        return `DELUXE-${flight.ticketClass}`;
+        return flight.ticketClass;
       }
-      // For round trip, show both with DELUXE prefix
-      return `DELUXE-${flight.ticketClass}-${flight.return.ticketClass}`;
+      // For round trip, show both ticket classes
+      return `${flight.ticketClass}-${flight.return.ticketClass}`;
     } else {
       // For VNA, if it's one-way, only show the departure ticket class
       if (!flight.return) {
