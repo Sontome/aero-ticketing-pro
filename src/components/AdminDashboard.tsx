@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Users, Settings, DollarSign, Mail, User, LogOut } from 'lucide-react';
+import { Users, Settings, DollarSign, Mail, User, LogOut, Phone, Facebook } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +15,8 @@ interface Profile {
   id: string;
   email: string;
   full_name: string | null;
+  phone: string | null;
+  linkfacebook: string | null;
   role: string;
   price_markup: number;
   price_vj: number;
@@ -32,6 +34,8 @@ export const AdminDashboard = () => {
   const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
   const [editForm, setEditForm] = useState({
     full_name: '',
+    phone: '',
+    linkfacebook: '',
     price_markup: 0,
     price_vj: 0,
     price_vna: 0,
@@ -73,6 +77,8 @@ export const AdminDashboard = () => {
     setEditingProfile(profile);
     setEditForm({
       full_name: profile.full_name || '',
+      phone: profile.phone || '',
+      linkfacebook: profile.linkfacebook || '',
       price_markup: profile.price_markup || 0,
       price_vj: profile.price_vj || 0,
       price_vna: profile.price_vna || 0,
@@ -91,6 +97,8 @@ export const AdminDashboard = () => {
         .from('profiles')
         .update({
           full_name: editForm.full_name,
+          phone: editForm.phone,
+          linkfacebook: editForm.linkfacebook,
           price_markup: editForm.price_markup,
           price_vj: editForm.price_vj,
           price_vna: editForm.price_vna,
@@ -246,6 +254,8 @@ export const AdminDashboard = () => {
                   <TableRow>
                     <TableHead>Người dùng</TableHead>
                     <TableHead>Email</TableHead>
+                    <TableHead>Điện thoại</TableHead>
+                    <TableHead>Facebook</TableHead>
                     <TableHead>Vai trò</TableHead>
                     <TableHead>Trạng thái</TableHead>
                     <TableHead>Phí chung</TableHead>
@@ -272,6 +282,29 @@ export const AdminDashboard = () => {
                         <div className="flex items-center space-x-2">
                           <Mail className="w-4 h-4 text-gray-400" />
                           <span>{profile.email}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-2">
+                          <Phone className="w-4 h-4 text-gray-400" />
+                          <span>{profile.phone || 'Chưa cập nhật'}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-2">
+                          <Facebook className="w-4 h-4 text-gray-400" />
+                          {profile.linkfacebook ? (
+                            <a 
+                              href={profile.linkfacebook} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:underline"
+                            >
+                              Facebook
+                            </a>
+                          ) : (
+                            <span>Chưa cập nhật</span>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell>{getRoleBadge(profile.role)}</TableCell>
@@ -325,6 +358,24 @@ export const AdminDashboard = () => {
                                   value={editForm.full_name}
                                   onChange={(e) => setEditForm(prev => ({ ...prev, full_name: e.target.value }))}
                                   placeholder="Nhập họ và tên"
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label htmlFor="phone">Số điện thoại</Label>
+                                <Input
+                                  id="phone"
+                                  value={editForm.phone}
+                                  onChange={(e) => setEditForm(prev => ({ ...prev, phone: e.target.value }))}
+                                  placeholder="Nhập số điện thoại"
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label htmlFor="linkfacebook">Link Facebook</Label>
+                                <Input
+                                  id="linkfacebook"
+                                  value={editForm.linkfacebook}
+                                  onChange={(e) => setEditForm(prev => ({ ...prev, linkfacebook: e.target.value }))}
+                                  placeholder="Nhập link Facebook"
                                 />
                               </div>
                               <div className="space-y-2">
