@@ -15,6 +15,8 @@ export type Database = {
           email: string
           full_name: string | null
           id: string
+          linkfacebook: string | null
+          phone: string | null
           price_markup: number | null
           price_ow: number | null
           price_rt: number | null
@@ -29,6 +31,8 @@ export type Database = {
           email: string
           full_name?: string | null
           id: string
+          linkfacebook?: string | null
+          phone?: string | null
           price_markup?: number | null
           price_ow?: number | null
           price_rt?: number | null
@@ -43,6 +47,8 @@ export type Database = {
           email?: string
           full_name?: string | null
           id?: string
+          linkfacebook?: string | null
+          phone?: string | null
           price_markup?: number | null
           price_ow?: number | null
           price_rt?: number | null

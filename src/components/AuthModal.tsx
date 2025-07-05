@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/components/ui/use-toast';
-import { Loader2, Mail, Lock, User } from 'lucide-react';
+import { Loader2, Mail, Lock, User, Phone, Facebook } from 'lucide-react';
 
 interface AuthModalProps {
   open: boolean;
@@ -29,6 +29,8 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
     password: '',
     confirmPassword: '',
     fullName: '',
+    phone: '',
+    linkfacebook: '',
   });
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -86,13 +88,24 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
       return;
     }
 
+    if (!signUpForm.phone.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Lỗi",
+        description: "Số điện thoại là bắt buộc",
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
       const { error } = await signUp(
         signUpForm.email,
         signUpForm.password,
-        signUpForm.fullName
+        signUpForm.fullName,
+        signUpForm.phone,
+        signUpForm.linkfacebook
       );
 
       if (error) {
@@ -214,6 +227,37 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
                     value={signUpForm.email}
                     onChange={(e) => setSignUpForm(prev => ({ ...prev, email: e.target.value }))}
                     required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="signup-phone">Số điện thoại</Label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input
+                    id="signup-phone"
+                    type="tel"
+                    placeholder="+84 123 456 789"
+                    className="pl-10"
+                    value={signUpForm.phone}
+                    onChange={(e) => setSignUpForm(prev => ({ ...prev, phone: e.target.value }))}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="signup-facebook">Link Facebook (tùy chọn)</Label>
+                <div className="relative">
+                  <Facebook className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input
+                    id="signup-facebook"
+                    type="url"
+                    placeholder="https://facebook.com/yourprofile"
+                    className="pl-10"
+                    value={signUpForm.linkfacebook}
+                    onChange={(e) => setSignUpForm(prev => ({ ...prev, linkfacebook: e.target.value }))}
                   />
                 </div>
               </div>
