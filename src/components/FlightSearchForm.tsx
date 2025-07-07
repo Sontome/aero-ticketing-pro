@@ -131,13 +131,17 @@ export const FlightSearchForm: React.FC<FlightSearchFormProps> = ({ onSearch, lo
   };
 
   const handleRefreshDepartureDate = () => {
+    // Clear both departure and return dates
+    setFormData(prev => ({ ...prev, departureDate: undefined, returnDate: undefined }));
     setDepartureDateMonth(new Date());
     setDepartureDateOpen(true);
   };
 
   const handleDepartureDateOpenChange = (open: boolean) => {
     setDepartureDateOpen(open);
-    if (open && !departureDateMonth) {
+    if (open) {
+      // If there's a selected departure date, navigate to that month
+      // Otherwise, use current date
       setDepartureDateMonth(formData.departureDate || new Date());
     }
   };
