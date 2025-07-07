@@ -109,6 +109,30 @@ export default function Index() {
     }
   };
 
+  const handleShowMore = () => {
+    setFilters(prev => {
+      // First click: remove cheapest only filter
+      if (prev.showCheapestOnly) {
+        return {
+          ...prev,
+          showCheapestOnly: false
+        };
+      }
+      // Second click: remove direct flights filter
+      else if (prev.directFlightsOnly) {
+        return {
+          ...prev,
+          directFlightsOnly: false
+        };
+      }
+      // This shouldn't happen, but fallback
+      return {
+        ...prev,
+        show2pc: false
+      };
+    });
+  };
+
   const filterAndSortFlights = (flights: Flight[]) => {
     let filtered = flights;
 
@@ -161,15 +185,6 @@ export default function Index() {
     return filtered;
   };
 
-  const handleShowMore = () => {
-    setFilters(prev => ({
-      ...prev,
-      showCheapestOnly: false,
-      directFlightsOnly: false,
-      show2pc: false
-    }));
-  };
-
   const filteredFlights = filterAndSortFlights(flights);
 
   // Separate flights by airline for side-by-side display
@@ -185,8 +200,8 @@ export default function Index() {
   });
   const hasVfr2pc = flights.some(f => f.airline === 'VNA' && f.baggageType === 'VFR');
 
-  // Check if any filter options are active to show the "Hiển thị thêm" button
-  const hasActiveFilters = filters.showCheapestOnly || filters.directFlightsOnly || filters.show2pc;
+  // Check if show more button should be visible
+  const shouldShowMoreButton = filters.showCheapestOnly || filters.directFlightsOnly;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-all duration-300">
@@ -232,7 +247,7 @@ export default function Index() {
                       VietJet ({vjFlights.length} chuyến bay)
                     </h3>
                     <div className="space-y-4">
-                      {vjFlights.map(flight => <FlightCard key={flight.id} flight={flight} priceMode="default" />)}
+                      {vjFlights.map(flight => <FlightCard key={flight.id} flight={flight} priceMode="Page" />)}
                     </div>
                   </div>}
               </div>
@@ -244,14 +259,14 @@ export default function Index() {
                       Vietnam Airlines ({vnaFlights.length} chuyến bay)
                     </h3>
                     <div className="space-y-4">
-                      {vnaFlights.map(flight => <FlightCard key={flight.id} flight={flight} priceMode="default" />)}
+                      {vnaFlights.map(flight => <FlightCard key={flight.id} flight={flight} priceMode="Page" />)}
                     </div>
                   </div>}
               </div>
             </div>
 
             {/* Show More Button */}
-            {hasActiveFilters && (
+            {shouldShowMoreButton && (
               <div className="flex justify-center mt-8">
                 <Button
                   onClick={handleShowMore}
