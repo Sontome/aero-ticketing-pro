@@ -191,28 +191,7 @@ export default function Index() {
                 Tìm kiếm và so sánh giá vé máy bay từ các hãng hàng không khác nhau.
               </p>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Chế độ:</span>
-                <Button
-                  variant={priceMode === 'Page' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setPriceMode('Page')}
-                  className="transition-all duration-200"
-                >
-                  Page
-                </Button>
-                <Button
-                  variant={priceMode === 'Live' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setPriceMode('Live')}
-                  className="transition-all duration-200"
-                >
-                  Live
-                </Button>
-              </div>
-              <UserProfileDropdown />
-            </div>
+            <UserProfileDropdown />
           </div>
         </div>
       </header>
