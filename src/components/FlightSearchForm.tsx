@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Plane } from 'lucide-react';
+import { CalendarIcon, Plane, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
@@ -68,6 +67,7 @@ export const FlightSearchForm: React.FC<FlightSearchFormProps> = ({ onSearch, lo
 
   const [departureDateOpen, setDepartureDateOpen] = useState(false);
   const [returnDateOpen, setReturnDateOpen] = useState(false);
+  const [departureDateMonth, setDepartureDateMonth] = useState<Date | undefined>(undefined);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -126,6 +126,18 @@ export const FlightSearchForm: React.FC<FlightSearchFormProps> = ({ onSearch, lo
       
       return newFormData;
     });
+  };
+
+  const handleRefreshDepartureDate = () => {
+    setDepartureDateMonth(new Date());
+    setDepartureDateOpen(true);
+  };
+
+  const handleDepartureDateOpenChange = (open: boolean) => {
+    setDepartureDateOpen(open);
+    if (open && !departureDateMonth) {
+      setDepartureDateMonth(formData.departureDate || new Date());
+    }
   };
 
   return (
@@ -195,34 +207,45 @@ export const FlightSearchForm: React.FC<FlightSearchFormProps> = ({ onSearch, lo
           {/* Departure Date */}
           <div className="space-y-2">
             <Label>Ngày đi</Label>
-            <Popover open={departureDateOpen} onOpenChange={setDepartureDateOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !formData.departureDate && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {formData.departureDate ? (
-                    format(formData.departureDate, "dd/MM/yyyy")
-                  ) : (
-                    <span>Chọn ngày</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={formData.departureDate}
-                  onSelect={handleDepartureDateSelect}
-                  disabled={(date) => date < new Date()}
-                  defaultMonth={formData.departureDate || new Date()}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
+            <div className="flex space-x-2">
+              <Popover open={departureDateOpen} onOpenChange={handleDepartureDateOpenChange}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "flex-1 justify-start text-left font-normal",
+                      !formData.departureDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {formData.departureDate ? (
+                      format(formData.departureDate, "dd/MM/yyyy")
+                    ) : (
+                      <span>Chọn ngày</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={formData.departureDate}
+                    onSelect={handleDepartureDateSelect}
+                    disabled={(date) => date < new Date()}
+                    defaultMonth={departureDateMonth || formData.departureDate || new Date()}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={handleRefreshDepartureDate}
+                className="shrink-0"
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </div>
 
