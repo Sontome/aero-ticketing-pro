@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { FlightSearchForm, SearchFormData } from '@/components/FlightSearchForm';
 import { FlightCard } from '@/components/FlightCard';
@@ -112,9 +111,16 @@ export default function Index() {
       filtered = filtered.filter(flight => filters.airlines.includes(flight.airline));
     }
 
-    // Filter for direct flights only
+    // Filter for direct flights only - check both departure and return flights
     if (filters.directFlightsOnly) {
-      filtered = filtered.filter(flight => flight.departure.stops === 0);
+      filtered = filtered.filter(flight => {
+        // For one-way flights, only check departure
+        if (!flight.return) {
+          return flight.departure.stops === 0;
+        }
+        // For round-trip flights, check both departure and return
+        return flight.departure.stops === 0 && flight.return.stops === 0;
+      });
     }
 
     // Filter for 2pc (VFR baggage type)
@@ -163,8 +169,13 @@ export default function Index() {
   const vjFlights = filteredFlights.filter(f => f.airline === 'VJ');
   const vnaFlights = filteredFlights.filter(f => f.airline === 'VNA');
 
-  // Check if we have direct flights and VFR 2pc flights
-  const hasDirectFlights = flights.some(f => f.departure.stops === 0);
+  // Check if we have direct flights (both departure and return for round-trip)
+  const hasDirectFlights = flights.some(f => {
+    if (!f.return) {
+      return f.departure.stops === 0;
+    }
+    return f.departure.stops === 0 && f.return.stops === 0;
+  });
   const hasVfr2pc = flights.some(f => f.airline === 'VNA' && f.baggageType === 'VFR');
 
   return (
