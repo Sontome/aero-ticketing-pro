@@ -59,6 +59,15 @@ export default function Index() {
     setSearchPerformed(true);
     setFlights([]); // Clear previous results
 
+    // Reset filters to default state
+    setFilters({
+      airlines: ['VJ', 'VNA'],
+      showCheapestOnly: true,
+      directFlightsOnly: true,
+      show2pc: true,
+      sortBy: 'price'
+    });
+
     try {
       // Start both API calls simultaneously
       const vietJetPromise = fetchVietJetFlights(searchData);
