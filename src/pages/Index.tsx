@@ -1,16 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FlightSearchForm, SearchFormData } from '@/components/FlightSearchForm';
 import { FlightCard } from '@/components/FlightCard';
 import { FlightFilters, FilterOptions } from '@/components/FlightFilters';
 import { fetchVietJetFlights, fetchVietnamAirlinesFlights, Flight } from '@/services/flightApi';
 import { Button } from '@/components/ui/button';
 import { UserProfileDropdown } from '@/components/UserProfileDropdown';
+import { ArrowUp } from 'lucide-react';
+
 export default function Index() {
   const [flights, setFlights] = useState<Flight[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchPerformed, setSearchPerformed] = useState(false);
-  const [priceMode, setPriceMode] = useState<'Page' | 'Live'>('Page');
+  const [showScrollTop, setShowScrollTop] = useState(false);
   const [filters, setFilters] = useState<FilterOptions>({
     airlines: ['VJ', 'VNA'],
     showCheapestOnly: true,
@@ -18,6 +20,24 @@ export default function Index() {
     show2pc: true,
     sortBy: 'price'
   });
+
+  // Show scroll to top button when user scrolls down
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 300);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+
   const playNotificationSound = () => {
     // Create a simple notification sound using Web Audio API
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -32,6 +52,7 @@ export default function Index() {
     oscillator.start(audioContext.currentTime);
     oscillator.stop(audioContext.currentTime + 0.5);
   };
+
   const handleSearch = async (searchData: SearchFormData) => {
     setLoading(true);
     setError(null);
@@ -87,6 +108,7 @@ export default function Index() {
       setLoading(false);
     }
   };
+
   const filterAndSortFlights = (flights: Flight[]) => {
     let filtered = flights;
 
@@ -138,6 +160,7 @@ export default function Index() {
     });
     return filtered;
   };
+
   const filteredFlights = filterAndSortFlights(flights);
 
   // Separate flights by airline for side-by-side display
@@ -152,15 +175,17 @@ export default function Index() {
     return f.departure.stops === 0 && f.return.stops === 0;
   });
   const hasVfr2pc = flights.some(f => f.airline === 'VNA' && f.baggageType === 'VFR');
-  return <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-all duration-300">
-      <header className="bg-white dark:bg-gray-800 shadow transition-all duration-300">
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-all duration-300">
+      <header className="sticky top-0 z-50 bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-800 dark:to-blue-900 shadow-lg backdrop-blur-sm transition-all duration-300">
         <div className="container mx-auto px-4 py-6">
           <div className="flex justify-between items-center">
             <div className="transition-all duration-200">
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent drop-shadow-sm">
                 Hàn Việt Air
               </h1>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-blue-100 dark:text-blue-200">
                 Tìm kiếm và so sánh giá vé máy bay từ các hãng hàng không khác nhau.
               </p>
             </div>
@@ -195,7 +220,7 @@ export default function Index() {
                       VietJet ({vjFlights.length} chuyến bay)
                     </h3>
                     <div className="space-y-4">
-                      {vjFlights.map(flight => <FlightCard key={flight.id} flight={flight} priceMode={priceMode} />)}
+                      {vjFlights.map(flight => <FlightCard key={flight.id} flight={flight} />)}
                     </div>
                   </div>}
               </div>
@@ -207,7 +232,7 @@ export default function Index() {
                       Vietnam Airlines ({vnaFlights.length} chuyến bay)
                     </h3>
                     <div className="space-y-4">
-                      {vnaFlights.map(flight => <FlightCard key={flight.id} flight={flight} priceMode={priceMode} />)}
+                      {vnaFlights.map(flight => <FlightCard key={flight.id} flight={flight} />)}
                     </div>
                   </div>}
               </div>
@@ -220,5 +245,17 @@ export default function Index() {
             </p>
           </div>}
       </main>
-    </div>;
+
+      {/* Scroll to top button */}
+      {showScrollTop && (
+        <Button
+          onClick={scrollToTop}
+          className="fixed bottom-6 right-6 z-50 rounded-full w-12 h-12 p-0 bg-blue-600 hover:bg-blue-700 shadow-lg animate-fade-in"
+          size="icon"
+        >
+          <ArrowUp className="h-5 w-5" />
+        </Button>
+      )}
+    </div>
+  );
 }
