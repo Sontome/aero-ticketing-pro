@@ -68,6 +68,7 @@ export const FlightSearchForm: React.FC<FlightSearchFormProps> = ({ onSearch, lo
   const [departureDateOpen, setDepartureDateOpen] = useState(false);
   const [returnDateOpen, setReturnDateOpen] = useState(false);
   const [departureDateMonth, setDepartureDateMonth] = useState<Date | undefined>(undefined);
+  const [returnDateMonth, setReturnDateMonth] = useState<Date | undefined>(undefined);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,6 +82,7 @@ export const FlightSearchForm: React.FC<FlightSearchFormProps> = ({ onSearch, lo
     // If round trip and departure date is selected, open return date picker
     if (formData.tripType === 'round_trip' && date) {
       setTimeout(() => {
+        setReturnDateMonth(date); // Set return date month to departure date
         setReturnDateOpen(true);
       }, 100);
     }
@@ -137,6 +139,13 @@ export const FlightSearchForm: React.FC<FlightSearchFormProps> = ({ onSearch, lo
     setDepartureDateOpen(open);
     if (open && !departureDateMonth) {
       setDepartureDateMonth(formData.departureDate || new Date());
+    }
+  };
+
+  const handleReturnDateOpenChange = (open: boolean) => {
+    setReturnDateOpen(open);
+    if (open && !returnDateMonth) {
+      setReturnDateMonth(formData.returnDate || formData.departureDate || new Date());
     }
   };
 
@@ -256,7 +265,7 @@ export const FlightSearchForm: React.FC<FlightSearchFormProps> = ({ onSearch, lo
             <div></div>
             <div className="space-y-2">
               <Label>Ngày về</Label>
-              <Popover open={returnDateOpen} onOpenChange={setReturnDateOpen}>
+              <Popover open={returnDateOpen} onOpenChange={handleReturnDateOpenChange}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
@@ -279,7 +288,7 @@ export const FlightSearchForm: React.FC<FlightSearchFormProps> = ({ onSearch, lo
                     selected={formData.returnDate}
                     onSelect={handleReturnDateSelect}
                     disabled={(date) => date < (formData.departureDate || new Date())}
-                    defaultMonth={formData.returnDate || formData.departureDate || new Date()}
+                    defaultMonth={returnDateMonth || formData.returnDate || formData.departureDate || new Date()}
                     initialFocus
                   />
                 </PopoverContent>
