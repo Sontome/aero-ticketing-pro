@@ -161,6 +161,15 @@ export default function Index() {
     return filtered;
   };
 
+  const handleShowMore = () => {
+    setFilters(prev => ({
+      ...prev,
+      showCheapestOnly: false,
+      directFlightsOnly: false,
+      show2pc: false
+    }));
+  };
+
   const filteredFlights = filterAndSortFlights(flights);
 
   // Separate flights by airline for side-by-side display
@@ -175,6 +184,9 @@ export default function Index() {
     return f.departure.stops === 0 && f.return.stops === 0;
   });
   const hasVfr2pc = flights.some(f => f.airline === 'VNA' && f.baggageType === 'VFR');
+
+  // Check if any filter options are active to show the "Hiển thị thêm" button
+  const hasActiveFilters = filters.showCheapestOnly || filters.directFlightsOnly || filters.show2pc;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-all duration-300">
@@ -220,7 +232,7 @@ export default function Index() {
                       VietJet ({vjFlights.length} chuyến bay)
                     </h3>
                     <div className="space-y-4">
-                      {vjFlights.map(flight => <FlightCard key={flight.id} flight={flight} />)}
+                      {vjFlights.map(flight => <FlightCard key={flight.id} flight={flight} priceMode="default" />)}
                     </div>
                   </div>}
               </div>
@@ -232,11 +244,24 @@ export default function Index() {
                       Vietnam Airlines ({vnaFlights.length} chuyến bay)
                     </h3>
                     <div className="space-y-4">
-                      {vnaFlights.map(flight => <FlightCard key={flight.id} flight={flight} />)}
+                      {vnaFlights.map(flight => <FlightCard key={flight.id} flight={flight} priceMode="default" />)}
                     </div>
                   </div>}
               </div>
             </div>
+
+            {/* Show More Button */}
+            {hasActiveFilters && (
+              <div className="flex justify-center mt-8">
+                <Button
+                  onClick={handleShowMore}
+                  variant="outline"
+                  className="px-6 py-3 text-blue-600 border-blue-300 hover:bg-blue-50 hover:border-blue-400 transition-colors"
+                >
+                  Hiển thị thêm
+                </Button>
+              </div>
+            )}
           </div>}
 
         {!loading && flights.length === 0 && searchPerformed && !error && <div className="text-center py-12 animate-fade-in">
