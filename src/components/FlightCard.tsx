@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -57,8 +56,25 @@ export const FlightCard: React.FC<FlightCardProps> = ({ flight, priceMode }) => 
   };
 
   const getFlightType = () => {
-    const isDirect = flight.departure.stops === 0;
-    return isDirect ? 'Bay thẳng' : `${flight.departure.stops} điểm dừng`;
+    // For one-way flights, only check departure
+    if (!flight.return) {
+      const isDirect = flight.departure.stops === 0;
+      return isDirect ? 'Bay thẳng' : `${flight.departure.stops} điểm dừng`;
+    }
+    
+    // For round-trip flights, check both departure and return
+    const isDepartureDirectOne = flight.departure.stops === 0;
+    const isReturnDirectOne = flight.return.stops === 0;
+    
+    if (isDepartureDirectOne && isReturnDirectOne) {
+      return 'Bay thẳng';
+    } else if (!isDepartureDirectOne && !isReturnDirectOne) {
+      return `${flight.departure.stops} điểm dừng - ${flight.return.stops} điểm dừng`;
+    } else if (!isDepartureDirectOne) {
+      return `${flight.departure.stops} điểm dừng - Bay thẳng`;
+    } else {
+      return `Bay thẳng - ${flight.return.stops} điểm dừng`;
+    }
   };
 
   const getBaggageInfo = () => {
