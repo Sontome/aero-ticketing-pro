@@ -97,11 +97,11 @@ export const FlightSearchForm: React.FC<FlightSearchFormProps> = ({ onSearch, lo
   // Get available destination airports based on departure selection
   const getAvailableDestinations = () => {
     if (isFromKorean) {
-      // If departure is Korean, show Vietnamese airports
+      // If departure is Korean, show only Vietnamese airports
       return vietnameseAirports;
     } else {
-      // If departure is Vietnamese, show Korean airports
-      return koreanAirports;
+      // If departure is Vietnamese, show all airports (both Korean and Vietnamese)
+      return [...koreanAirports, ...vietnameseAirports];
     }
   };
 
@@ -116,7 +116,7 @@ export const FlightSearchForm: React.FC<FlightSearchFormProps> = ({ onSearch, lo
       
       // Check if the new departure is Korean or Vietnamese
       const newIsFromKorean = koreanAirports.some(airport => airport.code === value);
-      const availableDestinations = newIsFromKorean ? vietnameseAirports : koreanAirports;
+      const availableDestinations = newIsFromKorean ? vietnameseAirports : [...koreanAirports, ...vietnameseAirports];
       
       // If current destination is not available for the new departure, reset to default
       const isCurrentDestinationAvailable = availableDestinations.some(airport => airport.code === prev.to);
