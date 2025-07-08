@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { FlightSearchForm, SearchFormData } from '@/components/FlightSearchForm';
 import { FlightCard } from '@/components/FlightCard';
@@ -33,16 +32,22 @@ export default function Index() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Auto scroll to results when flights are loaded
+  // Auto scroll to results when flights are loaded - smoother and slower
   useEffect(() => {
     if (flights.length > 0 && resultsRef.current) {
-      // Small delay to ensure content is rendered
+      // Longer delay to ensure content is fully rendered
       setTimeout(() => {
-        resultsRef.current?.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start'
-        });
-      }, 300);
+        const element = resultsRef.current;
+        if (element) {
+          const elementTop = element.offsetTop;
+          const offsetPosition = elementTop - 100; // Add some offset from top
+          
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+          });
+        }
+      }, 600); // Increased delay for smoother experience
     }
   }, [flights.length]);
 
