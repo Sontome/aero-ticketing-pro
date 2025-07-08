@@ -32,7 +32,34 @@ export default function Index() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Auto scroll to results when flights are loaded - smoother and slower
+  // Smooth scroll function with custom easing
+  const smoothScrollTo = (targetPosition: number, duration: number = 1200) => {
+    const startPosition = window.pageYOffset;
+    const distance = targetPosition - startPosition;
+    let startTime: number | null = null;
+
+    // Easing function for smooth animation
+    const easeInOutCubic = (t: number): number => {
+      return t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
+    };
+
+    const animateScroll = (currentTime: number) => {
+      if (startTime === null) startTime = currentTime;
+      const timeElapsed = currentTime - startTime;
+      const progress = Math.min(timeElapsed / duration, 1);
+      const easedProgress = easeInOutCubic(progress);
+      
+      window.scrollTo(0, startPosition + distance * easedProgress);
+      
+      if (progress < 1) {
+        requestAnimationFrame(animateScroll);
+      }
+    };
+
+    requestAnimationFrame(animateScroll);
+  };
+
+  // Auto scroll to results when flights are loaded - ultra smooth
   useEffect(() => {
     if (flights.length > 0 && resultsRef.current) {
       // Longer delay to ensure content is fully rendered
@@ -40,22 +67,17 @@ export default function Index() {
         const element = resultsRef.current;
         if (element) {
           const elementTop = element.offsetTop;
-          const offsetPosition = elementTop - 100; // Add some offset from top
+          const offsetPosition = elementTop - 120; // Add some offset from top
           
-          window.scrollTo({
-            top: offsetPosition,
-            behavior: 'smooth'
-          });
+          // Use custom smooth scroll instead of native scrollTo
+          smoothScrollTo(offsetPosition, 1500); // 1.5 seconds for very smooth scroll
         }
-      }, 600); // Increased delay for smoother experience
+      }, 800); // Increased delay for smoother experience
     }
   }, [flights.length]);
 
   const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
+    smoothScrollTo(0, 1000); // Use custom smooth scroll for scroll to top too
   };
 
   const playNotificationSound = () => {
