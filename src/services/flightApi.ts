@@ -222,7 +222,7 @@ export const fetchVietJetFlights = async (searchData: SearchFormData): Promise<F
   console.log('Calling VietJet API with:', requestBody);
 
   try {
-    const response = await fetch('https://completion-football-cancelled-moscow.trycloudflare.com/vj/check-ve-v2', {
+    const response = await fetch('https://thuhongtour.com/vj/check-ve-v2', {
       method: 'POST',
       headers: {
         'accept': 'application/json',
@@ -324,7 +324,7 @@ export const fetchVietnamAirlinesFlights = async (searchData: SearchFormData): P
   console.log('Calling Vietnam Airlines API with:', requestBody);
 
   try {
-    const response = await fetch('https://completion-football-cancelled-moscow.trycloudflare.com/vna/check-ve-v2', {
+    const response = await fetch('https://thuhongtour.com/vna/check-ve-v2', {
       method: 'POST',
       headers: {
         'accept': 'application/json',
