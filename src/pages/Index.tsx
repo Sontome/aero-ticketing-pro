@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useRef } from 'react';
 import { FlightSearchForm, SearchFormData } from '@/components/FlightSearchForm';
 import { FlightCard } from '@/components/FlightCard';
 import { FlightFilters, FilterOptions } from '@/components/FlightFilters';
@@ -13,6 +14,7 @@ export default function Index() {
   const [error, setError] = useState<string | null>(null);
   const [searchPerformed, setSearchPerformed] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const resultsRef = useRef<HTMLDivElement>(null);
   const [filters, setFilters] = useState<FilterOptions>({
     airlines: ['VJ', 'VNA'],
     showCheapestOnly: true,
@@ -30,6 +32,19 @@ export default function Index() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Auto scroll to results when flights are loaded
+  useEffect(() => {
+    if (flights.length > 0 && resultsRef.current) {
+      // Small delay to ensure content is rendered
+      setTimeout(() => {
+        resultsRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }, 300);
+    }
+  }, [flights.length]);
 
   const scrollToTop = () => {
     window.scrollTo({
@@ -235,7 +250,7 @@ export default function Index() {
           <FlightSearchForm onSearch={handleSearch} loading={loading} />
         </div>
         
-        {flights.length > 0 && <div className="animate-fade-in">
+        {flights.length > 0 && <div className="animate-fade-in" ref={resultsRef}>
             <FlightFilters filters={filters} onFiltersChange={setFilters} hasDirectFlights={hasDirectFlights} hasVfr2pc={hasVfr2pc} />
           </div>}
 
