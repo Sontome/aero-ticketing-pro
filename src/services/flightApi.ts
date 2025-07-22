@@ -307,7 +307,7 @@ export const fetchVietnamAirlinesFlights = async (searchData: SearchFormData): P
     arr0: searchData.to,
     depdate0: formatDate(searchData.departureDate),
     depdate1: searchData.returnDate ? formatDate(searchData.returnDate) : '',
-    activedVia: '0,1,2',
+    activedVia: '0',
     activedIDT: 'ADT,VFR',
     adt: searchData.passengers.toString(),
     chd: '0',
