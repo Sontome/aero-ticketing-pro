@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -13,6 +13,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 interface EmailTicketModalProps {
   isOpen: boolean;
@@ -20,6 +22,7 @@ interface EmailTicketModalProps {
 }
 
 export const EmailTicketModal = ({ isOpen, onClose }: EmailTicketModalProps) => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     tenKhach: '',
@@ -30,6 +33,28 @@ export const EmailTicketModal = ({ isOpen, onClose }: EmailTicketModalProps) => 
     banner:''
   });
   const [isLoading, setIsLoading] = useState(false);
+
+  // Load user's saved banner when modal opens
+  useEffect(() => {
+    if (isOpen && user) {
+      const loadUserBanner = async () => {
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('banner')
+          .eq('id', user.id)
+          .single();
+        
+        if (profile?.banner) {
+          setFormData(prev => ({
+            ...prev,
+            banner: profile.banner
+          }));
+        }
+      };
+      
+      loadUserBanner();
+    }
+  }, [isOpen, user]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -120,6 +145,14 @@ export const EmailTicketModal = ({ isOpen, onClose }: EmailTicketModalProps) => 
       
       
       if (result?.status === 'success') {
+        // Save banner to user profile for future use
+        if (user && formData.banner) {
+          await supabase
+            .from('profiles')
+            .update({ banner: formData.banner })
+            .eq('id', user.id);
+        }
+        
         toast.success('Đã thêm hàng chờ gửi mail thành công', {
           duration: 5000,
           style: {
