@@ -275,7 +275,7 @@ export default function Index() {
                 variant="ghost"
                 size="lg"
                 className="h-12 px-6 text-lg text-white border border-white rounded-xl
-                 hover:text-white hover:bg-blue-700/50 opacity-70 hover:opacity-100 
+                 hover:text-white hover:bg-blue-700/50 opacity-90 hover:opacity-100 
                  transition-all"
               >
                 Gửi Mặt Vé
