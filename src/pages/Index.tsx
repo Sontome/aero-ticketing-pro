@@ -5,7 +5,8 @@ import { FlightFilters, FilterOptions } from '@/components/FlightFilters';
 import { fetchVietJetFlights, fetchVietnamAirlinesFlights, Flight } from '@/services/flightApi';
 import { Button } from '@/components/ui/button';
 import { UserProfileDropdown } from '@/components/UserProfileDropdown';
-import { ArrowUp } from 'lucide-react';
+import { EmailTicketModal } from '@/components/EmailTicketModal';
+import { ArrowUp, Mail } from 'lucide-react';
 
 export default function Index() {
   const [flights, setFlights] = useState<Flight[]>([]);
@@ -13,6 +14,7 @@ export default function Index() {
   const [error, setError] = useState<string | null>(null);
   const [searchPerformed, setSearchPerformed] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
   const resultsRef = useRef<HTMLDivElement>(null);
   const [filters, setFilters] = useState<FilterOptions>({
     airlines: ['VJ', 'VNA'],
@@ -267,7 +269,17 @@ export default function Index() {
                 Tìm kiếm và so sánh giá vé máy bay từ các hãng hàng không khác nhau.
               </p>
             </div>
-            <UserProfileDropdown />
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={() => setIsEmailModalOpen(true)}
+                variant="ghost"
+                size="icon"
+                className="text-blue-100 hover:text-white hover:bg-blue-700/50 opacity-70 hover:opacity-100 transition-all"
+              >
+                <Mail className="h-5 w-5" />
+              </Button>
+              <UserProfileDropdown />
+            </div>
           </div>
         </div>
       </header>
@@ -347,6 +359,11 @@ export default function Index() {
           <ArrowUp className="h-5 w-5" />
         </Button>
       )}
+
+      <EmailTicketModal 
+        isOpen={isEmailModalOpen} 
+        onClose={() => setIsEmailModalOpen(false)} 
+      />
     </div>
   );
 }
