@@ -276,7 +276,7 @@ export default function Index() {
                 size="lg"
                 className="h-12 w-12 text-xl text-blue-100 hover:text-white hover:bg-blue-700/50 opacity-70 hover:opacity-100 transition-all"
               >
-                <Mail className="h-12 w-12" />
+                Gửi Mặt Vé
               </Button>
               <UserProfileDropdown />
             </div>
