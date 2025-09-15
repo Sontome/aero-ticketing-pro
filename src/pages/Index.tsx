@@ -274,7 +274,7 @@ export default function Index() {
                 onClick={() => setIsEmailModalOpen(true)}
                 variant="ghost"
                 size="lg"
-                className="h-12 px-6 text-lg text-blue-100 border border-white rounded-xl
+                className="h-12 px-6 text-lg text-white border border-white rounded-xl
                  hover:text-white hover:bg-blue-700/50 opacity-70 hover:opacity-100 
                  transition-all"
               >
