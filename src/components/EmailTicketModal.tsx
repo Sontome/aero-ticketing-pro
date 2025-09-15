@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
@@ -30,7 +31,7 @@ export const EmailTicketModal = ({ isOpen, onClose }: EmailTicketModalProps) => 
   });
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -218,13 +219,14 @@ export const EmailTicketModal = ({ isOpen, onClose }: EmailTicketModalProps) => 
           </div>
           <div className="space-y-2">
             <Label htmlFor="banner">Banner đại lý *</Label>
-            <Input
+            <Textarea
               id="banner"
               name="banner"
               value={formData.banner}
               onChange={handleInputChange}
               placeholder="Banner thông tin đại lý"
               required
+              rows={4}
             />
             <p className="text-sm text-muted-foreground">
                
