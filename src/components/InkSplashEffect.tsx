@@ -33,8 +33,10 @@ export const InkSplashEffect = ({ isActive, x, y, onComplete }: InkSplashEffectP
     >
       <div
         className={`absolute rounded-full 
-        bg-black 
+        
         transition-transform duration-1000 ease-out
+        bg-gradient-radial from-blue-50 via-white to-blue-50 
+        dark:from-gray-900 dark:via-gray-800 dark:to-gray-900
         `}
         style={{
           left: x,
