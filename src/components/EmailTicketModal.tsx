@@ -223,7 +223,7 @@ export const EmailTicketModal = ({ isOpen, onClose }: EmailTicketModalProps) => 
               name="banner"
               value={formData.banner}
               onChange={handleInputChange}
-              placeholder="Nanner thông tin đại lý"
+              placeholder="Banner thông tin đại lý"
               required
             />
             <p className="text-sm text-muted-foreground">
