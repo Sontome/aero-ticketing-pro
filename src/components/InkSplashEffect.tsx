@@ -35,7 +35,7 @@ export const InkSplashEffect = ({ isActive, x, y, onComplete }: InkSplashEffectP
         className={`absolute rounded-full 
         
         transition-transform duration-1000 ease-out
-        bg-blue-800
+        bg-white
         `}
         style={{
           left: x,
