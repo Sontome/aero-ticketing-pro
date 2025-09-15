@@ -273,7 +273,7 @@ export default function Index() {
               <Button
                 onClick={() => setIsEmailModalOpen(true)}
                 variant="ghost"
-                size="icon"
+                size="lg"
                 className="text-blue-100 hover:text-white hover:bg-blue-700/50 opacity-70 hover:opacity-100 transition-all"
               >
                 <Mail className="h-5 w-5" />
