@@ -29,16 +29,15 @@ export const InkSplashEffect = ({ isActive, x, y, onComplete }: InkSplashEffectP
       style={{ background: 'transparent' }}
     >
       <div
-        className={`absolute rounded-full bg-primary transition-all duration-1000 ease-out ${
+        className={`absolute rounded-full bg-primary ${
           isActive ? 'ink-splash-active' : ''
         }`}
         style={{
-          left: x - 10,
-          top: y - 10,
+          left: x,
+          top: y,
           width: '20px',
           height: '20px',
-          transform: isActive ? 'scale(100)' : 'scale(0)',
-          opacity: isActive ? 0 : 1,
+          transform: 'translate(-50%, -50%)', // căn tâm
         }}
       />
     </div>
