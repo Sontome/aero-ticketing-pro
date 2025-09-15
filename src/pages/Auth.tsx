@@ -34,11 +34,11 @@ export default function Auth() {
     linkfacebook: '',
   });
 
-  useEffect(() => {
-    if (user) {
-      navigate('/');
-    }
-  }, [user, navigate]);
+  // useEffect(() => {
+  //   if (user) {
+  //     navigate('/');
+  //   }
+  // }, [user, navigate]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -352,7 +352,11 @@ export default function Auth() {
         isActive={inkSplash.active}
         x={inkSplash.x}
         y={inkSplash.y}
-        onComplete={() => setInkSplash({ active: false, x: 0, y: 0 })}
+        onComplete={() => {
+          setInkSplash({ active: false, x: 0, y: 0 });
+          navigate('/'); // Navigate sau khi splash xong
+        }}
+
       />
     </div>
   );
