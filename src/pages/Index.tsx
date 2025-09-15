@@ -269,7 +269,7 @@ export default function Index() {
                 Tìm kiếm và so sánh giá vé máy bay từ các hãng hàng không khác nhau.
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-4">
               <Button
                 onClick={() => setIsEmailModalOpen(true)}
                 variant="ghost"
