@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Mail, Lock, User, Plane, Phone, Facebook } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { InkSplashEffect } from '@/components/InkSplashEffect';
 
 export default function Auth() {
   const { signIn, signUp, user, loading } = useAuth();
@@ -16,6 +17,8 @@ export default function Auth() {
   const navigate = useNavigate();
   const [authLoading, setAuthLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('signin');
+  const [inkSplash, setInkSplash] = useState({ active: false, x: 0, y: 0 });
+  const loginButtonRef = useRef<HTMLButtonElement>(null);
 
   const [signInForm, setSignInForm] = useState({
     email: '',
@@ -41,6 +44,11 @@ export default function Auth() {
     e.preventDefault();
     setAuthLoading(true);
 
+    // Get button position for ink splash effect
+    const buttonRect = loginButtonRef.current?.getBoundingClientRect();
+    const clickX = buttonRect ? buttonRect.left + buttonRect.width / 2 : window.innerWidth / 2;
+    const clickY = buttonRect ? buttonRect.top + buttonRect.height / 2 : window.innerHeight / 2;
+
     try {
       const { error } = await signIn(signInForm.email, signInForm.password);
       
@@ -58,6 +66,9 @@ export default function Auth() {
             description: error.message,
           });
         }
+      } else {
+        // Trigger ink splash effect on successful login
+        setInkSplash({ active: true, x: clickX, y: clickY });
       }
     } catch (error) {
       console.error('Sign in error:', error);
@@ -206,7 +217,12 @@ export default function Auth() {
                   </div>
                 </div>
 
-                <Button type="submit" className="w-full" disabled={authLoading}>
+                <Button 
+                  ref={loginButtonRef}
+                  type="submit" 
+                  className="w-full" 
+                  disabled={authLoading}
+                >
                   {authLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -331,6 +347,13 @@ export default function Auth() {
           </Tabs>
         </CardContent>
       </Card>
+      
+      <InkSplashEffect
+        isActive={inkSplash.active}
+        x={inkSplash.x}
+        y={inkSplash.y}
+        onComplete={() => setInkSplash({ active: false, x: 0, y: 0 })}
+      />
     </div>
   );
 }
