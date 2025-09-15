@@ -9,19 +9,22 @@ interface InkSplashEffectProps {
 
 export const InkSplashEffect = ({ isActive, x, y, onComplete }: InkSplashEffectProps) => {
   const [mounted, setMounted] = useState(false);
+  const [animate, setAnimate] = useState(false);
 
   useEffect(() => {
     if (isActive) {
       setMounted(true);
+      requestAnimationFrame(() => setAnimate(true));
       const timer = setTimeout(() => {
         onComplete();
         setMounted(false);
+        setAnimate(false);
       }, 1000);
       return () => clearTimeout(timer);
     }
   }, [isActive, onComplete]);
 
-  if (!isActive && !mounted) return null;
+  if ( !mounted) return null;
 
   return (
     <div 
