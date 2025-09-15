@@ -41,7 +41,7 @@ export const InkSplashEffect = ({ isActive, x, y, onComplete }: InkSplashEffectP
           top: y,
           width: '20px',
           height: '20px',
-          transform: isActive 
+          transform: animate 
             ? 'translate(-50%, -50%) scale(100)'  // bung to hết màn
             : 'translate(-50%, -50%) scale(0)',
         }}
