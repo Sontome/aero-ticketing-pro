@@ -26,6 +26,7 @@ export const EmailTicketModal = ({ isOpen, onClose }: EmailTicketModalProps) => 
     sdt: '',
     guiChung: true,
     pnrs: '',
+    banner:''
   });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -60,6 +61,7 @@ export const EmailTicketModal = ({ isOpen, onClose }: EmailTicketModalProps) => 
       sdt: '',
       guiChung: true,
       pnrs: '',
+      banner:''
     });
     onClose();
   };
@@ -97,7 +99,8 @@ export const EmailTicketModal = ({ isOpen, onClose }: EmailTicketModalProps) => 
             tenKhach: formData.tenKhach,
             xungHo: formData.xungHo,
             sdt: formData.sdt,
-            guiChung: formData.guiChung
+            guiChung: formData.guiChung,
+            banner:formData.banner
           }
         ]
       };
@@ -213,7 +216,20 @@ export const EmailTicketModal = ({ isOpen, onClose }: EmailTicketModalProps) => 
               Nhập một hoặc nhiều mã PNR (6 ký tự mỗi mã), phân tách bằng dấu cách, - hoặc ;
             </p>
           </div>
-
+          <div className="space-y-2">
+            <Label htmlFor="banner">Banner đại lý *</Label>
+            <Input
+              id="banner"
+              name="banner"
+              value={formData.banner}
+              onChange={handleInputChange}
+              placeholder="Nanner thông tin đại lý"
+              required
+            />
+            <p className="text-sm text-muted-foreground">
+               
+            </p>
+          </div>  
           <div className="flex items-center space-x-2">
             <Switch
               id="guiChung"
