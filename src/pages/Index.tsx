@@ -41,7 +41,7 @@ export default function Index() {
     // Show content after ink splash completes
     setTimeout(() => {
       setShowContent(true);
-    }, 1100);
+    }, 500);
   }, []);
 
   // Show scroll to top button when user scrolls down
@@ -284,7 +284,7 @@ export default function Index() {
     }`}>
       {showContent && (
         <>
-          <header className="sticky top-0 z-50 bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-800 dark:to-blue-900 shadow-lg backdrop-blur-sm transition-all duration-1500 animate-fade-in">
+          <header className="sticky top-0 z-50 bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-800 dark:to-blue-900 shadow-lg backdrop-blur-sm transition-all duration-800 animate-fade-in">
             <div className="container mx-auto px-4 py-6">
               <div className="flex justify-between items-center">
                 <div className="transition-all duration-200">
