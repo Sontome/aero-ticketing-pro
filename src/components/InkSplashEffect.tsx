@@ -7,14 +7,29 @@ interface InkSplashEffectProps {
   onComplete: () => void;
 }
 
-export const InkSplashEffect = ({ isActive, x, y, onComplete }: InkSplashEffectProps) => {
+interface InkSplashEffectProps {
+  isActive: boolean;
+  x: number;
+  y: number;
+  onComplete: () => void;
+  reverse?: boolean;
+}
+
+export const InkSplashEffect = ({ isActive, x, y, onComplete, reverse = false }: InkSplashEffectProps) => {
   const [mounted, setMounted] = useState(false);
   const [animate, setAnimate] = useState(false);
 
   useEffect(() => {
     if (isActive) {
       setMounted(true);
-      requestAnimationFrame(() => setAnimate(true));
+      if (reverse) {
+        // For reverse animation, start expanded and shrink
+        setAnimate(false);
+        requestAnimationFrame(() => setAnimate(true));
+      } else {
+        // For normal animation, start small and expand
+        requestAnimationFrame(() => setAnimate(true));
+      }
       const timer = setTimeout(() => {
         onComplete();
         setMounted(false);
@@ -22,7 +37,7 @@ export const InkSplashEffect = ({ isActive, x, y, onComplete }: InkSplashEffectP
       }, 1000);
       return () => clearTimeout(timer);
     }
-  }, [isActive, onComplete]);
+  }, [isActive, onComplete, reverse]);
 
   if ( !mounted) return null;
 
@@ -42,9 +57,13 @@ export const InkSplashEffect = ({ isActive, x, y, onComplete }: InkSplashEffectP
           top: y,
           width: '20px',
           height: '20px',
-          transform: animate 
-            ? 'translate(-50%, -50%) scale(120)'  // bung to hết màn
-            : 'translate(-50%, -50%) scale(0)',
+          transform: reverse
+            ? (animate 
+                ? 'translate(-50%, -50%) scale(0)' // Thu gọn lại
+                : 'translate(-50%, -50%) scale(120)') // Bắt đầu từ full màn hình
+            : (animate 
+                ? 'translate(-50%, -50%) scale(120)' // Bung ra hết màn hình
+                : 'translate(-50%, -50%) scale(0)'), // Bắt đầu từ điểm nhỏ
         }}
       />
     </div>

@@ -174,15 +174,15 @@ export const EmailTicketModal = ({ isOpen, onClose }: EmailTicketModalProps) => 
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto animate-fade-in">
+        <DialogHeader className="animate-fade-in">
           <DialogTitle>Gửi Email Mặt Vé</DialogTitle>
           <DialogDescription>
             Điền thông tin để gửi email thông tin vé máy bay
           </DialogDescription>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 animate-fade-in">
           <div className="space-y-2">
             <Label htmlFor="email">Email người nhận *</Label>
             <Input

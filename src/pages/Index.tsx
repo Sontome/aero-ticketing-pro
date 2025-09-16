@@ -6,6 +6,7 @@ import { fetchVietJetFlights, fetchVietnamAirlinesFlights, Flight } from '@/serv
 import { Button } from '@/components/ui/button';
 import { UserProfileDropdown } from '@/components/UserProfileDropdown';
 import { EmailTicketModal } from '@/components/EmailTicketModal';
+import { InkSplashEffect } from '@/components/InkSplashEffect';
 import { ArrowUp, Mail } from 'lucide-react';
 
 export default function Index() {
@@ -15,6 +16,7 @@ export default function Index() {
   const [searchPerformed, setSearchPerformed] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
+  const [reverseInkSplash, setReverseInkSplash] = useState({ active: false, x: 0, y: 0 });
   const resultsRef = useRef<HTMLDivElement>(null);
   const [filters, setFilters] = useState<FilterOptions>({
     airlines: ['VJ', 'VNA'],
@@ -23,6 +25,18 @@ export default function Index() {
     show2pc: true,
     sortBy: 'price'
   });
+
+  // Reverse ink splash effect when page loads
+  useEffect(() => {
+    // Trigger reverse ink splash from center of screen
+    setTimeout(() => {
+      setReverseInkSplash({ 
+        active: true, 
+        x: window.innerWidth / 2, 
+        y: window.innerHeight / 2 
+      });
+    }, 100);
+  }, []);
 
   // Show scroll to top button when user scrolls down
   useEffect(() => {
@@ -365,6 +379,16 @@ export default function Index() {
       <EmailTicketModal 
         isOpen={isEmailModalOpen} 
         onClose={() => setIsEmailModalOpen(false)} 
+      />
+
+      <InkSplashEffect
+        isActive={reverseInkSplash.active}
+        x={reverseInkSplash.x}
+        y={reverseInkSplash.y}
+        reverse={true}
+        onComplete={() => {
+          setReverseInkSplash({ active: false, x: 0, y: 0 });
+        }}
       />
     </div>
   );
