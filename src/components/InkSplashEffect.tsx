@@ -60,9 +60,9 @@ export const InkSplashEffect = ({ isActive, x, y, onComplete, reverse = false }:
           transform: reverse
             ? (animate 
                 ? 'translate(-50%, -50%) scale(0)' // Thu gọn lại
-                : 'translate(-50%, -50%) scale(120)') // Bắt đầu từ full màn hình
+                : 'translate(-50%, -50%) scale(150)') // Bắt đầu từ full màn hình, to hơn
             : (animate 
-                ? 'translate(-50%, -50%) scale(120)' // Bung ra hết màn hình
+                ? 'translate(-50%, -50%) scale(150)' // Bung ra hết màn hình, to hơn để phủ kín
                 : 'translate(-50%, -50%) scale(0)'), // Bắt đầu từ điểm nhỏ
         }}
       />

@@ -17,6 +17,7 @@ export default function Index() {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
   const [reverseInkSplash, setReverseInkSplash] = useState({ active: false, x: 0, y: 0 });
+  const [showContent, setShowContent] = useState(false);
   const resultsRef = useRef<HTMLDivElement>(null);
   const [filters, setFilters] = useState<FilterOptions>({
     airlines: ['VJ', 'VNA'],
@@ -35,7 +36,12 @@ export default function Index() {
         x: window.innerWidth / 2, 
         y: window.innerHeight / 2 
       });
-    }, 100);
+    }, 50);
+    
+    // Show content after ink splash completes
+    setTimeout(() => {
+      setShowContent(true);
+    }, 1100);
   }, []);
 
   // Show scroll to top button when user scrolls down
@@ -271,36 +277,42 @@ export default function Index() {
   const shouldShowMoreButton = filters.showCheapestOnly || filters.directFlightsOnly;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-all duration-1500">
-      <header className="sticky top-0 z-50 bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-800 dark:to-blue-900 shadow-lg backdrop-blur-sm transition-all duration-1500">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex justify-between items-center">
-            <div className="transition-all duration-200">
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent drop-shadow-sm">
-                Hàn Việt Air
-              </h1>
-              <p className="text-blue-100 dark:text-blue-200">
-                Tìm kiếm và so sánh giá vé máy bay từ các hãng hàng không khác nhau.
-              </p>
+    <div className={`min-h-screen transition-all duration-1500 ${
+      showContent 
+        ? 'bg-gradient-to-br from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900' 
+        : 'bg-white'
+    }`}>
+      {showContent && (
+        <>
+          <header className="sticky top-0 z-50 bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-800 dark:to-blue-900 shadow-lg backdrop-blur-sm transition-all duration-1500 animate-fade-in">
+            <div className="container mx-auto px-4 py-6">
+              <div className="flex justify-between items-center">
+                <div className="transition-all duration-200">
+                  <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent drop-shadow-sm">
+                    Hàn Việt Air
+                  </h1>
+                  <p className="text-blue-100 dark:text-blue-200">
+                    Tìm kiếm và so sánh giá vé máy bay từ các hãng hàng không khác nhau.
+                  </p>
+                </div>
+                <div className="flex items-center gap-4">
+                  <Button
+                    onClick={() => setIsEmailModalOpen(true)}
+                    variant="ghost"
+                    size="lg"
+                    className="h-12 px-6 text-lg text-white border border-white rounded-xl
+                     hover:text-white hover:bg-blue-700/50 opacity-90 hover:opacity-100 
+                     transition-all"
+                  >
+                    Gửi Mặt Vé
+                  </Button>
+                  <UserProfileDropdown />
+                </div>
+              </div>
             </div>
-            <div className="flex items-center gap-4">
-              <Button
-                onClick={() => setIsEmailModalOpen(true)}
-                variant="ghost"
-                size="lg"
-                className="h-12 px-6 text-lg text-white border border-white rounded-xl
-                 hover:text-white hover:bg-blue-700/50 opacity-90 hover:opacity-100 
-                 transition-all"
-              >
-                Gửi Mặt Vé
-              </Button>
-              <UserProfileDropdown />
-            </div>
-          </div>
-        </div>
-      </header>
+          </header>
 
-      <main className="container mx-auto px-4 py-8">
+          <main className="container mx-auto px-4 py-8 animate-fade-in">
         <div className="animate-fade-in">
           <FlightSearchForm onSearch={handleSearch} loading={loading} />
         </div>
@@ -358,15 +370,17 @@ export default function Index() {
             )}
           </div>}
 
-        {!loading && flights.length === 0 && searchPerformed && !error && <div className="text-center py-12 animate-fade-in">
-            <p className="text-gray-500 dark:text-gray-400">
-              Không tìm thấy chuyến bay nào phù hợp với yêu cầu của bạn.
-            </p>
-          </div>}
-      </main>
+            {!loading && flights.length === 0 && searchPerformed && !error && <div className="text-center py-12 animate-fade-in">
+                <p className="text-gray-500 dark:text-gray-400">
+                  Không tìm thấy chuyến bay nào phù hợp với yêu cầu của bạn.
+                </p>
+              </div>}
+          </main>
+        </>
+      )}
 
       {/* Scroll to top button */}
-      {showScrollTop && (
+      {showContent && showScrollTop && (
         <Button
           onClick={scrollToTop}
           className="fixed bottom-6 right-6 z-50 rounded-full w-12 h-12 p-0 bg-blue-600 hover:bg-blue-700 shadow-lg animate-fade-in"
@@ -376,10 +390,12 @@ export default function Index() {
         </Button>
       )}
 
-      <EmailTicketModal 
-        isOpen={isEmailModalOpen} 
-        onClose={() => setIsEmailModalOpen(false)} 
-      />
+      {showContent && (
+        <EmailTicketModal 
+          isOpen={isEmailModalOpen} 
+          onClose={() => setIsEmailModalOpen(false)} 
+        />
+      )}
 
       <InkSplashEffect
         isActive={reverseInkSplash.active}
