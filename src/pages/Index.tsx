@@ -277,7 +277,7 @@ export default function Index() {
   const shouldShowMoreButton = filters.showCheapestOnly || filters.directFlightsOnly;
 
   return (
-    <div className={`min-h-screen transition-all duration-1500 ${
+    <div className={`min-h-screen transition-all duration-100 ${
       showContent 
         ? 'bg-gradient-to-br from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900' 
         : 'bg-white'
