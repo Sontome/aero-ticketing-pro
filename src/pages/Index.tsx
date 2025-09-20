@@ -5,6 +5,7 @@ import { FlightFilters, FilterOptions } from '@/components/FlightFilters';
 import { fetchVietJetFlights, fetchVietnamAirlinesFlights, Flight } from '@/services/flightApi';
 import { Button } from '@/components/ui/button';
 import { UserProfileDropdown } from '@/components/UserProfileDropdown';
+import { PNRCheckModal } from '../components/PNRCheckModal';
 import { EmailTicketModal } from '@/components/EmailTicketModal';
 import { InkSplashEffect } from '@/components/InkSplashEffect';
 import { ArrowUp, Mail } from 'lucide-react';
@@ -19,6 +20,7 @@ export default function Index() {
   const [reverseInkSplash, setReverseInkSplash] = useState({ active: false, x: 0, y: 0 });
   const [showContent, setShowContent] = useState(false);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const [showPNRModal, setShowPNRModal] = useState(false);
   const [filters, setFilters] = useState<FilterOptions>({
     airlines: ['VJ', 'VNA'],
     showCheapestOnly: true,
@@ -297,6 +299,17 @@ export default function Index() {
                 </div>
                 <div className="flex items-center gap-4">
                   <Button
+                    onClick={() => setShowPNRModal(true)}
+                    variant="ghost"
+                    size="lg"
+                    className="h-12 px-6 text-lg text-white border border-white rounded-xl
+                     hover:text-white hover:bg-blue-700/50 opacity-90 hover:opacity-100 
+                     transition-all"
+                  >
+                    Lấy ảnh mặt vé
+                  </Button>
+                  
+                  <Button
                     onClick={() => setIsEmailModalOpen(true)}
                     variant="ghost"
                     size="lg"
@@ -394,6 +407,12 @@ export default function Index() {
         <EmailTicketModal 
           isOpen={isEmailModalOpen} 
           onClose={() => setIsEmailModalOpen(false)} 
+        />
+      )}
+      {showContent && (
+        <PNRCheckModal 
+          isOpen={showPNRModal} 
+          onClose={() => setShowPNRModal(false)} 
         />
       )}
 
