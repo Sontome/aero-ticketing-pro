@@ -190,7 +190,7 @@ export const PNRCheckModal = ({ isOpen, onClose }: PNRCheckModalProps) => {
                       <div className="mt-3">
                         <img
                           src={URL.createObjectURL(file.blob)}
-                          className="w-full h-[800px] object-contain border rounded"
+                          className="w-full h-[1000px] object-contain border rounded"
                           alt={`Preview ${file.name}`}
                         />
                       </div>
