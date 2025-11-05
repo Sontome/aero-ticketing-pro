@@ -94,7 +94,7 @@ export const AdminDashboard = () => {
         .select('user_id, role')
         .in('user_id', userIds);
 
-      // Combine data
+      // Combine data and filter to only show users with role 'user'
       const enrichedProfiles = profilesData?.map(profile => {
         const user = users.find(u => u.id === profile.id);
         const roleInfo = rolesData?.find(r => r.user_id === profile.id);
@@ -103,7 +103,7 @@ export const AdminDashboard = () => {
           email: user?.email || '',
           role: roleInfo?.role || 'user'
         };
-      }) || [];
+      }).filter(profile => profile.role === 'user') || [];
 
       setProfiles(enrichedProfiles);
     } catch (error) {
@@ -222,9 +222,9 @@ export const AdminDashboard = () => {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('vi-VN', {
+    return new Intl.NumberFormat('ko-KR', {
       style: 'currency',
-      currency: 'VND'
+      currency: 'KRW'
     }).format(amount);
   };
 
@@ -446,19 +446,19 @@ export const AdminDashboard = () => {
                                 />
                               </div>
                               <div className="space-y-2">
-                                <Label htmlFor="price_markup">Phí cộng thêm chung (VND)</Label>
+                                <Label htmlFor="price_markup">Phí cộng thêm chung (KRW)</Label>
                                 <Input
                                   id="price_markup"
                                   type="number"
                                   value={editForm.price_markup}
                                   onChange={(e) => setEditForm(prev => ({ ...prev, price_markup: parseFloat(e.target.value) || 0 }))}
-                                  placeholder="0"
+                                  placeholder="10000"
                                   min="0"
                                   step="1000"
                                 />
                               </div>
                               <div className="space-y-2">
-                                <Label htmlFor="price_vj">Phí VietJet (VND)</Label>
+                                <Label htmlFor="price_vj">Phí VietJet (KRW)</Label>
                                 <Input
                                   id="price_vj"
                                   type="number"
@@ -470,7 +470,7 @@ export const AdminDashboard = () => {
                                 />
                               </div>
                               <div className="space-y-2">
-                                <Label htmlFor="price_vna">Phí Vietnam Airlines (VND)</Label>
+                                <Label htmlFor="price_vna">Phí Vietnam Airlines (KRW)</Label>
                                 <Input
                                   id="price_vna"
                                   type="number"
@@ -482,7 +482,7 @@ export const AdminDashboard = () => {
                                 />
                               </div>
                               <div className="space-y-2">
-                                <Label htmlFor="price_ow">Phí vé một chiều (VND)</Label>
+                                <Label htmlFor="price_ow">Phí vé một chiều (KRW)</Label>
                                 <Input
                                   id="price_ow"
                                   type="number"
@@ -494,7 +494,7 @@ export const AdminDashboard = () => {
                                 />
                               </div>
                               <div className="space-y-2">
-                                <Label htmlFor="price_rt">Phí vé khứ hồi (VND)</Label>
+                                <Label htmlFor="price_rt">Phí vé khứ hồi (KRW)</Label>
                                 <Input
                                   id="price_rt"
                                   type="number"
@@ -588,18 +588,6 @@ export const AdminDashboard = () => {
                                 )}
                               </div>
 
-                              <div className="space-y-2">
-                                <Label htmlFor="role">Vai trò</Label>
-                                <select
-                                  id="role"
-                                  value={editForm.role}
-                                  onChange={(e) => setEditForm(prev => ({ ...prev, role: e.target.value }))}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
-                                >
-                                  <option value="user">User</option>
-                                  <option value="admin">Admin</option>
-                                </select>
-                              </div>
                               <div className="space-y-2">
                                 <Label htmlFor="status">Trạng thái</Label>
                                 <select
