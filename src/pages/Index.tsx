@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FlightSearchForm, SearchFormData } from '@/components/FlightSearchForm';
 import { FlightCard } from '@/components/FlightCard';
 import { FlightFilters, FilterOptions } from '@/components/FlightFilters';
@@ -8,9 +9,12 @@ import { UserProfileDropdown } from '@/components/UserProfileDropdown';
 import { PNRCheckModal } from '../components/PNRCheckModal';
 import { EmailTicketModal } from '@/components/EmailTicketModal';
 import { InkSplashEffect } from '@/components/InkSplashEffect';
+import { useAuth } from '@/hooks/useAuth';
 import { ArrowUp, Mail } from 'lucide-react';
 
 export default function Index() {
+  const { profile } = useAuth();
+  const navigate = useNavigate();
   const [flights, setFlights] = useState<Flight[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,6 +32,13 @@ export default function Index() {
     show2pc: true,
     sortBy: 'price'
   });
+
+  // Redirect admin to admin dashboard
+  useEffect(() => {
+    if (profile?.role === 'admin') {
+      navigate('/admin');
+    }
+  }, [profile, navigate]);
 
   // Reverse ink splash effect when page loads
   useEffect(() => {
@@ -298,27 +309,31 @@ export default function Index() {
                   </p>
                 </div>
                 <div className="flex items-center gap-4">
-                  <Button
-                    onClick={() => setShowPNRModal(true)}
-                    variant="ghost"
-                    size="lg"
-                    className="h-12 px-6 text-lg text-white border border-white rounded-xl
-                     hover:text-white hover:bg-blue-700/50 opacity-90 hover:opacity-100 
-                     transition-all"
-                  >
-                    Lấy ảnh mặt vé
-                  </Button>
+                  {profile?.perm_get_ticket_image && (
+                    <Button
+                      onClick={() => setShowPNRModal(true)}
+                      variant="ghost"
+                      size="lg"
+                      className="h-12 px-6 text-lg text-white border border-white rounded-xl
+                       hover:text-white hover:bg-blue-700/50 opacity-90 hover:opacity-100 
+                       transition-all"
+                    >
+                      Lấy ảnh mặt vé
+                    </Button>
+                  )}
                   
-                  <Button
-                    onClick={() => setIsEmailModalOpen(true)}
-                    variant="ghost"
-                    size="lg"
-                    className="h-12 px-6 text-lg text-white border border-white rounded-xl
-                     hover:text-white hover:bg-blue-700/50 opacity-90 hover:opacity-100 
-                     transition-all"
-                  >
-                    Gửi Mặt Vé
-                  </Button>
+                  {profile?.perm_send_ticket && (
+                    <Button
+                      onClick={() => setIsEmailModalOpen(true)}
+                      variant="ghost"
+                      size="lg"
+                      className="h-12 px-6 text-lg text-white border border-white rounded-xl
+                       hover:text-white hover:bg-blue-700/50 opacity-90 hover:opacity-100 
+                       transition-all"
+                    >
+                      Gửi Mặt Vé
+                    </Button>
+                  )}
                   <UserProfileDropdown />
                 </div>
               </div>

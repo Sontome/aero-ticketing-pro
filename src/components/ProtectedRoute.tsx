@@ -29,12 +29,6 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
         navigate('/auth');
         return;
       }
-
-      // Redirect admin to admin dashboard
-      if (profile.role === 'admin' && window.location.pathname === '/') {
-        navigate('/admin');
-        return;
-      }
     }
   }, [user, profile, loading, navigate, toast]);
 

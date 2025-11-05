@@ -19,8 +19,16 @@ export type Database = {
           banner: string | null
           created_at: string
           full_name: string
+          hold_ticket_quantity: number | null
           id: string
           linkfacebook: string | null
+          perm_check_discount: boolean | null
+          perm_check_vj: boolean | null
+          perm_check_vna: boolean | null
+          perm_get_pending_ticket: boolean | null
+          perm_get_ticket_image: boolean | null
+          perm_hold_ticket: boolean | null
+          perm_send_ticket: boolean | null
           phone: string | null
           price_markup: number | null
           price_ow: number | null
@@ -34,8 +42,16 @@ export type Database = {
           banner?: string | null
           created_at?: string
           full_name: string
+          hold_ticket_quantity?: number | null
           id: string
           linkfacebook?: string | null
+          perm_check_discount?: boolean | null
+          perm_check_vj?: boolean | null
+          perm_check_vna?: boolean | null
+          perm_get_pending_ticket?: boolean | null
+          perm_get_ticket_image?: boolean | null
+          perm_hold_ticket?: boolean | null
+          perm_send_ticket?: boolean | null
           phone?: string | null
           price_markup?: number | null
           price_ow?: number | null
@@ -49,8 +65,16 @@ export type Database = {
           banner?: string | null
           created_at?: string
           full_name?: string
+          hold_ticket_quantity?: number | null
           id?: string
           linkfacebook?: string | null
+          perm_check_discount?: boolean | null
+          perm_check_vj?: boolean | null
+          perm_check_vna?: boolean | null
+          perm_get_pending_ticket?: boolean | null
+          perm_get_ticket_image?: boolean | null
+          perm_hold_ticket?: boolean | null
+          perm_send_ticket?: boolean | null
           phone?: string | null
           price_markup?: number | null
           price_ow?: number | null

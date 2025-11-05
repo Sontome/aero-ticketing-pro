@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
@@ -25,6 +26,14 @@ interface Profile {
   price_rt: number;
   status: string;
   created_at: string;
+  perm_check_vj: boolean;
+  perm_check_vna: boolean;
+  perm_send_ticket: boolean;
+  perm_get_ticket_image: boolean;
+  perm_get_pending_ticket: boolean;
+  perm_check_discount: boolean;
+  perm_hold_ticket: boolean;
+  hold_ticket_quantity: number;
 }
 
 export const AdminDashboard = () => {
@@ -43,6 +52,14 @@ export const AdminDashboard = () => {
     price_rt: 0,
     role: 'user',
     status: 'active',
+    perm_check_vj: false,
+    perm_check_vna: false,
+    perm_send_ticket: false,
+    perm_get_ticket_image: false,
+    perm_get_pending_ticket: false,
+    perm_check_discount: false,
+    perm_hold_ticket: false,
+    hold_ticket_quantity: 0,
   });
 
   useEffect(() => {
@@ -51,21 +68,44 @@ export const AdminDashboard = () => {
 
   const fetchProfiles = async () => {
     try {
-      const { data, error } = await supabase
+      // Fetch profiles
+      const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching profiles:', error);
+      if (profilesError) {
+        console.error('Error fetching profiles:', profilesError);
         toast({
           variant: "destructive",
           title: "Lỗi",
           description: "Không thể tải danh sách người dùng",
         });
-      } else {
-        setProfiles(data || []);
+        return;
       }
+
+      // Fetch user emails and roles
+      const userIds = profilesData?.map(p => p.id) || [];
+      const { data: authData } = await supabase.auth.admin.listUsers();
+      const users = authData?.users || [];
+      
+      const { data: rolesData } = await supabase
+        .from('user_roles')
+        .select('user_id, role')
+        .in('user_id', userIds);
+
+      // Combine data
+      const enrichedProfiles = profilesData?.map(profile => {
+        const user = users.find(u => u.id === profile.id);
+        const roleInfo = rolesData?.find(r => r.user_id === profile.id);
+        return {
+          ...profile,
+          email: user?.email || '',
+          role: roleInfo?.role || 'user'
+        };
+      }) || [];
+
+      setProfiles(enrichedProfiles);
     } catch (error) {
       console.error('Error:', error);
     } finally {
@@ -86,6 +126,14 @@ export const AdminDashboard = () => {
       price_rt: profile.price_rt || 0,
       role: profile.role,
       status: profile.status,
+      perm_check_vj: profile.perm_check_vj || false,
+      perm_check_vna: profile.perm_check_vna || false,
+      perm_send_ticket: profile.perm_send_ticket || false,
+      perm_get_ticket_image: profile.perm_get_ticket_image || false,
+      perm_get_pending_ticket: profile.perm_get_pending_ticket || false,
+      perm_check_discount: profile.perm_check_discount || false,
+      perm_hold_ticket: profile.perm_hold_ticket || false,
+      hold_ticket_quantity: profile.hold_ticket_quantity || 0,
     });
   };
 
@@ -93,7 +141,8 @@ export const AdminDashboard = () => {
     if (!editingProfile) return;
 
     try {
-      const { error } = await supabase
+      // Update profile data
+      const { error: profileError } = await supabase
         .from('profiles')
         .update({
           full_name: editForm.full_name,
@@ -104,26 +153,44 @@ export const AdminDashboard = () => {
           price_vna: editForm.price_vna,
           price_ow: editForm.price_ow,
           price_rt: editForm.price_rt,
-          role: editForm.role,
           status: editForm.status,
+          perm_check_vj: editForm.perm_check_vj,
+          perm_check_vna: editForm.perm_check_vna,
+          perm_send_ticket: editForm.perm_send_ticket,
+          perm_get_ticket_image: editForm.perm_get_ticket_image,
+          perm_get_pending_ticket: editForm.perm_get_pending_ticket,
+          perm_check_discount: editForm.perm_check_discount,
+          perm_hold_ticket: editForm.perm_hold_ticket,
+          hold_ticket_quantity: editForm.hold_ticket_quantity,
           updated_at: new Date().toISOString(),
         })
         .eq('id', editingProfile.id);
 
-      if (error) {
+      if (profileError) {
         toast({
           variant: "destructive",
           title: "Lỗi",
           description: "Không thể cập nhật thông tin người dùng",
         });
-      } else {
-        toast({
-          title: "Thành công",
-          description: "Đã cập nhật thông tin người dùng",
-        });
-        fetchProfiles();
-        setEditingProfile(null);
+        return;
       }
+
+      // Update role in user_roles table
+      const { error: roleError } = await supabase
+        .from('user_roles')
+        .update({ role: editForm.role as 'admin' | 'user' })
+        .eq('user_id', editingProfile.id);
+
+      if (roleError) {
+        console.error('Error updating role:', roleError);
+      }
+
+      toast({
+        title: "Thành công",
+        description: "Đã cập nhật thông tin người dùng",
+      });
+      fetchProfiles();
+      setEditingProfile(null);
     } catch (error) {
       console.error('Error updating profile:', error);
     }
@@ -438,6 +505,89 @@ export const AdminDashboard = () => {
                                   step="1000"
                                 />
                               </div>
+
+                              {/* Permissions Section */}
+                              <div className="space-y-4 pt-4 border-t">
+                                <h3 className="text-lg font-semibold">Phân quyền tính năng</h3>
+                                
+                                <div className="flex items-center justify-between">
+                                  <Label htmlFor="perm_check_vj">Check vé VJ</Label>
+                                  <Switch
+                                    id="perm_check_vj"
+                                    checked={editForm.perm_check_vj}
+                                    onCheckedChange={(checked) => setEditForm(prev => ({ ...prev, perm_check_vj: checked }))}
+                                  />
+                                </div>
+
+                                <div className="flex items-center justify-between">
+                                  <Label htmlFor="perm_check_vna">Check vé VNA</Label>
+                                  <Switch
+                                    id="perm_check_vna"
+                                    checked={editForm.perm_check_vna}
+                                    onCheckedChange={(checked) => setEditForm(prev => ({ ...prev, perm_check_vna: checked }))}
+                                  />
+                                </div>
+
+                                <div className="flex items-center justify-between">
+                                  <Label htmlFor="perm_send_ticket">Gửi mặt vé</Label>
+                                  <Switch
+                                    id="perm_send_ticket"
+                                    checked={editForm.perm_send_ticket}
+                                    onCheckedChange={(checked) => setEditForm(prev => ({ ...prev, perm_send_ticket: checked }))}
+                                  />
+                                </div>
+
+                                <div className="flex items-center justify-between">
+                                  <Label htmlFor="perm_get_ticket_image">Lấy ảnh mặt vé</Label>
+                                  <Switch
+                                    id="perm_get_ticket_image"
+                                    checked={editForm.perm_get_ticket_image}
+                                    onCheckedChange={(checked) => setEditForm(prev => ({ ...prev, perm_get_ticket_image: checked }))}
+                                  />
+                                </div>
+
+                                <div className="flex items-center justify-between">
+                                  <Label htmlFor="perm_get_pending_ticket">Lấy mặt vé chờ</Label>
+                                  <Switch
+                                    id="perm_get_pending_ticket"
+                                    checked={editForm.perm_get_pending_ticket}
+                                    onCheckedChange={(checked) => setEditForm(prev => ({ ...prev, perm_get_pending_ticket: checked }))}
+                                  />
+                                </div>
+
+                                <div className="flex items-center justify-between">
+                                  <Label htmlFor="perm_check_discount">Tool check vé giảm</Label>
+                                  <Switch
+                                    id="perm_check_discount"
+                                    checked={editForm.perm_check_discount}
+                                    onCheckedChange={(checked) => setEditForm(prev => ({ ...prev, perm_check_discount: checked }))}
+                                  />
+                                </div>
+
+                                <div className="flex items-center justify-between">
+                                  <Label htmlFor="perm_hold_ticket">Giữ vé</Label>
+                                  <Switch
+                                    id="perm_hold_ticket"
+                                    checked={editForm.perm_hold_ticket}
+                                    onCheckedChange={(checked) => setEditForm(prev => ({ ...prev, perm_hold_ticket: checked }))}
+                                  />
+                                </div>
+
+                                {editForm.perm_hold_ticket && (
+                                  <div className="space-y-2 ml-6">
+                                    <Label htmlFor="hold_ticket_quantity">Số lượng giữ vé</Label>
+                                    <Input
+                                      id="hold_ticket_quantity"
+                                      type="number"
+                                      value={editForm.hold_ticket_quantity}
+                                      onChange={(e) => setEditForm(prev => ({ ...prev, hold_ticket_quantity: parseInt(e.target.value) || 0 }))}
+                                      placeholder="0"
+                                      min="0"
+                                    />
+                                  </div>
+                                )}
+                              </div>
+
                               <div className="space-y-2">
                                 <Label htmlFor="role">Vai trò</Label>
                                 <select
