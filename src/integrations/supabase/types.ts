@@ -10,117 +10,14 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.3 (519615d)"
+    PostgrestVersion: "13.0.5"
   }
   public: {
     Tables: {
-      profiles: {
-        Row: {
-          banner: string | null
-          created_at: string | null
-          email: string
-          full_name: string | null
-          id: string
-          linkfacebook: string | null
-          phone: string | null
-          price_markup: number | null
-          price_ow: number | null
-          price_rt: number | null
-          price_vj: number | null
-          price_vna: number | null
-          role: string | null
-          status: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          banner?: string | null
-          created_at?: string | null
-          email: string
-          full_name?: string | null
-          id: string
-          linkfacebook?: string | null
-          phone?: string | null
-          price_markup?: number | null
-          price_ow?: number | null
-          price_rt?: number | null
-          price_vj?: number | null
-          price_vna?: number | null
-          role?: string | null
-          status?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          banner?: string | null
-          created_at?: string | null
-          email?: string
-          full_name?: string | null
-          id?: string
-          linkfacebook?: string | null
-          phone?: string | null
-          price_markup?: number | null
-          price_ow?: number | null
-          price_rt?: number | null
-          price_vj?: number | null
-          price_vna?: number | null
-          role?: string | null
-          status?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      search_history: {
-        Row: {
-          arrival_city: string
-          departure_city: string
-          departure_date: string
-          id: string
-          passenger_count: number | null
-          return_date: string | null
-          search_timestamp: string | null
-          trip_type: string
-          user_id: string | null
-        }
-        Insert: {
-          arrival_city: string
-          departure_city: string
-          departure_date: string
-          id?: string
-          passenger_count?: number | null
-          return_date?: string | null
-          search_timestamp?: string | null
-          trip_type: string
-          user_id?: string | null
-        }
-        Update: {
-          arrival_city?: string
-          departure_city?: string
-          departure_date?: string
-          id?: string
-          passenger_count?: number | null
-          return_date?: string | null
-          search_timestamp?: string | null
-          trip_type?: string
-          user_id?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Views: {
-      profiles_roles: {
-        Row: {
-          id: string | null
-          role: string | null
-        }
-        Insert: {
-          id?: string | null
-          role?: string | null
-        }
-        Update: {
-          id?: string | null
-          role?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       [_ in never]: never
