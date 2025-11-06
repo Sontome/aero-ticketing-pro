@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Users, Settings, DollarSign, Mail, User, LogOut, Phone, Facebook } from 'lucide-react';
+import { Users, Settings, DollarSign, Mail, User, LogOut, Phone, Facebook, Ticket } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 interface Profile {
   id: string;
@@ -37,6 +38,7 @@ interface Profile {
 
 export const AdminDashboard = () => {
   const { signOut, profile } = useAuth();
+  const navigate = useNavigate();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
@@ -260,7 +262,7 @@ export const AdminDashboard = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Tổng người dùng</CardTitle>
@@ -300,6 +302,24 @@ export const AdminDashboard = () => {
               </div>
               <p className="text-xs text-muted-foreground">
                 Giá trị cộng thêm trung bình
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-shadow"
+            onClick={() => navigate('/admin/pending-tickets')}
+          >
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Vé chờ</CardTitle>
+              <Ticket className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                Quản lý
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Xem danh sách vé đang giữ
               </p>
             </CardContent>
           </Card>

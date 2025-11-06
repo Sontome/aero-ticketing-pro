@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      held_tickets: {
+        Row: {
+          created_at: string
+          expire_date: string | null
+          flight_details: Json | null
+          hold_date: string
+          id: string
+          pnr: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expire_date?: string | null
+          flight_details?: Json | null
+          hold_date?: string
+          id?: string
+          pnr: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expire_date?: string | null
+          flight_details?: Json | null
+          hold_date?: string
+          id?: string
+          pnr?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           banner: string | null

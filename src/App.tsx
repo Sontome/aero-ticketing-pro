@@ -10,6 +10,7 @@ import { AdminDashboard } from "@/components/AdminDashboard";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import PendingTickets from "./pages/PendingTickets";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,11 @@ const App = () => (
             <Route path="/admin" element={
               <ProtectedRoute>
                 <AdminDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/pending-tickets" element={
+              <ProtectedRoute>
+                <PendingTickets />
               </ProtectedRoute>
             } />
             <Route path="/" element={
