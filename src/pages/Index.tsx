@@ -132,13 +132,28 @@ export default function Index() {
   };
 
   const handleSearch = async (searchData: SearchFormData) => {
+    console.log('=== FLIGHT SEARCH DEBUG ===');
+    console.log('Profile:', profile);
+    console.log('perm_check_vj:', profile?.perm_check_vj);
+    console.log('perm_check_vna:', profile?.perm_check_vna);
+    
     // Check permissions first
-    const canCheckVJ = profile?.perm_check_vj || false;
-    const canCheckVNA = profile?.perm_check_vna || false;
+    const canCheckVJ = profile?.perm_check_vj === true;
+    const canCheckVNA = profile?.perm_check_vna === true;
+    
+    console.log('canCheckVJ:', canCheckVJ);
+    console.log('canCheckVNA:', canCheckVNA);
 
     // If no permissions at all, show error and return
     if (!canCheckVJ && !canCheckVNA) {
-      setError('Tính năng tìm kiếm chuyến bay đã bị khóa. Vui lòng liên hệ admin để được cấp quyền.');
+      const errorMsg = 'Tính năng tìm kiếm chuyến bay đã bị khóa. Vui lòng liên hệ admin để được cấp quyền.';
+      console.log('BLOCKING SEARCH - No permissions:', errorMsg);
+      setError(errorMsg);
+      toast({
+        title: "Không có quyền truy cập",
+        description: errorMsg,
+        variant: "destructive",
+      });
       return;
     }
 
@@ -182,6 +197,7 @@ export default function Index() {
 
       // Only fetch from airlines with permission
       if (canCheckVJ) {
+        console.log('Fetching VietJet flights...');
         const vietJetPromise = fetchVietJetFlights(searchData);
         promises.push(vietJetPromise);
         
@@ -197,6 +213,7 @@ export default function Index() {
       }
 
       if (canCheckVNA) {
+        console.log('Fetching Vietnam Airlines flights...');
         const vietnamAirlinesPromise = fetchVietnamAirlinesFlights(searchData);
         promises.push(vietnamAirlinesPromise);
         
