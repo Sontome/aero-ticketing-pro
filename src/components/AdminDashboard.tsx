@@ -32,7 +32,6 @@ interface Profile {
   perm_get_ticket_image: boolean;
   perm_get_pending_ticket: boolean;
   perm_check_discount: boolean;
-  perm_hold_ticket: boolean;
   hold_ticket_quantity: number;
 }
 
@@ -55,11 +54,10 @@ export const AdminDashboard = () => {
     perm_check_vj: false,
     perm_check_vna: false,
     perm_send_ticket: false,
-    perm_get_ticket_image: false,
-    perm_get_pending_ticket: false,
-    perm_check_discount: false,
-    perm_hold_ticket: false,
-    hold_ticket_quantity: 0,
+        perm_get_ticket_image: false,
+        perm_get_pending_ticket: false,
+        perm_check_discount: false,
+        hold_ticket_quantity: 0,
   });
 
   useEffect(() => {
@@ -126,14 +124,13 @@ export const AdminDashboard = () => {
       price_rt: profile.price_rt || 0,
       role: profile.role,
       status: profile.status,
-      perm_check_vj: profile.perm_check_vj || false,
-      perm_check_vna: profile.perm_check_vna || false,
-      perm_send_ticket: profile.perm_send_ticket || false,
-      perm_get_ticket_image: profile.perm_get_ticket_image || false,
-      perm_get_pending_ticket: profile.perm_get_pending_ticket || false,
-      perm_check_discount: profile.perm_check_discount || false,
-      perm_hold_ticket: profile.perm_hold_ticket || false,
-      hold_ticket_quantity: profile.hold_ticket_quantity || 0,
+        perm_check_vj: profile.perm_check_vj || false,
+        perm_check_vna: profile.perm_check_vna || false,
+        perm_send_ticket: profile.perm_send_ticket || false,
+        perm_get_ticket_image: profile.perm_get_ticket_image || false,
+        perm_get_pending_ticket: profile.perm_get_pending_ticket || false,
+        perm_check_discount: profile.perm_check_discount || false,
+        hold_ticket_quantity: profile.hold_ticket_quantity || 0,
     });
   };
 
@@ -157,11 +154,10 @@ export const AdminDashboard = () => {
           perm_check_vj: editForm.perm_check_vj,
           perm_check_vna: editForm.perm_check_vna,
           perm_send_ticket: editForm.perm_send_ticket,
-          perm_get_ticket_image: editForm.perm_get_ticket_image,
-          perm_get_pending_ticket: editForm.perm_get_pending_ticket,
-          perm_check_discount: editForm.perm_check_discount,
-          perm_hold_ticket: editForm.perm_hold_ticket,
-          hold_ticket_quantity: editForm.hold_ticket_quantity,
+        perm_get_ticket_image: editForm.perm_get_ticket_image,
+        perm_get_pending_ticket: editForm.perm_get_pending_ticket,
+        perm_check_discount: editForm.perm_check_discount,
+        hold_ticket_quantity: editForm.hold_ticket_quantity,
           updated_at: new Date().toISOString(),
         })
         .eq('id', editingProfile.id);
@@ -564,28 +560,19 @@ export const AdminDashboard = () => {
                                   />
                                 </div>
 
-                                <div className="flex items-center justify-between">
-                                  <Label htmlFor="perm_hold_ticket">Giữ vé</Label>
-                                  <Switch
-                                    id="perm_hold_ticket"
-                                    checked={editForm.perm_hold_ticket}
-                                    onCheckedChange={(checked) => setEditForm(prev => ({ ...prev, perm_hold_ticket: checked }))}
+                                <div className="space-y-2">
+                                  <Label htmlFor="hold_ticket_quantity">
+                                    Giữ vé (Tối đa: {editForm.hold_ticket_quantity || 0})
+                                  </Label>
+                                  <Input
+                                    id="hold_ticket_quantity"
+                                    type="number"
+                                    min="0"
+                                    value={editForm.hold_ticket_quantity || 0}
+                                    onChange={(e) => setEditForm(prev => ({ ...prev, hold_ticket_quantity: parseInt(e.target.value) || 0 }))}
+                                    placeholder="0 = tắt, >0 = số vé tối đa"
                                   />
                                 </div>
-
-                                {editForm.perm_hold_ticket && (
-                                  <div className="space-y-2 ml-6">
-                                    <Label htmlFor="hold_ticket_quantity">Số lượng giữ vé</Label>
-                                    <Input
-                                      id="hold_ticket_quantity"
-                                      type="number"
-                                      value={editForm.hold_ticket_quantity}
-                                      onChange={(e) => setEditForm(prev => ({ ...prev, hold_ticket_quantity: parseInt(e.target.value) || 0 }))}
-                                      placeholder="0"
-                                      min="0"
-                                    />
-                                  </div>
-                                )}
                               </div>
 
                               <div className="space-y-2">
