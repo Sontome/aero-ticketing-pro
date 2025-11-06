@@ -11,6 +11,7 @@ import { EmailTicketModal } from '@/components/EmailTicketModal';
 import { InkSplashEffect } from '@/components/InkSplashEffect';
 import { useAuth } from '@/hooks/useAuth';
 import { ArrowUp, Mail } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
 
 export default function Index() {
   const { profile } = useAuth();
@@ -131,14 +132,45 @@ export default function Index() {
   };
 
   const handleSearch = async (searchData: SearchFormData) => {
+    // Check permissions first
+    const canCheckVJ = profile?.perm_check_vj || false;
+    const canCheckVNA = profile?.perm_check_vna || false;
+
+    // If no permissions at all, show error and return
+    if (!canCheckVJ && !canCheckVNA) {
+      setError('Tính năng tìm kiếm chuyến bay đã bị khóa. Vui lòng liên hệ admin để được cấp quyền.');
+      return;
+    }
+
+    // Show toast for locked features
+    if (!canCheckVJ) {
+      toast({
+        title: "Thông báo",
+        description: "Tính năng tìm vé VietJet đã bị khóa. Vui lòng liên hệ admin.",
+        variant: "destructive",
+      });
+    }
+    if (!canCheckVNA) {
+      toast({
+        title: "Thông báo",
+        description: "Tính năng tìm vé Vietnam Airlines đã bị khóa. Vui lòng liên hệ admin.",
+        variant: "destructive",
+      });
+    }
+
     setLoading(true);
     setError(null);
     setSearchPerformed(true);
     setFlights([]); // Clear previous results
 
-    // Reset filters to default state
+    // Determine which airlines to fetch based on permissions
+    const availableAirlines = [];
+    if (canCheckVJ) availableAirlines.push('VJ');
+    if (canCheckVNA) availableAirlines.push('VNA');
+
+    // Reset filters to default state with available airlines
     setFilters({
-      airlines: ['VJ', 'VNA'],
+      airlines: availableAirlines as ('VJ' | 'VNA')[],
       showCheapestOnly: true,
       directFlightsOnly: true,
       show2pc: true,
@@ -146,39 +178,48 @@ export default function Index() {
     });
 
     try {
-      // Start both API calls simultaneously
-      const vietJetPromise = fetchVietJetFlights(searchData);
-      const vietnamAirlinesPromise = fetchVietnamAirlinesFlights(searchData);
+      const promises = [];
 
-      // Handle VietJet results as soon as they arrive
-      vietJetPromise.then(vietJetFlights => {
-        if (vietJetFlights.length > 0) {
-          setFlights(prev => [...prev, ...vietJetFlights]);
-          playNotificationSound();
-        }
-      }).catch(error => {
-        console.error('VietJet API error:', error);
-      });
+      // Only fetch from airlines with permission
+      if (canCheckVJ) {
+        const vietJetPromise = fetchVietJetFlights(searchData);
+        promises.push(vietJetPromise);
+        
+        // Handle VietJet results as soon as they arrive
+        vietJetPromise.then(vietJetFlights => {
+          if (vietJetFlights.length > 0) {
+            setFlights(prev => [...prev, ...vietJetFlights]);
+            playNotificationSound();
+          }
+        }).catch(error => {
+          console.error('VietJet API error:', error);
+        });
+      }
 
-      // Handle Vietnam Airlines results as soon as they arrive
-      vietnamAirlinesPromise.then(vietnamAirlinesFlights => {
-        if (vietnamAirlinesFlights.length > 0) {
-          setFlights(prev => [...prev, ...vietnamAirlinesFlights]);
-          setTimeout(() => playNotificationSound(), 200); // Slight delay for second notification
-        }
-      }).catch(error => {
-        console.error('Vietnam Airlines API error:', error);
-      });
+      if (canCheckVNA) {
+        const vietnamAirlinesPromise = fetchVietnamAirlinesFlights(searchData);
+        promises.push(vietnamAirlinesPromise);
+        
+        // Handle Vietnam Airlines results as soon as they arrive
+        vietnamAirlinesPromise.then(vietnamAirlinesFlights => {
+          if (vietnamAirlinesFlights.length > 0) {
+            setFlights(prev => [...prev, ...vietnamAirlinesFlights]);
+            setTimeout(() => playNotificationSound(), 200); // Slight delay for second notification
+          }
+        }).catch(error => {
+          console.error('Vietnam Airlines API error:', error);
+        });
+      }
 
-      // Wait for both to complete to update filters and loading state
-      const [vietJetResult, vietnamAirlinesResult] = await Promise.allSettled([vietJetPromise, vietnamAirlinesPromise]);
+      // Wait for all to complete to update filters and loading state
+      const results = await Promise.allSettled(promises);
       let allFlights: Flight[] = [];
-      if (vietJetResult.status === 'fulfilled') {
-        allFlights = [...allFlights, ...vietJetResult.value];
-      }
-      if (vietnamAirlinesResult.status === 'fulfilled') {
-        allFlights = [...allFlights, ...vietnamAirlinesResult.value];
-      }
+      
+      results.forEach(result => {
+        if (result.status === 'fulfilled') {
+          allFlights = [...allFlights, ...result.value];
+        }
+      });
 
       // Auto-adjust filters based on available flights
       const hasDirectFlights = allFlights.some(f => f.departure.stops === 0);
