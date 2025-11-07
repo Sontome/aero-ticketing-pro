@@ -14,7 +14,7 @@ import { BookingModal as VJBookingModal } from '@/components/VJBookingModal';
 import { VNABookingModal } from '@/components/VNABookingModal';
 import { InkSplashEffect } from '@/components/InkSplashEffect';
 import { useAuth } from '@/hooks/useAuth';
-import { ArrowUp, Mail, Wrench, ChevronRight } from 'lucide-react';
+import { ArrowUp, Mail, Wrench, ShoppingBasket } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import {
   DropdownMenu,
@@ -394,6 +394,19 @@ export default function Index() {
                   </p>
                 </div>
                 <div className="flex items-center gap-4">
+                  {profile?.perm_hold_ticket === true && (
+                    <Button
+                      variant="ghost"
+                      size="lg"
+                      onClick={() => navigate('/cart')}
+                      className="h-12 px-6 text-lg text-white border border-white rounded-xl
+                       hover:text-white hover:bg-blue-700/50 opacity-90 hover:opacity-100 
+                       transition-all"
+                    >
+                      <ShoppingBasket className="w-5 h-5 mr-2" />
+                      Giỏ hàng
+                    </Button>
+                  )}
                   {(profile?.perm_get_ticket_image || profile?.perm_send_ticket || profile?.perm_get_pending_ticket) && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>

@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Trash2, Copy } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface PassengerInfo {
   Họ: string;
@@ -99,6 +100,14 @@ export const BookingModal = ({
         .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
         .join(' ');
     }
+  };
+
+  const parseExpireDate = (deadline: string): string => {
+    // deadline format: "19:51 07/11/2025"
+    const [time, date] = deadline.split(' ');
+    const [day, month, year] = date.split('/');
+    const [hour, minute] = time.split(':');
+    return `${year}-${month}-${day}T${hour}:${minute}:00`;
   };
 
   const handlePassengerChange = (index: number, field: keyof PassengerInfo, value: string) => {
@@ -241,6 +250,31 @@ export const BookingModal = ({
 
       if (data.mã_giữ_vé) {
         setSuccessData({ code: data.mã_giữ_vé, deadline: data.hạn_thanh_toán });
+        
+        // Save to database
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const expireDate = parseExpireDate(data.hạn_thanh_toán);
+          const { error: insertError } = await supabase.from('held_tickets').insert([{
+            user_id: user.id,
+            pnr: data.mã_giữ_vé,
+            flight_details: JSON.parse(JSON.stringify({
+              bookingKey,
+              bookingKeyReturn,
+              tripType,
+              departureAirport,
+              passengers: formattedPassengers,
+              deadline: data.hạn_thanh_toán
+            })),
+            expire_date: expireDate,
+            status: 'holding'
+          }]);
+          
+          if (insertError) {
+            console.error('Error saving held ticket:', insertError);
+          }
+        }
+        
         // Call callback and auto-open ticket modal
         if (onBookingSuccess) {
           setTimeout(() => {

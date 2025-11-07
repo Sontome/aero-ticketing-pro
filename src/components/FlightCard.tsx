@@ -164,11 +164,11 @@ ${getBaggageInfo()}, giá vé = ${formatPrice(adjustedPrice)}w`;
           <Button 
             onClick={() => onHoldTicket(flight)}
             size="icon"
-            variant="default"
-            className="absolute top-4 right-4 z-10"
+            variant="ghost"
+            className="absolute top-4 right-4 z-10 bg-white/80 hover:bg-white/90 dark:bg-gray-800/80 dark:hover:bg-gray-800/90"
             title="Giữ vé"
           >
-            <ShoppingCart className="h-5 w-5" />
+            <ShoppingCart className="h-5 w-5 text-blue-600 dark:text-blue-400" />
           </Button>
         )}
 

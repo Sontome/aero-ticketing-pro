@@ -11,6 +11,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import PendingTickets from "./pages/PendingTickets";
+import HeldTickets from "./pages/HeldTickets";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,11 @@ const App = () => (
             <Route path="/admin/pending-tickets" element={
               <ProtectedRoute>
                 <PendingTickets />
+              </ProtectedRoute>
+            } />
+            <Route path="/cart" element={
+              <ProtectedRoute>
+                <HeldTickets />
               </ProtectedRoute>
             } />
             <Route path="/" element={
