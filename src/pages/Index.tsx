@@ -10,6 +10,8 @@ import { PNRCheckModal } from '../components/PNRCheckModal';
 import { EmailTicketModal } from '@/components/EmailTicketModal';
 import { VJTicketModal } from '@/components/VJTicketModal';
 import { VNATicketModal } from '@/components/VNATicketModal';
+import { BookingModal as VJBookingModal } from '@/components/VJBookingModal';
+import { VNABookingModal } from '@/components/VNABookingModal';
 import { InkSplashEffect } from '@/components/InkSplashEffect';
 import { useAuth } from '@/hooks/useAuth';
 import { ArrowUp, Mail, Wrench, ChevronRight } from 'lucide-react';
@@ -39,6 +41,9 @@ export default function Index() {
   const [showPNRModal, setShowPNRModal] = useState(false);
   const [showVJTicketModal, setShowVJTicketModal] = useState(false);
   const [showVNATicketModal, setShowVNATicketModal] = useState(false);
+  const [showVJBookingModal, setShowVJBookingModal] = useState(false);
+  const [showVNABookingModal, setShowVNABookingModal] = useState(false);
+  const [selectedFlight, setSelectedFlight] = useState<Flight | null>(null);
   const [filters, setFilters] = useState<FilterOptions>({
     airlines: ['VJ', 'VNA'],
     showCheapestOnly: true,
@@ -127,6 +132,15 @@ export default function Index() {
 
   const scrollToTop = () => {
     smoothScrollTo(0, 1000); // Use custom smooth scroll for scroll to top too
+  };
+
+  const handleHoldTicket = (flight: Flight) => {
+    setSelectedFlight(flight);
+    if (flight.airline === 'VJ') {
+      setShowVJBookingModal(true);
+    } else {
+      setShowVNABookingModal(true);
+    }
   };
 
   const playNotificationSound = () => {
@@ -455,7 +469,7 @@ export default function Index() {
                       VietJet ({vjFlights.length} chuyến bay)
                     </h3>
                     <div className="space-y-4">
-                      {vjFlights.map(flight => <FlightCard key={flight.id} flight={flight} priceMode="Page" />)}
+                      {vjFlights.map(flight => <FlightCard key={flight.id} flight={flight} priceMode="Page" onHoldTicket={profile?.perm_hold_ticket ? handleHoldTicket : undefined} />)}
                     </div>
                   </div>}
               </div>
@@ -467,7 +481,7 @@ export default function Index() {
                       Vietnam Airlines ({vnaFlights.length} chuyến bay)
                     </h3>
                     <div className="space-y-4">
-                      {vnaFlights.map(flight => <FlightCard key={flight.id} flight={flight} priceMode="Page" />)}
+                      {vnaFlights.map(flight => <FlightCard key={flight.id} flight={flight} priceMode="Page" onHoldTicket={profile?.perm_hold_ticket ? handleHoldTicket : undefined} />)}
                     </div>
                   </div>}
               </div>
@@ -525,6 +539,53 @@ export default function Index() {
             isOpen={showVNATicketModal} 
             onClose={() => setShowVNATicketModal(false)} 
           />
+          {selectedFlight?.airline === 'VJ' && selectedFlight?.bookingKey && (
+            <VJBookingModal
+              isOpen={showVJBookingModal}
+              onClose={() => {
+                setShowVJBookingModal(false);
+                setSelectedFlight(null);
+              }}
+              bookingKey={selectedFlight.bookingKey}
+              bookingKeyReturn={undefined}
+              tripType={selectedFlight.return ? 'RT' : 'OW'}
+              departureAirport={selectedFlight.departure.airport}
+              maxSeats={selectedFlight.availableSeats}
+              onBookingSuccess={(pnr) => {
+                console.log('Booking success:', pnr);
+                toast({
+                  title: "Giữ vé thành công!",
+                  description: `Mã giữ vé: ${pnr}`,
+                });
+              }}
+            />
+          )}
+          {selectedFlight?.airline === 'VNA' && (
+            <VNABookingModal
+              isOpen={showVNABookingModal}
+              onClose={() => {
+                setShowVNABookingModal(false);
+                setSelectedFlight(null);
+              }}
+              flightInfo={{
+                dep: selectedFlight.departure.airport,
+                arr: selectedFlight.arrival.airport,
+                depdate: selectedFlight.departure.date,
+                deptime: selectedFlight.departure.time,
+                arrdate: selectedFlight.return?.departure.date,
+                arrtime: selectedFlight.return?.departure.time,
+                tripType: selectedFlight.return ? 'RT' : 'OW',
+              }}
+              maxSeats={selectedFlight.availableSeats}
+              onBookingSuccess={(pnr) => {
+                console.log('Booking success:', pnr);
+                toast({
+                  title: "Giữ vé thành công!",
+                  description: `Mã giữ vé: ${pnr}`,
+                });
+              }}
+            />
+          )}
         </>
       )}
 

@@ -10,9 +10,10 @@ import { useToast } from '@/hooks/use-toast';
 interface FlightCardProps {
   flight: Flight;
   priceMode: 'Page' | 'Live';
+  onHoldTicket?: (flight: Flight) => void;
 }
 
-export const FlightCard: React.FC<FlightCardProps> = ({ flight, priceMode }) => {
+export const FlightCard: React.FC<FlightCardProps> = ({ flight, priceMode, onHoldTicket }) => {
   const { profile } = useAuth();
   const { toast } = useToast();
   const [adjustedPrice, setAdjustedPrice] = useState(flight.price);
@@ -231,8 +232,21 @@ ${getBaggageInfo()}, giá vé = ${formatPrice(adjustedPrice)}w`;
           </div>
 
           {/* Baggage and Price Info */}
-          <div className={`border-t pt-4 text-sm transition-all duration-200 ${isADT ? 'text-red-600 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}>
-            <div>{getBaggageInfo()}, giá vé = {formatPrice(adjustedPrice)}w</div>
+          <div className={`border-t pt-4 transition-all duration-200`}>
+            <div className={`text-sm ${isADT ? 'text-red-600 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}>
+              {getBaggageInfo()}, giá vé = {formatPrice(adjustedPrice)}w
+            </div>
+            
+            {/* Hold Ticket Button */}
+            {onHoldTicket && (
+              <Button
+                onClick={() => onHoldTicket(flight)}
+                className="w-full mt-3"
+                variant="default"
+              >
+                Giữ vé
+              </Button>
+            )}
           </div>
         </div>
       </CardContent>
