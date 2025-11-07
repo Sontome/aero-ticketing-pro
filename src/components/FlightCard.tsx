@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Plane, Clock, Users, Copy } from 'lucide-react';
+import { Plane, Clock, Users, Copy, ShoppingCart } from 'lucide-react';
 import { Flight } from '@/services/flightApi';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -157,8 +157,21 @@ ${getBaggageInfo()}, giá vé = ${formatPrice(adjustedPrice)}w`;
   const isADT = flight.airline === 'VNA' && flight.baggageType === 'ADT';
 
   return (
-    <Card className={`hover:shadow-lg transition-all duration-300 mb-4 opacity-0 animate-fade-in ${isADT ? 'border-red-500 border-2' : ''}`}>
+    <Card className={`hover:shadow-lg transition-all duration-300 mb-4 opacity-0 animate-fade-in relative ${isADT ? 'border-red-500 border-2' : ''}`}>
       <CardContent className="p-6">
+        {/* Hold Ticket Icon Button */}
+        {onHoldTicket && (
+          <Button 
+            onClick={() => onHoldTicket(flight)}
+            size="icon"
+            variant="default"
+            className="absolute top-4 right-4 z-10"
+            title="Giữ vé"
+          >
+            <ShoppingCart className="h-5 w-5" />
+          </Button>
+        )}
+
         <div className="flex flex-col space-y-4">
           {/* Price and Main Info */}
           <div className="flex justify-between items-start">
@@ -174,7 +187,7 @@ ${getBaggageInfo()}, giá vé = ${formatPrice(adjustedPrice)}w`;
                 Còn {flight.availableSeats} ghế
               </div>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 mr-12">
               <Badge 
                 variant={flight.airline === 'VJ' ? 'default' : 'secondary'}
                 className={`transition-all duration-200 ${flight.airline === 'VJ' ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
@@ -236,17 +249,6 @@ ${getBaggageInfo()}, giá vé = ${formatPrice(adjustedPrice)}w`;
             <div className={`text-sm ${isADT ? 'text-red-600 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}>
               {getBaggageInfo()}, giá vé = {formatPrice(adjustedPrice)}w
             </div>
-            
-            {/* Hold Ticket Button */}
-            {onHoldTicket && (
-              <Button
-                onClick={() => onHoldTicket(flight)}
-                className="w-full mt-3"
-                variant="default"
-              >
-                Giữ vé
-              </Button>
-            )}
           </div>
         </div>
       </CardContent>

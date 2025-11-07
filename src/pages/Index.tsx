@@ -547,7 +547,7 @@ export default function Index() {
                 setSelectedFlight(null);
               }}
               bookingKey={selectedFlight.bookingKey}
-              bookingKeyReturn={undefined}
+              bookingKeyReturn={selectedFlight.bookingKeyReturn}
               tripType={selectedFlight.return ? 'RT' : 'OW'}
               departureAirport={selectedFlight.departure.airport}
               maxSeats={selectedFlight.availableSeats}

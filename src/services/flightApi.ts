@@ -151,6 +151,7 @@ export interface Flight {
   aircraft: string;
   availableSeats: number;
   bookingKey?: string;
+  bookingKeyReturn?: string;
   ticketClass: string;
   baggageType: string;
   stopInfo?: {
@@ -286,6 +287,7 @@ export const fetchVietJetFlights = async (searchData: SearchFormData): Promise<F
       aircraft: 'Airbus A320',
       availableSeats: parseInt(flight.thông_tin_chung.số_ghế_còn),
       bookingKey: flight['chiều_đi'].BookingKey,
+      bookingKeyReturn: flight['chiều_về']?.BookingKey,
       ticketClass: flight['chiều_đi'].loại_vé,
       baggageType: flight.thông_tin_chung.hành_lý_vna,
       stopInfo: flight['chiều_đi'].điểm_dừng_1 ? {
