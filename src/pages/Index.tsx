@@ -382,26 +382,25 @@ export default function Index() {
     }`}>
       {showContent && (
         <>
-          <header className="sticky top-0 z-50 bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-800 dark:to-blue-900 shadow-lg backdrop-blur-sm transition-all duration-100 animate-fade-in">
+          <header className="sticky top-0 z-50 bg-white dark:bg-gray-900 shadow-md backdrop-blur-sm transition-all duration-100 animate-fade-in border-b border-blue-100 dark:border-gray-800">
             <div className="container mx-auto px-4 py-6">
               <div className="flex justify-between items-center">
                 <div className="transition-all duration-200">
-                  <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent drop-shadow-sm">
+                  <h1 className="text-3xl font-bold text-blue-700 dark:text-blue-400">
                     Hàn Việt Air
                   </h1>
-                  <p className="text-blue-100 dark:text-blue-200">
+                  <p className="text-gray-600 dark:text-gray-300">
                     Tìm kiếm và so sánh giá vé máy bay từ các hãng hàng không khác nhau.
                   </p>
                 </div>
                 <div className="flex items-center gap-4">
                   {profile?.perm_hold_ticket === true && (
                     <Button
-                      variant="ghost"
+                      variant="outline"
                       size="lg"
                       onClick={() => navigate('/cart')}
-                      className="h-12 px-6 text-lg text-white border border-white rounded-xl
-                       hover:text-white hover:bg-blue-700/50 opacity-90 hover:opacity-100 
-                       transition-all"
+                      className="h-12 px-6 text-lg text-blue-700 dark:text-blue-400 border-blue-300 dark:border-blue-600 rounded-xl
+                       hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all"
                     >
                       <ShoppingBasket className="w-5 h-5 mr-2" />
                       Giỏ hàng
@@ -411,11 +410,10 @@ export default function Index() {
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           size="lg"
-                          className="h-12 px-6 text-lg text-white border border-white rounded-xl
-                           hover:text-white hover:bg-blue-700/50 opacity-90 hover:opacity-100 
-                           transition-all"
+                          className="h-12 px-6 text-lg text-blue-700 dark:text-blue-400 border-blue-300 dark:border-blue-600 rounded-xl
+                           hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all"
                         >
                           <Wrench className="w-5 h-5 mr-2" />
                           Tiện ích
@@ -527,7 +525,7 @@ export default function Index() {
       {showContent && showScrollTop && (
         <Button
           onClick={scrollToTop}
-          className="fixed bottom-6 right-6 z-50 rounded-full w-12 h-12 p-0 bg-blue-600 hover:bg-blue-700 shadow-lg animate-fade-in"
+          className="fixed bottom-6 right-6 z-50 rounded-full w-12 h-12 p-0 bg-white dark:bg-gray-800 border-2 border-blue-600 dark:border-blue-400 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 shadow-lg animate-fade-in"
           size="icon"
         >
           <ArrowUp className="h-5 w-5" />

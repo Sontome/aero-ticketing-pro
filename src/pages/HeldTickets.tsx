@@ -99,20 +99,20 @@ export default function HeldTickets() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white"></div>
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800">
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
           <Button
             variant="ghost"
             onClick={() => navigate('/')}
-            className="text-white hover:bg-white/10"
+            className="text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
           >
             <ArrowLeft className="w-5 h-5 mr-2" />
             Quay lại
@@ -120,7 +120,7 @@ export default function HeldTickets() {
         </div>
 
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold text-white mb-6">Giỏ hàng - Vé đang giữ</h1>
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-6">Giỏ hàng - Vé đang giữ</h1>
 
           {tickets.length === 0 ? (
             <Card>
