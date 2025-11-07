@@ -469,7 +469,7 @@ export default function Index() {
                       VietJet ({vjFlights.length} chuyến bay)
                     </h3>
                     <div className="space-y-4">
-                      {vjFlights.map(flight => <FlightCard key={flight.id} flight={flight} priceMode="Page" onHoldTicket={profile?.perm_hold_ticket ? handleHoldTicket : undefined} />)}
+                      {vjFlights.map(flight => <FlightCard key={flight.id} flight={flight} priceMode="Page" onHoldTicket={profile?.perm_hold_ticket === true ? handleHoldTicket : undefined} />)}
                     </div>
                   </div>}
               </div>
@@ -481,7 +481,7 @@ export default function Index() {
                       Vietnam Airlines ({vnaFlights.length} chuyến bay)
                     </h3>
                     <div className="space-y-4">
-                      {vnaFlights.map(flight => <FlightCard key={flight.id} flight={flight} priceMode="Page" onHoldTicket={profile?.perm_hold_ticket ? handleHoldTicket : undefined} />)}
+                      {vnaFlights.map(flight => <FlightCard key={flight.id} flight={flight} priceMode="Page" onHoldTicket={profile?.perm_hold_ticket === true ? handleHoldTicket : undefined} />)}
                     </div>
                   </div>}
               </div>
