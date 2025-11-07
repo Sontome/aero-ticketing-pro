@@ -8,10 +8,21 @@ import { Button } from '@/components/ui/button';
 import { UserProfileDropdown } from '@/components/UserProfileDropdown';
 import { PNRCheckModal } from '../components/PNRCheckModal';
 import { EmailTicketModal } from '@/components/EmailTicketModal';
+import { VJTicketModal } from '@/components/VJTicketModal';
+import { VNATicketModal } from '@/components/VNATicketModal';
 import { InkSplashEffect } from '@/components/InkSplashEffect';
 import { useAuth } from '@/hooks/useAuth';
-import { ArrowUp, Mail } from 'lucide-react';
+import { ArrowUp, Mail, Wrench, ChevronRight } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export default function Index() {
   const { profile } = useAuth();
@@ -26,6 +37,8 @@ export default function Index() {
   const [showContent, setShowContent] = useState(false);
   const resultsRef = useRef<HTMLDivElement>(null);
   const [showPNRModal, setShowPNRModal] = useState(false);
+  const [showVJTicketModal, setShowVJTicketModal] = useState(false);
+  const [showVNATicketModal, setShowVNATicketModal] = useState(false);
   const [filters, setFilters] = useState<FilterOptions>({
     airlines: ['VJ', 'VNA'],
     showCheapestOnly: true,
@@ -367,30 +380,48 @@ export default function Index() {
                   </p>
                 </div>
                 <div className="flex items-center gap-4">
-                  {profile?.perm_get_ticket_image && (
-                    <Button
-                      onClick={() => setShowPNRModal(true)}
-                      variant="ghost"
-                      size="lg"
-                      className="h-12 px-6 text-lg text-white border border-white rounded-xl
-                       hover:text-white hover:bg-blue-700/50 opacity-90 hover:opacity-100 
-                       transition-all"
-                    >
-                      Lấy ảnh mặt vé
-                    </Button>
-                  )}
-                  
-                  {profile?.perm_send_ticket && (
-                    <Button
-                      onClick={() => setIsEmailModalOpen(true)}
-                      variant="ghost"
-                      size="lg"
-                      className="h-12 px-6 text-lg text-white border border-white rounded-xl
-                       hover:text-white hover:bg-blue-700/50 opacity-90 hover:opacity-100 
-                       transition-all"
-                    >
-                      Gửi Mặt Vé
-                    </Button>
+                  {(profile?.perm_get_ticket_image || profile?.perm_send_ticket || profile?.perm_get_pending_ticket) && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="lg"
+                          className="h-12 px-6 text-lg text-white border border-white rounded-xl
+                           hover:text-white hover:bg-blue-700/50 opacity-90 hover:opacity-100 
+                           transition-all"
+                        >
+                          <Wrench className="w-5 h-5 mr-2" />
+                          Tiện ích
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="w-56 bg-background z-[100]" align="end">
+                        {profile?.perm_get_ticket_image && (
+                          <DropdownMenuItem onClick={() => setShowPNRModal(true)}>
+                            Lấy ảnh mặt vé
+                          </DropdownMenuItem>
+                        )}
+                        {profile?.perm_send_ticket && (
+                          <DropdownMenuItem onClick={() => setIsEmailModalOpen(true)}>
+                            Gửi mặt vé
+                          </DropdownMenuItem>
+                        )}
+                        {profile?.perm_get_pending_ticket && (
+                          <DropdownMenuSub>
+                            <DropdownMenuSubTrigger>
+                              Lấy ảnh mặt vé chờ
+                            </DropdownMenuSubTrigger>
+                            <DropdownMenuSubContent className="bg-background z-[110]">
+                              <DropdownMenuItem onClick={() => setShowVJTicketModal(true)}>
+                                VietJet
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => setShowVNATicketModal(true)}>
+                                Vietnam Airlines
+                              </DropdownMenuItem>
+                            </DropdownMenuSubContent>
+                          </DropdownMenuSub>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   )}
                   <UserProfileDropdown />
                 </div>
@@ -477,16 +508,24 @@ export default function Index() {
       )}
 
       {showContent && (
-        <EmailTicketModal 
-          isOpen={isEmailModalOpen} 
-          onClose={() => setIsEmailModalOpen(false)} 
-        />
-      )}
-      {showContent && (
-        <PNRCheckModal 
-          isOpen={showPNRModal} 
-          onClose={() => setShowPNRModal(false)} 
-        />
+        <>
+          <EmailTicketModal 
+            isOpen={isEmailModalOpen} 
+            onClose={() => setIsEmailModalOpen(false)} 
+          />
+          <PNRCheckModal 
+            isOpen={showPNRModal} 
+            onClose={() => setShowPNRModal(false)} 
+          />
+          <VJTicketModal 
+            isOpen={showVJTicketModal} 
+            onClose={() => setShowVJTicketModal(false)} 
+          />
+          <VNATicketModal 
+            isOpen={showVNATicketModal} 
+            onClose={() => setShowVNATicketModal(false)} 
+          />
+        </>
       )}
 
       <InkSplashEffect
