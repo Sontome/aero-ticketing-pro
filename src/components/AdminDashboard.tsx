@@ -140,6 +140,9 @@ export const AdminDashboard = () => {
     if (!editingProfile) return;
 
     try {
+      // Automatically set perm_hold_ticket based on hold_ticket_quantity
+      const permHoldTicket = editForm.hold_ticket_quantity > 0;
+
       // Update profile data
       const { error: profileError } = await supabase
         .from('profiles')
@@ -160,6 +163,7 @@ export const AdminDashboard = () => {
         perm_get_pending_ticket: editForm.perm_get_pending_ticket,
         perm_check_discount: editForm.perm_check_discount,
         hold_ticket_quantity: editForm.hold_ticket_quantity,
+          perm_hold_ticket: permHoldTicket,
           updated_at: new Date().toISOString(),
         })
         .eq('id', editingProfile.id);
