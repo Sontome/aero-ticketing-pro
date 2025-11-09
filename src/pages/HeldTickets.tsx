@@ -94,7 +94,12 @@ export default function HeldTickets() {
   };
 
   const isExpired = (expireDate: string) => {
+    if (!expireDate) return false;
     return new Date(expireDate) < new Date();
+  };
+
+  const isVNA = (ticket: HeldTicket) => {
+    return ticket.flight_details?.airline === 'VNA';
   };
 
   if (loading) {
@@ -130,8 +135,13 @@ export default function HeldTickets() {
             </Card>
           ) : (
             <div className="space-y-4">
-              {tickets.map((ticket) => (
-                <Card key={ticket.id} className={isExpired(ticket.expire_date) ? 'border-red-300 bg-red-50' : ''}>
+              {tickets.map((ticket) => {
+                const expired = isExpired(ticket.expire_date);
+                const vnaTicket = isVNA(ticket);
+                const isVJExpired = !vnaTicket && expired;
+                
+                return (
+                <Card key={ticket.id} className={isVJExpired ? 'opacity-50 grayscale' : ''}>
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="space-y-1">
@@ -162,17 +172,19 @@ export default function HeldTickets() {
                   <CardContent>
                     <div className="space-y-3">
                       <div className="flex items-center gap-2">
-                        <Badge variant={isExpired(ticket.expire_date) ? 'destructive' : 'default'}>
+                        <Badge variant={isVJExpired ? 'destructive' : 'default'}>
                           {ticket.status === 'holding' ? 'Đang giữ' : ticket.status}
                         </Badge>
-                        {isExpired(ticket.expire_date) && (
+                        {isVJExpired && (
                           <Badge variant="destructive">Hết hạn</Badge>
                         )}
                       </div>
                       
                       <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
                         <div className="text-sm space-y-1">
-                          <p><strong>Hạn thanh toán:</strong> {ticket.flight_details?.deadline || formatDate(ticket.expire_date)}</p>
+                          {!vnaTicket && (
+                            <p><strong>Hạn thanh toán:</strong> {ticket.flight_details?.deadline || formatDate(ticket.expire_date)}</p>
+                          )}
                           <p><strong>Loại vé:</strong> {ticket.flight_details?.tripType === 'RT' ? 'Khứ hồi' : 'Một chiều'}</p>
                           <p><strong>Sân bay đi:</strong> {ticket.flight_details?.departureAirport}</p>
                           {ticket.flight_details?.passengers && (
@@ -183,7 +195,8 @@ export default function HeldTickets() {
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+              );
+              })}
             </div>
           )}
         </div>

@@ -192,11 +192,11 @@ export const VNABookingModal = ({
       
       params.append('doituong', doiTuong);
 
-      // Add passengers
-      passengers.forEach(passenger => {
-        const formattedName = formatNameForAPI(passenger);
+      // Add passengers in reverse order (last to first)
+      for (let i = passengers.length - 1; i >= 0; i--) {
+        const formattedName = formatNameForAPI(passengers[i]);
         params.append('hanhkhach', formattedName);
-      });
+      }
 
       setIsLoading(true);
       const response = await fetch(`https://thuhongtour.com/giuveVNAlive?${params.toString()}`, {
