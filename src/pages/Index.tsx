@@ -14,7 +14,7 @@ import { BookingModal as VJBookingModal } from '@/components/VJBookingModal';
 import { VNABookingModal } from '@/components/VNABookingModal';
 import { InkSplashEffect } from '@/components/InkSplashEffect';
 import { useAuth } from '@/hooks/useAuth';
-import { ArrowUp, Mail, Wrench, ShoppingBasket } from 'lucide-react';
+import { ArrowUp, Mail, Wrench, ShoppingBasket, TrendingDown } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import {
   DropdownMenu,
@@ -394,6 +394,18 @@ export default function Index() {
                   </p>
                 </div>
                 <div className="flex items-center gap-4">
+                  {profile?.perm_check_discount === true && (
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      onClick={() => navigate('/price-monitor')}
+                      className="h-12 px-6 text-lg text-blue-700 dark:text-blue-400 border-blue-300 dark:border-blue-600 rounded-xl
+                       hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all"
+                    >
+                      <TrendingDown className="w-5 h-5 mr-2" />
+                      Tool Check Vé Giảm
+                    </Button>
+                  )}
                   {profile?.perm_hold_ticket === true && (
                     <Button
                       variant="outline"

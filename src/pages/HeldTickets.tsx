@@ -141,11 +141,17 @@ export default function HeldTickets() {
                 const isVJExpired = !vnaTicket && expired;
                 
                 return (
-                <Card key={ticket.id} className={isVJExpired ? 'opacity-50 grayscale' : ''}>
+                <Card key={ticket.id} className={`${isVJExpired ? 'opacity-50 grayscale' : ''} ${
+                  vnaTicket 
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/20' 
+                    : 'border-red-500 bg-red-50 dark:bg-red-950/20'
+                }`}>
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="space-y-1">
-                        <CardTitle className="flex items-center gap-2">
+                        <CardTitle className={`flex items-center gap-2 ${
+                          vnaTicket ? 'text-blue-700 dark:text-blue-400' : 'text-red-700 dark:text-red-400'
+                        }`}>
                           Mã PNR: {ticket.pnr}
                           <Button
                             size="sm"

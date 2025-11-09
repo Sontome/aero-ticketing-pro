@@ -50,6 +50,51 @@ export type Database = {
         }
         Relationships: []
       }
+      monitored_flights: {
+        Row: {
+          airline: string
+          arrival_airport: string
+          check_interval_minutes: number | null
+          created_at: string
+          current_price: number | null
+          departure_airport: string
+          departure_date: string
+          id: string
+          is_active: boolean | null
+          last_checked_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          airline: string
+          arrival_airport: string
+          check_interval_minutes?: number | null
+          created_at?: string
+          current_price?: number | null
+          departure_airport: string
+          departure_date: string
+          id?: string
+          is_active?: boolean | null
+          last_checked_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          airline?: string
+          arrival_airport?: string
+          check_interval_minutes?: number | null
+          created_at?: string
+          current_price?: number | null
+          departure_airport?: string
+          departure_date?: string
+          id?: string
+          is_active?: boolean | null
+          last_checked_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           banner: string | null

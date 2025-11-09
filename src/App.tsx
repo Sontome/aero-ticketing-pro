@@ -12,6 +12,7 @@ import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import PendingTickets from "./pages/PendingTickets";
 import HeldTickets from "./pages/HeldTickets";
+import PriceMonitor from "./pages/PriceMonitor";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,11 @@ const App = () => (
             <Route path="/cart" element={
               <ProtectedRoute>
                 <HeldTickets />
+              </ProtectedRoute>
+            } />
+            <Route path="/price-monitor" element={
+              <ProtectedRoute>
+                <PriceMonitor />
               </ProtectedRoute>
             } />
             <Route path="/" element={
