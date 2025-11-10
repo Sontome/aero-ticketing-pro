@@ -59,9 +59,15 @@ export type Database = {
           current_price: number | null
           departure_airport: string
           departure_date: string
+          departure_time: string | null
           id: string
           is_active: boolean | null
+          is_round_trip: boolean | null
           last_checked_at: string | null
+          return_date: string | null
+          return_time: string | null
+          segments: Json | null
+          ticket_class: string | null
           updated_at: string
           user_id: string
         }
@@ -73,9 +79,15 @@ export type Database = {
           current_price?: number | null
           departure_airport: string
           departure_date: string
+          departure_time?: string | null
           id?: string
           is_active?: boolean | null
+          is_round_trip?: boolean | null
           last_checked_at?: string | null
+          return_date?: string | null
+          return_time?: string | null
+          segments?: Json | null
+          ticket_class?: string | null
           updated_at?: string
           user_id: string
         }
@@ -87,9 +99,15 @@ export type Database = {
           current_price?: number | null
           departure_airport?: string
           departure_date?: string
+          departure_time?: string | null
           id?: string
           is_active?: boolean | null
+          is_round_trip?: boolean | null
           last_checked_at?: string | null
+          return_date?: string | null
+          return_time?: string | null
+          segments?: Json | null
+          ticket_class?: string | null
           updated_at?: string
           user_id?: string
         }

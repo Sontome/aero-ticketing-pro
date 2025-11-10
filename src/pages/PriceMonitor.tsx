@@ -12,12 +12,26 @@ import { ArrowLeft, Plus, Trash2, RefreshCw, Bell } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
+interface FlightSegment {
+  departure_airport: string;
+  arrival_airport: string;
+  departure_date: string;
+  departure_time?: string;
+  ticket_class: 'economy' | 'business';
+}
+
 interface MonitoredFlight {
   id: string;
   airline: string;
   departure_airport: string;
   arrival_airport: string;
   departure_date: string;
+  departure_time?: string;
+  is_round_trip?: boolean;
+  return_date?: string;
+  return_time?: string;
+  segments?: FlightSegment[];
+  ticket_class?: string;
   current_price: number | null;
   last_checked_at: string | null;
   check_interval_minutes: number;
@@ -36,7 +50,16 @@ export default function PriceMonitor() {
   const [departureAirport, setDepartureAirport] = useState('');
   const [arrivalAirport, setArrivalAirport] = useState('');
   const [departureDate, setDepartureDate] = useState('');
+  const [departureTime, setDepartureTime] = useState('');
+  const [isRoundTrip, setIsRoundTrip] = useState(false);
+  const [returnDate, setReturnDate] = useState('');
+  const [returnTime, setReturnTime] = useState('');
   const [checkInterval, setCheckInterval] = useState('60');
+  
+  // VNA segments state
+  const [vnaSegments, setVnaSegments] = useState<FlightSegment[]>([
+    { departure_airport: '', arrival_airport: '', departure_date: '', departure_time: '', ticket_class: 'economy' }
+  ]);
 
   useEffect(() => {
     if (!profile?.perm_check_discount) {
@@ -58,7 +81,14 @@ export default function PriceMonitor() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setFlights(data || []);
+      
+      // Map data to properly typed flights
+      const typedFlights: MonitoredFlight[] = (data || []).map(flight => ({
+        ...flight,
+        segments: flight.segments ? (flight.segments as any as FlightSegment[]) : undefined
+      }));
+      
+      setFlights(typedFlights);
     } catch (error) {
       console.error('Error fetching monitored flights:', error);
       toast({
@@ -72,29 +102,66 @@ export default function PriceMonitor() {
   };
 
   const handleAddFlight = async () => {
-    if (!departureAirport || !arrivalAirport || !departureDate) {
-      toast({
-        title: 'Lỗi',
-        description: 'Vui lòng điền đầy đủ thông tin',
-        variant: 'destructive'
-      });
-      return;
+    // Validate based on airline
+    if (airline === 'VJ') {
+      if (!departureAirport || !arrivalAirport || !departureDate) {
+        toast({
+          title: 'Lỗi',
+          description: 'Vui lòng điền đầy đủ thông tin',
+          variant: 'destructive'
+        });
+        return;
+      }
+      if (isRoundTrip && !returnDate) {
+        toast({
+          title: 'Lỗi',
+          description: 'Vui lòng chọn ngày về',
+          variant: 'destructive'
+        });
+        return;
+      }
+    } else {
+      // VNA validation
+      const invalidSegment = vnaSegments.find(seg => !seg.departure_airport || !seg.arrival_airport || !seg.departure_date);
+      if (invalidSegment) {
+        toast({
+          title: 'Lỗi',
+          description: 'Vui lòng điền đầy đủ thông tin cho tất cả hành trình',
+          variant: 'destructive'
+        });
+        return;
+      }
     }
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      const insertData: any = {
+        user_id: user.id,
+        airline,
+        check_interval_minutes: parseInt(checkInterval)
+      };
+
+      if (airline === 'VJ') {
+        insertData.departure_airport = departureAirport;
+        insertData.arrival_airport = arrivalAirport;
+        insertData.departure_date = departureDate;
+        insertData.departure_time = departureTime || null;
+        insertData.is_round_trip = isRoundTrip;
+        insertData.return_date = isRoundTrip ? returnDate : null;
+        insertData.return_time = isRoundTrip ? (returnTime || null) : null;
+      } else {
+        // For VNA, use segments
+        insertData.segments = vnaSegments;
+        insertData.departure_airport = vnaSegments[0].departure_airport;
+        insertData.arrival_airport = vnaSegments[vnaSegments.length - 1].arrival_airport;
+        insertData.departure_date = vnaSegments[0].departure_date;
+      }
+
       const { error } = await supabase
         .from('monitored_flights')
-        .insert({
-          user_id: user.id,
-          airline,
-          departure_airport: departureAirport,
-          arrival_airport: arrivalAirport,
-          departure_date: departureDate,
-          check_interval_minutes: parseInt(checkInterval)
-        });
+        .insert(insertData);
 
       if (error) throw error;
 
@@ -107,7 +174,12 @@ export default function PriceMonitor() {
       setDepartureAirport('');
       setArrivalAirport('');
       setDepartureDate('');
+      setDepartureTime('');
+      setIsRoundTrip(false);
+      setReturnDate('');
+      setReturnTime('');
       setCheckInterval('60');
+      setVnaSegments([{ departure_airport: '', arrival_airport: '', departure_date: '', departure_time: '', ticket_class: 'economy' }]);
       setIsAddModalOpen(false);
       fetchMonitoredFlights();
     } catch (error) {
@@ -171,6 +243,44 @@ export default function PriceMonitor() {
     }
   };
 
+  const handleManualCheck = async (flightId: string) => {
+    try {
+      toast({
+        title: 'Đang kiểm tra...',
+        description: 'Đang kiểm tra giá vé hiện tại'
+      });
+
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const response = await fetch('https://hggdgcbrdanwmlbgeaca.supabase.co/functions/v1/check-flight-prices', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token || ''}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to check prices');
+      }
+
+      // Refresh the list to show updated prices
+      await fetchMonitoredFlights();
+      
+      toast({
+        title: 'Đã cập nhật',
+        description: 'Giá vé đã được cập nhật'
+      });
+    } catch (error) {
+      console.error('Error checking price:', error);
+      toast({
+        title: 'Lỗi',
+        description: 'Không thể kiểm tra giá vé',
+        variant: 'destructive'
+      });
+    }
+  };
+
   const formatDate = (dateString: string | null) => {
     if (!dateString) return 'Chưa kiểm tra';
     const date = new Date(dateString);
@@ -212,7 +322,18 @@ export default function PriceMonitor() {
               <div className="space-y-4">
                 <div>
                   <Label>Hãng bay</Label>
-                  <Select value={airline} onValueChange={(value: 'VJ' | 'VNA') => setAirline(value)}>
+                  <Select value={airline} onValueChange={(value: 'VJ' | 'VNA') => {
+                    setAirline(value);
+                    // Reset forms when switching airlines
+                    setDepartureAirport('');
+                    setArrivalAirport('');
+                    setDepartureDate('');
+                    setDepartureTime('');
+                    setIsRoundTrip(false);
+                    setReturnDate('');
+                    setReturnTime('');
+                    setVnaSegments([{ departure_airport: '', arrival_airport: '', departure_date: '', departure_time: '', ticket_class: 'economy' }]);
+                  }}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -222,32 +343,188 @@ export default function PriceMonitor() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div>
-                  <Label>Sân bay đi</Label>
-                  <Input
-                    value={departureAirport}
-                    onChange={(e) => setDepartureAirport(e.target.value.toUpperCase())}
-                    placeholder="Ví dụ: HAN"
-                    maxLength={3}
-                  />
-                </div>
-                <div>
-                  <Label>Sân bay đến</Label>
-                  <Input
-                    value={arrivalAirport}
-                    onChange={(e) => setArrivalAirport(e.target.value.toUpperCase())}
-                    placeholder="Ví dụ: SGN"
-                    maxLength={3}
-                  />
-                </div>
-                <div>
-                  <Label>Ngày bay</Label>
-                  <Input
-                    type="date"
-                    value={departureDate}
-                    onChange={(e) => setDepartureDate(e.target.value)}
-                  />
-                </div>
+
+                {airline === 'VJ' ? (
+                  <>
+                    <div>
+                      <Label>Sân bay đi</Label>
+                      <Input
+                        value={departureAirport}
+                        onChange={(e) => setDepartureAirport(e.target.value.toUpperCase())}
+                        placeholder="Ví dụ: HAN"
+                        maxLength={3}
+                      />
+                    </div>
+                    <div>
+                      <Label>Sân bay đến</Label>
+                      <Input
+                        value={arrivalAirport}
+                        onChange={(e) => setArrivalAirport(e.target.value.toUpperCase())}
+                        placeholder="Ví dụ: SGN"
+                        maxLength={3}
+                      />
+                    </div>
+                    <div>
+                      <Label>Ngày bay</Label>
+                      <Input
+                        type="date"
+                        value={departureDate}
+                        onChange={(e) => setDepartureDate(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label>Giờ đi (tùy chọn)</Label>
+                      <Input
+                        type="time"
+                        value={departureTime}
+                        onChange={(e) => setDepartureTime(e.target.value)}
+                      />
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="roundTrip"
+                        checked={isRoundTrip}
+                        onChange={(e) => setIsRoundTrip(e.target.checked)}
+                        className="rounded"
+                      />
+                      <Label htmlFor="roundTrip">Khứ hồi</Label>
+                    </div>
+                    {isRoundTrip && (
+                      <>
+                        <div>
+                          <Label>Ngày về</Label>
+                          <Input
+                            type="date"
+                            value={returnDate}
+                            onChange={(e) => setReturnDate(e.target.value)}
+                          />
+                        </div>
+                        <div>
+                          <Label>Giờ về (tùy chọn)</Label>
+                          <Input
+                            type="time"
+                            value={returnTime}
+                            onChange={(e) => setReturnTime(e.target.value)}
+                          />
+                        </div>
+                      </>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <Label>Hành trình</Label>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setVnaSegments([...vnaSegments, { departure_airport: '', arrival_airport: '', departure_date: '', departure_time: '', ticket_class: 'economy' }])}
+                          disabled={vnaSegments.length >= 4}
+                        >
+                          <Plus className="w-4 h-4 mr-1" />
+                          Thêm chặng
+                        </Button>
+                      </div>
+                      
+                      {vnaSegments.map((segment, index) => (
+                        <div key={index} className="p-4 border rounded-lg space-y-3 bg-blue-50 dark:bg-blue-950/20">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-medium text-sm">Chặng {index + 1}</span>
+                            {vnaSegments.length > 1 && (
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => setVnaSegments(vnaSegments.filter((_, i) => i !== index))}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            )}
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <Label className="text-xs">Nơi đi</Label>
+                              <Input
+                                value={segment.departure_airport}
+                                onChange={(e) => {
+                                  const newSegments = [...vnaSegments];
+                                  newSegments[index].departure_airport = e.target.value.toUpperCase();
+                                  setVnaSegments(newSegments);
+                                }}
+                                placeholder="HAN"
+                                maxLength={3}
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs">Nơi đến</Label>
+                              <Input
+                                value={segment.arrival_airport}
+                                onChange={(e) => {
+                                  const newSegments = [...vnaSegments];
+                                  newSegments[index].arrival_airport = e.target.value.toUpperCase();
+                                  setVnaSegments(newSegments);
+                                }}
+                                placeholder="SGN"
+                                maxLength={3}
+                              />
+                            </div>
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <Label className="text-xs">Ngày đi</Label>
+                              <Input
+                                type="date"
+                                value={segment.departure_date}
+                                onChange={(e) => {
+                                  const newSegments = [...vnaSegments];
+                                  newSegments[index].departure_date = e.target.value;
+                                  setVnaSegments(newSegments);
+                                }}
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs">Giờ đi (tùy chọn)</Label>
+                              <Input
+                                type="time"
+                                value={segment.departure_time}
+                                onChange={(e) => {
+                                  const newSegments = [...vnaSegments];
+                                  newSegments[index].departure_time = e.target.value;
+                                  setVnaSegments(newSegments);
+                                }}
+                              />
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <Label className="text-xs">Hạng vé</Label>
+                            <Select 
+                              value={segment.ticket_class} 
+                              onValueChange={(value: 'economy' | 'business') => {
+                                const newSegments = [...vnaSegments];
+                                newSegments[index].ticket_class = value;
+                                setVnaSegments(newSegments);
+                              }}
+                            >
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="economy">Phổ thông</SelectItem>
+                                <SelectItem value="business">Thương gia</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+
                 <div>
                   <Label>Kiểm tra mỗi (phút)</Label>
                   <Input
@@ -310,15 +587,25 @@ export default function PriceMonitor() {
                       <div className="flex gap-2">
                         <Button
                           size="sm"
+                          variant="outline"
+                          onClick={() => handleManualCheck(flight.id)}
+                          title="Kiểm tra giá ngay"
+                        >
+                          <RefreshCw className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
                           variant={flight.is_active ? 'default' : 'outline'}
                           onClick={() => handleToggleActive(flight.id, flight.is_active)}
+                          title={flight.is_active ? 'Tắt theo dõi' : 'Bật theo dõi'}
                         >
-                          {flight.is_active ? <Bell className="h-4 w-4" /> : <RefreshCw className="h-4 w-4" />}
+                          {flight.is_active ? <Bell className="h-4 w-4" /> : <Bell className="h-4 w-4 opacity-50" />}
                         </Button>
                         <Button
                           size="sm"
                           variant="destructive"
                           onClick={() => handleDelete(flight.id)}
+                          title="Xóa"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -351,6 +638,45 @@ export default function PriceMonitor() {
                               {flight.is_active ? 'Đang theo dõi' : 'Tạm dừng'}
                             </Badge>
                           </div>
+                        </div>
+                        
+                        {/* Additional flight details */}
+                        <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                          {flight.airline === 'VJ' && (
+                            <>
+                              {flight.departure_time && (
+                                <p className="text-sm">
+                                  <strong>Giờ đi:</strong> {flight.departure_time}
+                                </p>
+                              )}
+                              {flight.is_round_trip && (
+                                <p className="text-sm mt-1">
+                                  <strong>Khứ hồi:</strong> {flight.return_date}
+                                  {flight.return_time && ` - ${flight.return_time}`}
+                                </p>
+                              )}
+                            </>
+                          )}
+                          
+                          {flight.airline === 'VNA' && flight.segments && flight.segments.length > 1 && (
+                            <div className="text-sm">
+                              <strong>Hành trình đa chặng ({flight.segments.length} chặng):</strong>
+                              <div className="mt-2 space-y-1">
+                                {flight.segments.map((seg: FlightSegment, idx: number) => (
+                                  <div key={idx} className="flex items-center gap-2">
+                                    <Badge variant="outline" className="text-xs">
+                                      Chặng {idx + 1}
+                                    </Badge>
+                                    <span>
+                                      {seg.departure_airport} → {seg.arrival_airport}
+                                      {seg.departure_time && ` - ${seg.departure_time}`}
+                                      {seg.ticket_class === 'business' && ' (Thương gia)'}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
