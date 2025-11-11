@@ -287,6 +287,81 @@ export default function PriceMonitor() {
     return date.toLocaleString('vi-VN');
   };
 
+  const generatePNR = (flightId: string) => {
+    // Generate a consistent 6-character PNR from flight ID
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let hash = 0;
+    for (let i = 0; i < flightId.length; i++) {
+      hash = ((hash << 5) - hash) + flightId.charCodeAt(i);
+      hash = hash & hash;
+    }
+    let pnr = '';
+    for (let i = 0; i < 6; i++) {
+      pnr += chars[Math.abs(hash >> (i * 5)) % chars.length];
+    }
+    return pnr;
+  };
+
+  const renderFlightSegments = (flight: MonitoredFlight) => {
+    if (flight.airline === 'VNA' && flight.segments && flight.segments.length > 0) {
+      return (
+        <div className="text-sm">
+          <strong>
+            {flight.segments.length > 1 
+              ? `Hành trình đa chặng (${flight.segments.length} chặng):` 
+              : 'Hành trình:'}
+          </strong>
+          <div className="mt-2 space-y-1">
+            {flight.segments.map((seg: FlightSegment, idx: number) => (
+              <div key={idx}>
+                <span className="font-medium">Chặng {idx + 1}</span>
+                <div className="ml-2">
+                  {seg.departure_airport} → {seg.arrival_airport}
+                  {seg.ticket_class === 'business' && ' (Thương gia)'}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    } else if (flight.airline === 'VJ') {
+      if (flight.is_round_trip) {
+        return (
+          <div className="text-sm">
+            <strong>Hành trình khứ hồi (2 chặng):</strong>
+            <div className="mt-2 space-y-1">
+              <div>
+                <span className="font-medium">Chặng 1</span>
+                <div className="ml-2">
+                  {flight.departure_airport} → {flight.arrival_airport}
+                </div>
+              </div>
+              <div>
+                <span className="font-medium">Chặng 2</span>
+                <div className="ml-2">
+                  {flight.arrival_airport} → {flight.departure_airport}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      } else {
+        return (
+          <div className="text-sm">
+            <strong>Hành trình:</strong>
+            <div className="mt-2">
+              <span className="font-medium">Chặng 1</span>
+              <div className="ml-2">
+                {flight.departure_airport} → {flight.arrival_airport}
+              </div>
+            </div>
+          </div>
+        );
+      }
+    }
+    return null;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
@@ -575,14 +650,11 @@ export default function PriceMonitor() {
                             ? 'text-blue-700 dark:text-blue-400' 
                             : 'text-red-700 dark:text-red-400'
                         }`}>
-                          {flight.departure_airport} → {flight.arrival_airport}
+                          {generatePNR(flight.id)}
                           <Badge variant={flight.airline === 'VNA' ? 'default' : 'destructive'}>
                             {flight.airline}
                           </Badge>
                         </CardTitle>
-                        <div className="text-sm text-gray-500">
-                          Ngày bay: {flight.departure_date}
-                        </div>
                       </div>
                       <div className="flex gap-2">
                         <Button
@@ -640,43 +712,9 @@ export default function PriceMonitor() {
                           </div>
                         </div>
                         
-                        {/* Additional flight details */}
+                        {/* Flight segments */}
                         <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-                          {flight.airline === 'VJ' && (
-                            <>
-                              {flight.departure_time && (
-                                <p className="text-sm">
-                                  <strong>Giờ đi:</strong> {flight.departure_time}
-                                </p>
-                              )}
-                              {flight.is_round_trip && (
-                                <p className="text-sm mt-1">
-                                  <strong>Khứ hồi:</strong> {flight.return_date}
-                                  {flight.return_time && ` - ${flight.return_time}`}
-                                </p>
-                              )}
-                            </>
-                          )}
-                          
-                          {flight.airline === 'VNA' && flight.segments && flight.segments.length > 1 && (
-                            <div className="text-sm">
-                              <strong>Hành trình đa chặng ({flight.segments.length} chặng):</strong>
-                              <div className="mt-2 space-y-1">
-                                {flight.segments.map((seg: FlightSegment, idx: number) => (
-                                  <div key={idx} className="flex items-center gap-2">
-                                    <Badge variant="outline" className="text-xs">
-                                      Chặng {idx + 1}
-                                    </Badge>
-                                    <span>
-                                      {seg.departure_airport} → {seg.arrival_airport}
-                                      {seg.departure_time && ` - ${seg.departure_time}`}
-                                      {seg.ticket_class === 'business' && ' (Thương gia)'}
-                                    </span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
+                          {renderFlightSegments(flight)}
                         </div>
                       </div>
                     </div>
