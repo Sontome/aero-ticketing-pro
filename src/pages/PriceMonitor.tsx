@@ -39,6 +39,29 @@ interface MonitoredFlight {
   is_active: boolean;
 }
 
+// Korean airports
+const KOREAN_AIRPORTS = ['ICN', 'GMP', 'PUS', 'CJU', 'TAE', 'KWJ', 'USN', 'CHN', 'RSU', 'KUV'];
+
+// Vietnamese airports
+const VIETNAMESE_AIRPORTS = ['HAN', 'SGN', 'DAD', 'CXR', 'HPH', 'HUI', 'VCA', 'VCS', 'VDO', 'VII', 'PQC', 'UIH', 'DIN', 'BMV', 'VKG'];
+
+// All airports combined
+const ALL_AIRPORTS = [...VIETNAMESE_AIRPORTS, ...KOREAN_AIRPORTS].sort();
+
+// Generate time options in 5-minute intervals
+const TIME_OPTIONS = Array.from({ length: 288 }, (_, i) => {
+  const hours = Math.floor(i / 12);
+  const minutes = (i % 12) * 5;
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+});
+
+// Get today's date in YYYY-MM-DD format
+const getTodayString = () => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return today.toISOString().split('T')[0];
+};
+
 export default function PriceMonitor() {
   const navigate = useNavigate();
   const { profile } = useAuth();
@@ -105,6 +128,8 @@ export default function PriceMonitor() {
   };
 
   const handleAddFlight = async () => {
+    const today = getTodayString();
+    
     // Validate based on airline
     if (airline === 'VJ') {
       if (!departureAirport || !arrivalAirport || !departureDate) {
@@ -115,13 +140,35 @@ export default function PriceMonitor() {
         });
         return;
       }
-      if (isRoundTrip && !returnDate) {
+      
+      // Validate departure date is in the future
+      if (departureDate <= today) {
         toast({
           title: 'Lỗi',
-          description: 'Vui lòng chọn ngày về',
+          description: 'Ngày đi phải lớn hơn ngày hiện tại',
           variant: 'destructive'
         });
         return;
+      }
+      
+      if (isRoundTrip) {
+        if (!returnDate) {
+          toast({
+            title: 'Lỗi',
+            description: 'Vui lòng chọn ngày về',
+            variant: 'destructive'
+          });
+          return;
+        }
+        // Validate return date is after departure date
+        if (returnDate <= departureDate) {
+          toast({
+            title: 'Lỗi',
+            description: 'Ngày về phải lớn hơn ngày đi',
+            variant: 'destructive'
+          });
+          return;
+        }
       }
     } else {
       // VNA validation
@@ -133,6 +180,28 @@ export default function PriceMonitor() {
           variant: 'destructive'
         });
         return;
+      }
+      
+      // Validate first segment date is in the future
+      if (vnaSegments[0].departure_date <= today) {
+        toast({
+          title: 'Lỗi',
+          description: 'Ngày đi phải lớn hơn ngày hiện tại',
+          variant: 'destructive'
+        });
+        return;
+      }
+      
+      // Validate sequential dates for multi-segment
+      for (let i = 1; i < vnaSegments.length; i++) {
+        if (vnaSegments[i].departure_date <= vnaSegments[i - 1].departure_date) {
+          toast({
+            title: 'Lỗi',
+            description: `Ngày đi chặng ${i + 1} phải lớn hơn ngày đi chặng ${i}`,
+            variant: 'destructive'
+          });
+          return;
+        }
       }
     }
 
@@ -512,21 +581,29 @@ export default function PriceMonitor() {
                   <>
                     <div>
                       <Label>Sân bay đi</Label>
-                      <Input
-                        value={departureAirport}
-                        onChange={(e) => setDepartureAirport(e.target.value.toUpperCase())}
-                        placeholder="Ví dụ: HAN"
-                        maxLength={3}
-                      />
+                      <Select value={departureAirport} onValueChange={setDepartureAirport}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Chọn sân bay" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {ALL_AIRPORTS.map(code => (
+                            <SelectItem key={code} value={code}>{code}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div>
                       <Label>Sân bay đến</Label>
-                      <Input
-                        value={arrivalAirport}
-                        onChange={(e) => setArrivalAirport(e.target.value.toUpperCase())}
-                        placeholder="Ví dụ: SGN"
-                        maxLength={3}
-                      />
+                      <Select value={arrivalAirport} onValueChange={setArrivalAirport}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Chọn sân bay" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {ALL_AIRPORTS.map(code => (
+                            <SelectItem key={code} value={code}>{code}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div>
                       <Label>Ngày bay</Label>
@@ -534,15 +611,21 @@ export default function PriceMonitor() {
                         type="date"
                         value={departureDate}
                         onChange={(e) => setDepartureDate(e.target.value)}
+                        min={getTodayString()}
                       />
                     </div>
                     <div>
                       <Label>Giờ đi (tùy chọn)</Label>
-                      <Input
-                        type="time"
-                        value={departureTime}
-                        onChange={(e) => setDepartureTime(e.target.value)}
-                      />
+                      <Select value={departureTime} onValueChange={setDepartureTime}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Chọn giờ" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-[200px]">
+                          {TIME_OPTIONS.map(time => (
+                            <SelectItem key={time} value={time}>{time}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="flex items-center space-x-2">
                       <input
@@ -562,15 +645,21 @@ export default function PriceMonitor() {
                             type="date"
                             value={returnDate}
                             onChange={(e) => setReturnDate(e.target.value)}
+                            min={departureDate || getTodayString()}
                           />
                         </div>
                         <div>
                           <Label>Giờ về (tùy chọn)</Label>
-                          <Input
-                            type="time"
-                            value={returnTime}
-                            onChange={(e) => setReturnTime(e.target.value)}
-                          />
+                          <Select value={returnTime} onValueChange={setReturnTime}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Chọn giờ" />
+                            </SelectTrigger>
+                            <SelectContent className="max-h-[200px]">
+                              {TIME_OPTIONS.map(time => (
+                                <SelectItem key={time} value={time}>{time}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                       </>
                     )}
@@ -611,29 +700,43 @@ export default function PriceMonitor() {
                           <div className="grid grid-cols-2 gap-2">
                             <div>
                               <Label className="text-xs">Nơi đi</Label>
-                              <Input
+                              <Select 
                                 value={segment.departure_airport}
-                                onChange={(e) => {
+                                onValueChange={(value) => {
                                   const newSegments = [...vnaSegments];
-                                  newSegments[index].departure_airport = e.target.value.toUpperCase();
+                                  newSegments[index].departure_airport = value;
                                   setVnaSegments(newSegments);
                                 }}
-                                placeholder="HAN"
-                                maxLength={3}
-                              />
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Chọn" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {ALL_AIRPORTS.map(code => (
+                                    <SelectItem key={code} value={code}>{code}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
                             </div>
                             <div>
                               <Label className="text-xs">Nơi đến</Label>
-                              <Input
+                              <Select 
                                 value={segment.arrival_airport}
-                                onChange={(e) => {
+                                onValueChange={(value) => {
                                   const newSegments = [...vnaSegments];
-                                  newSegments[index].arrival_airport = e.target.value.toUpperCase();
+                                  newSegments[index].arrival_airport = value;
                                   setVnaSegments(newSegments);
                                 }}
-                                placeholder="SGN"
-                                maxLength={3}
-                              />
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Chọn" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {ALL_AIRPORTS.map(code => (
+                                    <SelectItem key={code} value={code}>{code}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
                             </div>
                           </div>
                           
@@ -648,19 +751,28 @@ export default function PriceMonitor() {
                                   newSegments[index].departure_date = e.target.value;
                                   setVnaSegments(newSegments);
                                 }}
+                                min={index === 0 ? getTodayString() : (vnaSegments[index - 1]?.departure_date || getTodayString())}
                               />
                             </div>
                             <div>
                               <Label className="text-xs">Giờ đi (tùy chọn)</Label>
-                              <Input
-                                type="time"
+                              <Select 
                                 value={segment.departure_time}
-                                onChange={(e) => {
+                                onValueChange={(value) => {
                                   const newSegments = [...vnaSegments];
-                                  newSegments[index].departure_time = e.target.value;
+                                  newSegments[index].departure_time = value;
                                   setVnaSegments(newSegments);
                                 }}
-                              />
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Chọn giờ" />
+                                </SelectTrigger>
+                                <SelectContent className="max-h-[200px]">
+                                  {TIME_OPTIONS.map(time => (
+                                    <SelectItem key={time} value={time}>{time}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
                             </div>
                           </div>
                           
