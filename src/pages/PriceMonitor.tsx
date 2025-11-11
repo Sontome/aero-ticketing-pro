@@ -8,9 +8,10 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Plus, Trash2, RefreshCw, Bell } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, RefreshCw, Bell, Pencil } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Progress } from '@/components/ui/progress';
 
 interface FlightSegment {
   departure_airport: string;
@@ -44,6 +45,8 @@ export default function PriceMonitor() {
   const [flights, setFlights] = useState<MonitoredFlight[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingFlightId, setEditingFlightId] = useState<string | null>(null);
+  const [editCheckInterval, setEditCheckInterval] = useState('60');
   
   // Form state
   const [airline, setAirline] = useState<'VJ' | 'VNA'>('VJ');
@@ -287,6 +290,72 @@ export default function PriceMonitor() {
     return date.toLocaleString('vi-VN');
   };
 
+  const formatFlightDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  };
+
+  const calculateProgress = (lastChecked: string | null, intervalMinutes: number) => {
+    if (!lastChecked) return 0;
+    const lastCheckedTime = new Date(lastChecked).getTime();
+    const now = Date.now();
+    const elapsed = now - lastCheckedTime;
+    const intervalMs = intervalMinutes * 60 * 1000;
+    const progress = (elapsed / intervalMs) * 100;
+    return Math.min(progress, 100);
+  };
+
+  const getTimeUntilNextCheck = (lastChecked: string | null, intervalMinutes: number) => {
+    if (!lastChecked) return 'Chưa check';
+    const lastCheckedTime = new Date(lastChecked).getTime();
+    const now = Date.now();
+    const elapsed = now - lastCheckedTime;
+    const intervalMs = intervalMinutes * 60 * 1000;
+    const remaining = intervalMs - elapsed;
+    
+    if (remaining <= 0) return 'Sẵn sàng check';
+    
+    const minutes = Math.floor(remaining / 60000);
+    const seconds = Math.floor((remaining % 60000) / 1000);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  const handleUpdateInterval = async (flightId: string, newInterval: number) => {
+    try {
+      const { error } = await supabase
+        .from('monitored_flights')
+        .update({ check_interval_minutes: newInterval })
+        .eq('id', flightId);
+
+      if (error) throw error;
+      
+      setFlights(flights.map(f => 
+        f.id === flightId ? { ...f, check_interval_minutes: newInterval } : f
+      ));
+      
+      setEditingFlightId(null);
+      toast({
+        title: 'Đã cập nhật',
+        description: 'Đã cập nhật tần suất kiểm tra'
+      });
+    } catch (error) {
+      console.error('Error updating interval:', error);
+      toast({
+        title: 'Lỗi',
+        description: 'Không thể cập nhật tần suất kiểm tra',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  // Auto refresh to update progress bars
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setFlights(prev => [...prev]); // Trigger re-render for progress updates
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   const generatePNR = (flightId: string) => {
     // Generate a consistent 6-character PNR from flight ID
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -311,13 +380,19 @@ export default function PriceMonitor() {
               ? `Hành trình đa chặng (${flight.segments.length} chặng):` 
               : 'Hành trình:'}
           </strong>
-          <div className="mt-2 space-y-1">
+          <div className="mt-2 space-y-2">
             {flight.segments.map((seg: FlightSegment, idx: number) => (
-              <div key={idx}>
+              <div key={idx} className="ml-2">
                 <span className="font-medium">Chặng {idx + 1}</span>
-                <div className="ml-2">
-                  {seg.departure_airport} → {seg.arrival_airport}
-                  {seg.ticket_class === 'business' && ' (Thương gia)'}
+                <div className="ml-2 text-gray-700 dark:text-gray-300">
+                  <div className="flex items-center gap-2">
+                    <span>{seg.departure_airport} → {seg.arrival_airport}</span>
+                    {seg.ticket_class === 'business' && <Badge variant="secondary" className="text-xs">Thương gia</Badge>}
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    {formatFlightDate(seg.departure_date)}
+                    {seg.departure_time && ` | ${seg.departure_time}`}
+                  </div>
                 </div>
               </div>
             ))}
@@ -329,17 +404,27 @@ export default function PriceMonitor() {
         return (
           <div className="text-sm">
             <strong>Hành trình khứ hồi (2 chặng):</strong>
-            <div className="mt-2 space-y-1">
-              <div>
+            <div className="mt-2 space-y-2">
+              <div className="ml-2">
                 <span className="font-medium">Chặng 1</span>
-                <div className="ml-2">
-                  {flight.departure_airport} → {flight.arrival_airport}
+                <div className="ml-2 text-gray-700 dark:text-gray-300">
+                  <div>{flight.departure_airport} → {flight.arrival_airport}</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    {formatFlightDate(flight.departure_date)}
+                    {flight.departure_time && ` | ${flight.departure_time}`}
+                  </div>
                 </div>
               </div>
-              <div>
+              <div className="ml-2">
                 <span className="font-medium">Chặng 2</span>
-                <div className="ml-2">
-                  {flight.arrival_airport} → {flight.departure_airport}
+                <div className="ml-2 text-gray-700 dark:text-gray-300">
+                  <div>{flight.arrival_airport} → {flight.departure_airport}</div>
+                  {flight.return_date && (
+                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                      {formatFlightDate(flight.return_date)}
+                      {flight.return_time && ` | ${flight.return_time}`}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -350,9 +435,13 @@ export default function PriceMonitor() {
           <div className="text-sm">
             <strong>Hành trình:</strong>
             <div className="mt-2">
-              <span className="font-medium">Chặng 1</span>
-              <div className="ml-2">
-                {flight.departure_airport} → {flight.arrival_airport}
+              <span className="font-medium ml-2">Chặng 1</span>
+              <div className="ml-4 text-gray-700 dark:text-gray-300">
+                <div>{flight.departure_airport} → {flight.arrival_airport}</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">
+                  {formatFlightDate(flight.departure_date)}
+                  {flight.departure_time && ` | ${flight.departure_time}`}
+                </div>
               </div>
             </div>
           </div>
@@ -702,7 +791,49 @@ export default function PriceMonitor() {
                           </div>
                           <div>
                             <strong>Tần suất check:</strong>
-                            <p>Mỗi {flight.check_interval_minutes} phút</p>
+                            <div className="flex items-center gap-2">
+                              <p>Mỗi {flight.check_interval_minutes} phút</p>
+                              <Dialog 
+                                open={editingFlightId === flight.id} 
+                                onOpenChange={(open) => {
+                                  if (open) {
+                                    setEditingFlightId(flight.id);
+                                    setEditCheckInterval(flight.check_interval_minutes.toString());
+                                  } else {
+                                    setEditingFlightId(null);
+                                  }
+                                }}
+                              >
+                                <DialogTrigger asChild>
+                                  <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
+                                    <Pencil className="h-3 w-3" />
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                  <DialogHeader>
+                                    <DialogTitle>Chỉnh sửa tần suất check</DialogTitle>
+                                  </DialogHeader>
+                                  <div className="space-y-4">
+                                    <div>
+                                      <Label>Kiểm tra mỗi (phút)</Label>
+                                      <Input
+                                        type="number"
+                                        value={editCheckInterval}
+                                        onChange={(e) => setEditCheckInterval(e.target.value)}
+                                        min="5"
+                                        placeholder="60"
+                                      />
+                                    </div>
+                                    <Button 
+                                      onClick={() => handleUpdateInterval(flight.id, parseInt(editCheckInterval))} 
+                                      className="w-full"
+                                    >
+                                      Cập nhật
+                                    </Button>
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
+                            </div>
                           </div>
                           <div>
                             <strong>Trạng thái:</strong>
@@ -711,6 +842,17 @@ export default function PriceMonitor() {
                             </Badge>
                           </div>
                         </div>
+
+                        {/* Progress bar for next check */}
+                        {flight.is_active && (
+                          <div className="mt-4 space-y-1">
+                            <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                              <span>Thời gian đến lần check tiếp theo:</span>
+                              <span className="font-medium">{getTimeUntilNextCheck(flight.last_checked_at, flight.check_interval_minutes)}</span>
+                            </div>
+                            <Progress value={calculateProgress(flight.last_checked_at, flight.check_interval_minutes)} className="h-2" />
+                          </div>
+                        )}
                         
                         {/* Flight segments */}
                         <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
