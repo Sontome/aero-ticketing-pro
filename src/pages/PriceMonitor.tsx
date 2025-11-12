@@ -327,53 +327,150 @@ export default function PriceMonitor() {
     setCheckingFlightId(flightId);
     
     try {
-      const { data, error } = await supabase.functions.invoke('check-flight-prices', {
-        body: { flightId }
-      });
+      // Find the flight in current state
+      const flight = flights.find(f => f.id === flightId);
+      if (!flight) {
+        throw new Error('Không tìm thấy thông tin chuyến bay');
+      }
 
-      if (error) throw error;
-
-      if (data?.results && data.results.length > 0) {
-        const result = data.results[0];
-        
-        if (result.price_decreased) {
-          toast({
-            title: 'Giá vé giảm! 🎉',
-            description: `Giá mới: ${result.new_price.toLocaleString()} KRW (giảm ${Math.abs(result.price_difference).toLocaleString()} KRW)`,
-            className: 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800',
-          });
-        } else if (result.price_increased) {
-          toast({
-            title: 'Giá vé tăng',
-            description: `Giá mới: ${result.new_price.toLocaleString()} KRW (tăng ${result.price_difference.toLocaleString()} KRW)`,
-            variant: 'destructive',
-          });
-        } else if (result.old_price !== null) {
-          toast({
-            title: 'Giá vé không đổi',
-            description: `Giá hiện tại: ${result.new_price.toLocaleString()} KRW`,
-          });
-        } else {
-          toast({
-            title: 'Đã cập nhật giá',
-            description: `Giá hiện tại: ${result.new_price.toLocaleString()} KRW`,
-          });
-        }
-        
-        await fetchMonitoredFlights();
-      } else {
+      // Only support VJ for now
+      if (flight.airline !== 'VJ') {
         toast({
           variant: 'destructive',
           title: 'Lỗi',
-          description: 'Không tìm thấy chuyến bay phù hợp',
+          description: 'Hiện tại chỉ hỗ trợ kiểm tra giá VietJet',
+        });
+        return;
+      }
+
+      // Build request body for VJ API
+      const requestBody: any = {
+        dep0: flight.departure_airport,
+        arr0: flight.arrival_airport,
+        depdate0: flight.departure_date,
+        adt: "1",
+        chd: "0",
+        inf: "0",
+        sochieu: flight.is_round_trip ? "RT" : "OW"
+      };
+
+      if (flight.is_round_trip && flight.return_date) {
+        requestBody.depdate1 = flight.return_date;
+      }
+
+      // Call VJ API directly
+      const response = await fetch("https://thuhongtour.com/vj/check-ve-v2", {
+        method: "POST",
+        headers: {
+          "accept": "application/json",
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(requestBody)
+      });
+
+      if (!response.ok) {
+        throw new Error('Không thể kết nối API VietJet');
+      }
+
+      const data = await response.json();
+
+      if (!data.body || data.body.length === 0) {
+        toast({
+          variant: 'destructive',
+          title: 'Không tìm thấy chuyến bay',
+          description: 'Không có chuyến bay nào phù hợp với hành trình này',
+        });
+        return;
+      }
+
+      // Find matching flight
+      let matchingFlight: any = null;
+
+      if (flight.departure_time || (flight.is_round_trip && flight.return_time)) {
+        // Filter by specific time
+        const filtered = data.body.filter((f: any) => {
+          const departureMatch = flight.departure_time 
+            ? f['chiều_đi']?.giờ_cất_cánh === flight.departure_time
+            : true;
+          
+          const returnMatch = (flight.is_round_trip && flight.return_time)
+            ? f['chiều_về']?.giờ_cất_cánh === flight.return_time
+            : true;
+          
+          return departureMatch && returnMatch;
+        });
+
+        if (filtered.length > 0) {
+          matchingFlight = filtered[0];
+        }
+      } else {
+        // Find cheapest flight
+        matchingFlight = data.body.reduce((cheapest: any, current: any) => {
+          const currentPrice = parseInt(current['thông_tin_chung']?.giá_vé || '999999999');
+          const cheapestPrice = parseInt(cheapest['thông_tin_chung']?.giá_vé || '999999999');
+          return currentPrice < cheapestPrice ? current : cheapest;
+        }, data.body[0]);
+      }
+
+      if (!matchingFlight) {
+        toast({
+          variant: 'destructive',
+          title: 'Không tìm thấy chuyến bay',
+          description: 'Không có chuyến bay nào phù hợp với giờ bay đã chọn',
+        });
+        return;
+      }
+
+      const newPrice = parseInt(matchingFlight['thông_tin_chung']?.giá_vé || '0');
+      const oldPrice = flight.current_price;
+
+      // Update database with new price and last_checked_at
+      const { error: updateError } = await supabase
+        .from('monitored_flights')
+        .update({ 
+          current_price: newPrice,
+          last_checked_at: new Date().toISOString()
+        })
+        .eq('id', flightId);
+
+      if (updateError) throw updateError;
+
+      // Show notification based on price change
+      if (oldPrice !== null && oldPrice !== undefined) {
+        const priceDiff = newPrice - oldPrice;
+        
+        if (priceDiff < 0) {
+          toast({
+            title: 'Giá vé giảm! 🎉',
+            description: `Giá mới: ${newPrice.toLocaleString()} KRW (giảm ${Math.abs(priceDiff).toLocaleString()} KRW)`,
+            className: 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800',
+          });
+        } else if (priceDiff > 0) {
+          toast({
+            title: 'Giá vé tăng',
+            description: `Giá mới: ${newPrice.toLocaleString()} KRW (tăng ${priceDiff.toLocaleString()} KRW)`,
+            variant: 'destructive',
+          });
+        } else {
+          toast({
+            title: 'Giá vé không đổi',
+            description: `Giá hiện tại: ${newPrice.toLocaleString()} KRW`,
+          });
+        }
+      } else {
+        toast({
+          title: 'Đã cập nhật giá',
+          description: `Giá hiện tại: ${newPrice.toLocaleString()} KRW`,
         });
       }
+
+      await fetchMonitoredFlights();
     } catch (error) {
       console.error('Error checking price:', error);
       toast({
         variant: 'destructive',
         title: 'Lỗi',
-        description: 'Không thể kiểm tra giá vé',
+        description: error instanceof Error ? error.message : 'Không thể kiểm tra giá vé',
       });
     } finally {
       setCheckingFlightId(null);
