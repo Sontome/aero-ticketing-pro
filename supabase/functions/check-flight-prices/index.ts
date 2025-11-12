@@ -44,6 +44,8 @@ async function checkVJPrice(flight: MonitoredFlight): Promise<number | null> {
       sochieu: flight.is_round_trip ? 'RT' : 'OW'
     };
 
+    console.log('Checking VJ price for:', requestBody);
+
     const response = await fetch('https://thuhongtour.com/vj/check-ve-v2', {
       method: 'POST',
       headers: {
@@ -61,26 +63,47 @@ async function checkVJPrice(flight: MonitoredFlight): Promise<number | null> {
     const data = await response.json();
     
     if (data.status_code !== 200 || !data.body || data.body.length === 0) {
+      console.log('No flights found in VJ API response');
       return null;
     }
+
+    console.log(`Found ${data.body.length} flights from VJ API`);
 
     // Filter flights by time if departure_time is specified
     let matchingFlights = data.body;
     
     if (flight.departure_time) {
       matchingFlights = data.body.filter((f: any) => {
-        const flightTime = f['chiều_đi'].giờ_cất_cánh;
-        return flightTime === flight.departure_time;
+        const departureTime = f['chiều_đi']?.giờ_cất_cánh;
+        const returnTime = f['chiều_về']?.giờ_cất_cánh;
+        
+        // For round trip, match both departure and return times if specified
+        if (flight.is_round_trip && flight.return_time) {
+          return departureTime === flight.departure_time && returnTime === flight.return_time;
+        }
+        
+        // Otherwise just match departure time
+        return departureTime === flight.departure_time;
       });
+      
+      console.log(`Filtered to ${matchingFlights.length} flights matching time ${flight.departure_time}`);
     }
 
     if (matchingFlights.length === 0) {
+      console.log('No matching flights found after filtering');
       return null;
     }
 
     // Get the cheapest price
-    const prices = matchingFlights.map((f: any) => parseInt(f.thông_tin_chung.giá_vé));
-    return Math.min(...prices);
+    const prices = matchingFlights.map((f: any) => parseInt(f.thông_tin_chung?.giá_vé || 0)).filter(p => p > 0);
+    
+    if (prices.length === 0) {
+      return null;
+    }
+    
+    const minPrice = Math.min(...prices);
+    console.log(`Cheapest price found: ${minPrice} KRW`);
+    return minPrice;
   } catch (error) {
     console.error('Error checking VJ price:', error);
     return null;
@@ -170,11 +193,22 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Get all active monitored flights that need checking
-    const { data: flights, error } = await supabaseClient
+    const { flightId } = await req.json().catch(() => ({}));
+
+    // Get flights to check
+    let query = supabaseClient
       .from('monitored_flights')
-      .select('*')
-      .eq('is_active', true);
+      .select('*');
+    
+    if (flightId) {
+      // Check specific flight (manual check)
+      query = query.eq('id', flightId);
+    } else {
+      // Check all active flights (scheduled check)
+      query = query.eq('is_active', true);
+    }
+
+    const { data: flights, error } = await query;
 
     if (error) {
       throw error;
@@ -184,12 +218,15 @@ Deno.serve(async (req) => {
     const results = [];
 
     for (const flight of flights as MonitoredFlight[]) {
-      // Check if it's time to check this flight
-      const lastChecked = flight.last_checked_at ? new Date(flight.last_checked_at) : null;
-      const intervalMs = flight.check_interval_minutes * 60 * 1000;
-      
-      if (lastChecked && (now.getTime() - lastChecked.getTime() < intervalMs)) {
-        continue; // Not time yet
+      // If checking specific flight (manual), skip time check
+      if (!flightId) {
+        // Check if it's time to check this flight (scheduled check)
+        const lastChecked = flight.last_checked_at ? new Date(flight.last_checked_at) : null;
+        const intervalMs = flight.check_interval_minutes * 60 * 1000;
+        
+        if (lastChecked && (now.getTime() - lastChecked.getTime() < intervalMs)) {
+          continue; // Not time yet
+        }
       }
 
       // Check the price
@@ -203,6 +240,8 @@ Deno.serve(async (req) => {
 
       if (newPrice !== null) {
         const priceChanged = flight.current_price !== null && flight.current_price !== newPrice;
+        const priceDecreased = flight.current_price !== null && newPrice < flight.current_price;
+        const priceIncreased = flight.current_price !== null && newPrice > flight.current_price;
         
         // Update the flight with new price and last_checked_at
         await supabaseClient
@@ -220,6 +259,9 @@ Deno.serve(async (req) => {
           old_price: flight.current_price,
           new_price: newPrice,
           price_changed: priceChanged,
+          price_decreased: priceDecreased,
+          price_increased: priceIncreased,
+          price_difference: flight.current_price !== null ? newPrice - flight.current_price : 0,
         });
       }
     }

@@ -70,6 +70,7 @@ export default function PriceMonitor() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingFlightId, setEditingFlightId] = useState<string | null>(null);
   const [editCheckInterval, setEditCheckInterval] = useState('60');
+  const [checkingFlightId, setCheckingFlightId] = useState<string | null>(null);
   
   // Form state
   const [airline, setAirline] = useState<'VJ' | 'VNA'>('VJ');
@@ -93,6 +94,13 @@ export default function PriceMonitor() {
       return;
     }
     fetchMonitoredFlights();
+    
+    // Refresh every second to update progress bars and time remaining
+    const interval = setInterval(() => {
+      setFlights(prev => [...prev]);
+    }, 1000);
+    
+    return () => clearInterval(interval);
   }, [profile, navigate]);
 
   const fetchMonitoredFlights = async () => {
@@ -316,40 +324,59 @@ export default function PriceMonitor() {
   };
 
   const handleManualCheck = async (flightId: string) => {
+    setCheckingFlightId(flightId);
+    
     try {
-      toast({
-        title: 'Đang kiểm tra...',
-        description: 'Đang kiểm tra giá vé hiện tại'
+      const { data, error } = await supabase.functions.invoke('check-flight-prices', {
+        body: { flightId }
       });
 
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      const response = await fetch('https://hggdgcbrdanwmlbgeaca.supabase.co/functions/v1/check-flight-prices', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session?.access_token || ''}`
+      if (error) throw error;
+
+      if (data?.results && data.results.length > 0) {
+        const result = data.results[0];
+        
+        if (result.price_decreased) {
+          toast({
+            title: 'Giá vé giảm! 🎉',
+            description: `Giá mới: ${result.new_price.toLocaleString()} KRW (giảm ${Math.abs(result.price_difference).toLocaleString()} KRW)`,
+            className: 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800',
+          });
+        } else if (result.price_increased) {
+          toast({
+            title: 'Giá vé tăng',
+            description: `Giá mới: ${result.new_price.toLocaleString()} KRW (tăng ${result.price_difference.toLocaleString()} KRW)`,
+            variant: 'destructive',
+          });
+        } else if (result.old_price !== null) {
+          toast({
+            title: 'Giá vé không đổi',
+            description: `Giá hiện tại: ${result.new_price.toLocaleString()} KRW`,
+          });
+        } else {
+          toast({
+            title: 'Đã cập nhật giá',
+            description: `Giá hiện tại: ${result.new_price.toLocaleString()} KRW`,
+          });
         }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to check prices');
+        
+        await fetchMonitoredFlights();
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Lỗi',
+          description: 'Không tìm thấy chuyến bay phù hợp',
+        });
       }
-
-      // Refresh the list to show updated prices
-      await fetchMonitoredFlights();
-      
-      toast({
-        title: 'Đã cập nhật',
-        description: 'Giá vé đã được cập nhật'
-      });
     } catch (error) {
       console.error('Error checking price:', error);
       toast({
+        variant: 'destructive',
         title: 'Lỗi',
         description: 'Không thể kiểm tra giá vé',
-        variant: 'destructive'
       });
+    } finally {
+      setCheckingFlightId(null);
     }
   };
 
@@ -862,9 +889,10 @@ export default function PriceMonitor() {
                           size="sm"
                           variant="outline"
                           onClick={() => handleManualCheck(flight.id)}
+                          disabled={checkingFlightId === flight.id}
                           title="Kiểm tra giá ngay"
                         >
-                          <RefreshCw className="h-4 w-4" />
+                          <RefreshCw className={`h-4 w-4 ${checkingFlightId === flight.id ? 'animate-spin' : ''}`} />
                         </Button>
                         <Button
                           size="sm"
@@ -893,7 +921,7 @@ export default function PriceMonitor() {
                             <strong>Giá hiện tại:</strong>
                             <p className="text-lg font-bold text-green-600">
                               {flight.current_price 
-                                ? `${flight.current_price.toLocaleString('vi-VN')} VNĐ` 
+                                ? `${flight.current_price.toLocaleString('vi-VN')} KRW` 
                                 : 'Chưa có dữ liệu'}
                             </p>
                           </div>
