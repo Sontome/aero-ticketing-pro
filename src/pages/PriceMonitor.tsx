@@ -95,13 +95,25 @@ export default function PriceMonitor() {
     }
     fetchMonitoredFlights();
     
-    // Refresh every second to update progress bars and time remaining
+    // Refresh every second to update progress bars and check if auto-check is needed
     const interval = setInterval(() => {
-      setFlights(prev => [...prev]);
+      setFlights(prev => {
+        // Check if any active flight needs auto-check
+        prev.forEach(flight => {
+          if (flight.is_active && !checkingFlightId) {
+            const progress = calculateProgress(flight.last_checked_at, flight.check_interval_minutes);
+            if (progress >= 100) {
+              // Auto-trigger check when timer reaches 0
+              handleManualCheck(flight.id);
+            }
+          }
+        });
+        return [...prev];
+      });
     }, 1000);
     
     return () => clearInterval(interval);
-  }, [profile, navigate]);
+  }, [profile, navigate, checkingFlightId]);
 
   const fetchMonitoredFlights = async () => {
     try {
@@ -541,13 +553,6 @@ export default function PriceMonitor() {
     }
   };
 
-  // Auto refresh to update progress bars
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setFlights(prev => [...prev]); // Trigger re-render for progress updates
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
 
   const generatePNR = (flightId: string) => {
     // Generate a consistent 6-character PNR from flight ID
