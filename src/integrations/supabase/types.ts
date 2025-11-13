@@ -54,6 +54,8 @@ export type Database = {
         Row: {
           airline: string
           arrival_airport: string
+          booking_key_departure: string | null
+          booking_key_return: string | null
           check_interval_minutes: number | null
           created_at: string
           current_price: number | null
@@ -64,6 +66,7 @@ export type Database = {
           is_active: boolean | null
           is_round_trip: boolean | null
           last_checked_at: string | null
+          passengers: Json | null
           return_date: string | null
           return_time: string | null
           segments: Json | null
@@ -74,6 +77,8 @@ export type Database = {
         Insert: {
           airline: string
           arrival_airport: string
+          booking_key_departure?: string | null
+          booking_key_return?: string | null
           check_interval_minutes?: number | null
           created_at?: string
           current_price?: number | null
@@ -84,6 +89,7 @@ export type Database = {
           is_active?: boolean | null
           is_round_trip?: boolean | null
           last_checked_at?: string | null
+          passengers?: Json | null
           return_date?: string | null
           return_time?: string | null
           segments?: Json | null
@@ -94,6 +100,8 @@ export type Database = {
         Update: {
           airline?: string
           arrival_airport?: string
+          booking_key_departure?: string | null
+          booking_key_return?: string | null
           check_interval_minutes?: number | null
           created_at?: string
           current_price?: number | null
@@ -104,6 +112,7 @@ export type Database = {
           is_active?: boolean | null
           is_round_trip?: boolean | null
           last_checked_at?: string | null
+          passengers?: Json | null
           return_date?: string | null
           return_time?: string | null
           segments?: Json | null
