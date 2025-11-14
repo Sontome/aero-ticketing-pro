@@ -8,7 +8,7 @@ import { Plus, Trash2, Copy } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
-interface PassengerInfo {
+export interface PassengerInfo {
   Họ: string;
   Tên: string;
   Hộ_chiếu: string;
@@ -16,7 +16,7 @@ interface PassengerInfo {
   Quốc_tịch: string;
 }
 
-interface PassengerWithType extends PassengerInfo {
+export interface PassengerWithType extends PassengerInfo {
   type: 'người_lớn' | 'trẻ_em';
   infant?: PassengerInfo;
 }
