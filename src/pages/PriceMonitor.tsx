@@ -12,7 +12,7 @@ import { ArrowLeft, Plus, Trash2, RefreshCw, Bell, Pencil, Users } from "lucide-
 import { toast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
-import { PassengerWithType } from "@/components/VJBookingModal";
+import { PassengerWithType, PassengerInfo } from "@/components/VJBookingModal";
 
 interface FlightSegment {
   departure_airport: string;
@@ -20,13 +20,6 @@ interface FlightSegment {
   departure_date: string;
   departure_time?: string;
   ticket_class: "economy" | "business";
-}
-
-interface PassengerInfo {
-  lastName: string;
-  firstName: string;
-  gender: "MR" | "MS" | "MISS" | "MSTR";
-  dob?: string;
 }
 
 interface MonitoredFlight {
@@ -100,7 +93,14 @@ export default function PriceMonitor() {
   const [editCheckInterval, setEditCheckInterval] = useState("60");
   const [checkingFlightId, setCheckingFlightId] = useState<string | null>(null);
   const [passengerModalFlightId, setPassengerModalFlightId] = useState<string | null>(null);
-  const [passengers, setPassengers] = useState<PassengerInfo[]>([{ lastName: "", firstName: "", gender: "MR" }]);
+  const [passengers, setPassengers] = useState<PassengerWithType[]>([{ 
+    Họ: '', 
+    Tên: '', 
+    Hộ_chiếu: 'B12345678', 
+    Giới_tính: 'nam', 
+    Quốc_tịch: 'VN',
+    type: 'người_lớn'
+  }]);
 
   // Form state
   const [airline, setAirline] = useState<"VJ" | "VNA">("VJ");
@@ -165,7 +165,7 @@ export default function PriceMonitor() {
       const typedFlights: MonitoredFlight[] = (data || []).map((flight) => ({
         ...flight,
         segments: flight.segments ? (flight.segments as any as FlightSegment[]) : undefined,
-        passengers: flight.passengers ? (flight.passengers as any as PassengerInfo[]) : undefined,
+        passengers: flight.passengers ? (flight.passengers as any as PassengerWithType[]) : undefined,
       }));
 
       setFlights(typedFlights);
@@ -599,7 +599,14 @@ export default function PriceMonitor() {
       });
 
       setPassengerModalFlightId(null);
-      setPassengers([{ lastName: "", firstName: "", gender: "MR" }]);
+      setPassengers([{ 
+        Họ: '', 
+        Tên: '', 
+        Hộ_chiếu: 'B12345678', 
+        Giới_tính: 'nam', 
+        Quốc_tịch: 'VN',
+        type: 'người_lớn'
+      }]);
       await fetchMonitoredFlights();
     } catch (error) {
       console.error("Error saving passengers:", error);
@@ -616,13 +623,27 @@ export default function PriceMonitor() {
     if (flight?.passengers && flight.passengers.length > 0) {
       setPassengers(flight.passengers);
     } else {
-      setPassengers([{ lastName: "", firstName: "", gender: "MR" }]);
+      setPassengers([{ 
+        Họ: '', 
+        Tên: '', 
+        Hộ_chiếu: 'B12345678', 
+        Giới_tính: 'nam', 
+        Quốc_tịch: 'VN',
+        type: 'người_lớn'
+      }]);
     }
     setPassengerModalFlightId(flightId);
   };
 
   const addPassenger = () => {
-    setPassengers([...passengers, { lastName: "", firstName: "", gender: "MR" }]);
+    setPassengers([...passengers, { 
+      Họ: '', 
+      Tên: '', 
+      Hộ_chiếu: 'B12345678', 
+      Giới_tính: 'nam', 
+      Quốc_tịch: 'VN',
+      type: 'người_lớn'
+    }]);
   };
 
   const removePassenger = (index: number) => {
@@ -1255,7 +1276,14 @@ export default function PriceMonitor() {
         onOpenChange={(open) => {
           if (!open) {
             setPassengerModalFlightId(null);
-            setPassengers([{ lastName: "", firstName: "", gender: "MR" }]);
+            setPassengers([{ 
+              Họ: '', 
+              Tên: '', 
+              Hộ_chiếu: 'B12345678', 
+              Giới_tính: 'nam', 
+              Quốc_tịch: 'VN',
+              type: 'người_lớn'
+            }]);
           }
         }}
       >
@@ -1278,42 +1306,48 @@ export default function PriceMonitor() {
                   <div>
                     <Label>Họ (VD: NGUYEN)</Label>
                     <Input
-                      value={passenger.lastName}
-                      onChange={(e) => updatePassenger(index, "lastName", e.target.value.toUpperCase())}
+                      value={passenger.Họ}
+                      onChange={(e) => updatePassenger(index, "Họ", e.target.value.toUpperCase())}
                       placeholder="NGUYEN"
                     />
                   </div>
                   <div>
                     <Label>Tên (VD: VAN A)</Label>
                     <Input
-                      value={passenger.firstName}
-                      onChange={(e) => updatePassenger(index, "firstName", e.target.value.toUpperCase())}
+                      value={passenger.Tên}
+                      onChange={(e) => updatePassenger(index, "Tên", e.target.value.toUpperCase())}
                       placeholder="VAN A"
                     />
                   </div>
                   <div>
                     <Label>Giới tính</Label>
                     <Select
-                      value={passenger.gender}
-                      onValueChange={(value: any) => updatePassenger(index, "gender", value)}
+                      value={passenger.Giới_tính}
+                      onValueChange={(value: any) => updatePassenger(index, "Giới_tính", value)}
                     >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="MR">MR (Ông)</SelectItem>
-                        <SelectItem value="MS">MS (Bà)</SelectItem>
-                        <SelectItem value="MISS">MISS (Cô)</SelectItem>
-                        <SelectItem value="MSTR">MSTR (Bé trai)</SelectItem>
+                        <SelectItem value="nam">Nam</SelectItem>
+                        <SelectItem value="nữ">Nữ</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div>
-                    <Label>Ngày sinh (không bắt buộc)</Label>
+                    <Label>Hộ chiếu</Label>
                     <Input
-                      type="date"
-                      value={passenger.dob || ""}
-                      onChange={(e) => updatePassenger(index, "dob", e.target.value)}
+                      value={passenger.Hộ_chiếu}
+                      onChange={(e) => updatePassenger(index, "Hộ_chiếu", e.target.value.toUpperCase())}
+                      placeholder="B12345678"
+                    />
+                  </div>
+                  <div>
+                    <Label>Quốc tịch</Label>
+                    <Input
+                      value={passenger.Quốc_tịch}
+                      onChange={(e) => updatePassenger(index, "Quốc_tịch", e.target.value.toUpperCase())}
+                      placeholder="VN"
                     />
                   </div>
                 </div>
