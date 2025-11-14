@@ -44,9 +44,10 @@ interface MonitoredFlight {
   last_checked_at: string | null;
   check_interval_minutes: number;
   is_active: boolean;
-  passengers?: PassengerInfo[];
+  passengers?: PassengerWithType[];
   booking_key_departure?: string;
   booking_key_return?: string;
+  auto_hold_enabled?: boolean;
 }
 
 // Korean airports
