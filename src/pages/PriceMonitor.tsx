@@ -8,11 +8,12 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Plus, Trash2, RefreshCw, Bell, Pencil, Users } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, RefreshCw, Bell, Pencil, Users, ShoppingBasket } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
-import { PassengerWithType, PassengerInfo } from "@/components/VJBookingModal";
+import { PassengerWithType, PassengerInfo, BookingModal } from "@/components/VJBookingModal";
+import { Switch } from "@/components/ui/switch";
 
 interface FlightSegment {
   departure_airport: string;
@@ -101,6 +102,8 @@ export default function PriceMonitor() {
     Quốc_tịch: 'VN',
     type: 'người_lớn'
   }]);
+  const [bookingModalOpen, setBookingModalOpen] = useState(false);
+  const [selectedFlight, setSelectedFlight] = useState<MonitoredFlight | null>(null);
 
   // Form state
   const [airline, setAirline] = useState<"VJ" | "VNA">("VJ");
@@ -128,6 +131,9 @@ export default function PriceMonitor() {
     // Refresh every second to update progress bars and check if auto-check is needed
     const interval = setInterval(() => {
       setFlights((prev) => {
+        // Don't run auto-check if flights array is empty (still loading)
+        if (prev.length === 0) return prev;
+        
         // Check if any active flight needs auto-check
         prev.forEach((flight) => {
           // Only auto-check if last_checked_at is not null (already checked at least once)
@@ -452,20 +458,25 @@ export default function PriceMonitor() {
       }
 
       if (!matchingFlight) {
+        // Update last_checked_at even when no matching flight is found (reset timer)
+        await supabase
+          .from('monitored_flights')
+          .update({ last_checked_at: new Date().toISOString() })
+          .eq('id', flightId);
+        
         toast({
           variant: "destructive",
           title: "Không tìm thấy chuyến bay",
           description: "Không có chuyến bay nào phù hợp với giờ bay đã chọn",
         });
+        fetchMonitoredFlights();
         return;
       }
 
       const newPrice = parseInt(matchingFlight["thông_tin_chung"]?.giá_vé || "0");
       const oldPrice = flight.current_price;
-
-      // Extract booking keys
-      const bookingKeyDeparture = matchingFlight["chiều_đi"]?.BookingKey || null;
-      const bookingKeyReturn = matchingFlight["chiều_về"]?.BookingKey || null;
+      const bookingKeyDeparture = matchingFlight["chiều_đi"]?.booking_key;
+      const bookingKeyReturn = flight.is_round_trip ? matchingFlight["chiều_về"]?.booking_key : null;
 
       // Update database with new price, booking keys, and last_checked_at
       const { error: updateError } = await supabase
@@ -479,6 +490,21 @@ export default function PriceMonitor() {
         .eq("id", flightId);
 
       if (updateError) throw updateError;
+
+      // Check if auto-hold should be triggered
+      const shouldAutoHold = flight.auto_hold_enabled && 
+        ((oldPrice && oldPrice > 0 && newPrice < oldPrice) || (!oldPrice || oldPrice === 0) && newPrice > 0);
+
+      if (shouldAutoHold && bookingKeyDeparture && flight.passengers && flight.passengers.length > 0) {
+        try {
+          // Call auto-hold function
+          await handleAutoHoldTicket(flight, bookingKeyDeparture, bookingKeyReturn);
+          return; // Exit early as the flight is now held and deleted
+        } catch (error) {
+          console.error("Auto-hold failed:", error);
+          // Continue with normal flow if auto-hold fails
+        }
+      }
 
       // Show notification based on price change
       if (oldPrice !== null && oldPrice !== undefined) {
@@ -582,6 +608,202 @@ export default function PriceMonitor() {
         variant: "destructive",
       });
     }
+  };
+
+  const handleToggleAutoHold = async (flightId: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from("monitored_flights")
+        .update({ auto_hold_enabled: !currentStatus })
+        .eq("id", flightId);
+
+      if (error) throw error;
+
+      setFlights(flights.map((f) => (f.id === flightId ? { ...f, auto_hold_enabled: !currentStatus } : f)));
+
+      toast({
+        title: !currentStatus ? "Đã bật giữ vé tự động" : "Đã tắt giữ vé tự động",
+        description: !currentStatus ? "Hệ thống sẽ tự động giữ vé khi giá giảm" : "Đã tắt chức năng giữ vé tự động",
+      });
+    } catch (error) {
+      console.error("Error toggling auto hold:", error);
+      toast({
+        title: "Lỗi",
+        description: "Không thể cập nhật trạng thái",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleOpenBookingModal = (flightId: string) => {
+    const flight = flights.find((f) => f.id === flightId);
+    if (!flight) return;
+    
+    if (!flight.booking_key_departure) {
+      toast({
+        title: "Lỗi",
+        description: "Chưa có thông tin booking key. Vui lòng kiểm tra giá trước",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setSelectedFlight(flight);
+    setBookingModalOpen(true);
+  };
+
+  const handleBookingSuccess = async (pnr: string) => {
+    if (!selectedFlight) return;
+    
+    // Delete the monitored flight after successful booking
+    try {
+      const { error } = await supabase
+        .from("monitored_flights")
+        .delete()
+        .eq("id", selectedFlight.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Đã giữ vé thành công",
+        description: `PNR: ${pnr}. Hành trình đã được xóa khỏi danh sách theo dõi.`,
+      });
+
+      setBookingModalOpen(false);
+      setSelectedFlight(null);
+      await fetchMonitoredFlights();
+    } catch (error) {
+      console.error("Error deleting monitored flight:", error);
+    }
+  };
+
+  const handleAutoHoldTicket = async (flight: MonitoredFlight, bookingKeyDeparture: string, bookingKeyReturn: string | null) => {
+    if (!flight.passengers || flight.passengers.length === 0) {
+      throw new Error("Không có thông tin hành khách");
+    }
+
+    // Helper functions from VJBookingModal
+    const removeVietnameseDiacritics = (str: string): string => {
+      return str
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/đ/g, 'd')
+        .replace(/Đ/g, 'D');
+    };
+
+    const formatName = (name: string): string => {
+      const cleaned = removeVietnameseDiacritics(name);
+      return cleaned.split(' ').map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+      ).join(' ');
+    };
+
+    // Organize passengers
+    const adults: any[] = [];
+    const children: any[] = [];
+    const infants: any[] = [];
+
+    flight.passengers.forEach((passenger) => {
+      const formattedPassenger = {
+        Họ: formatName(passenger.Họ),
+        Tên: formatName(passenger.Tên),
+        Hộ_chiếu: passenger.Hộ_chiếu,
+        Giới_tính: passenger.Giới_tính,
+        Quốc_tịch: passenger.Quốc_tịch,
+      };
+
+      if (passenger.type === 'người_lớn') {
+        adults.push(formattedPassenger);
+        if (passenger.infant) {
+          infants.push({
+            Họ: formatName(passenger.infant.Họ),
+            Tên: formatName(passenger.infant.Tên),
+            Hộ_chiếu: passenger.infant.Hộ_chiếu,
+            Giới_tính: passenger.infant.Giới_tính,
+            Quốc_tịch: passenger.infant.Quốc_tịch,
+          });
+        }
+      } else if (passenger.type === 'trẻ_em') {
+        children.push(formattedPassenger);
+      }
+    });
+
+    const requestBody: any = {
+      booking_key: bookingKeyDeparture,
+      tripType: flight.is_round_trip ? 'RT' : 'OW',
+      người_lớn: adults,
+    };
+
+    if (children.length > 0) {
+      requestBody.trẻ_em = children;
+    }
+
+    if (infants.length > 0) {
+      requestBody.trẻ_sơ_sinh = infants;
+    }
+
+    if (flight.is_round_trip && bookingKeyReturn) {
+      requestBody.booking_key_return = bookingKeyReturn;
+    }
+
+    // Call VJ booking API
+    const response = await fetch('https://thuhongtour.com/vj/booking', {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    if (!response.ok) {
+      throw new Error('Không thể kết nối API giữ vé');
+    }
+
+    const data = await response.json();
+
+    if (!data.bookingCode) {
+      throw new Error(data.message || 'Giữ vé thất bại');
+    }
+
+    // Save to held_tickets
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Không tìm thấy thông tin người dùng');
+
+    const { error: insertError } = await supabase
+      .from('held_tickets')
+      .insert({
+        pnr: data.bookingCode,
+        user_id: user.id,
+        flight_details: {
+          airline: flight.airline,
+          departure_airport: flight.departure_airport,
+          arrival_airport: flight.arrival_airport,
+          departure_date: flight.departure_date,
+          return_date: flight.return_date,
+          price: flight.current_price,
+          passengers: flight.passengers,
+        } as any,
+        expire_date: data.expireDate || null,
+      });
+
+    if (insertError) throw insertError;
+
+    // Delete monitored flight
+    const { error: deleteError } = await supabase
+      .from('monitored_flights')
+      .delete()
+      .eq('id', flight.id);
+
+    if (deleteError) throw deleteError;
+
+    toast({
+      title: "Đã tự động giữ vé thành công! 🎉",
+      description: `PNR: ${data.bookingCode}. Hành trình đã được chuyển vào giỏ vé.`,
+      className: "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800",
+    });
+
+    await fetchMonitoredFlights();
   };
 
   const handleSavePassengers = async (flightId: string) => {
@@ -1142,6 +1364,15 @@ export default function PriceMonitor() {
                         <Button
                           size="sm"
                           variant="outline"
+                          onClick={() => handleOpenBookingModal(flight.id)}
+                          title="Giữ vé"
+                          disabled={!flight.booking_key_departure}
+                        >
+                          <ShoppingBasket className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
                           onClick={() => handleOpenPassengerModal(flight.id)}
                           title="Thông tin hành khách"
                         >
@@ -1237,6 +1468,16 @@ export default function PriceMonitor() {
                             <Badge variant={flight.is_active ? "default" : "secondary"}>
                               {flight.is_active ? "Đang theo dõi" : "Tạm dừng"}
                             </Badge>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <strong>Giữ vé tự động:</strong>
+                            <Switch
+                              checked={flight.auto_hold_enabled || false}
+                              onCheckedChange={() => handleToggleAutoHold(flight.id, flight.auto_hold_enabled || false)}
+                            />
+                            <span className="text-xs text-gray-500">
+                              {flight.auto_hold_enabled ? "Bật" : "Tắt"}
+                            </span>
                           </div>
                         </div>
 
@@ -1368,6 +1609,23 @@ export default function PriceMonitor() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Booking Modal */}
+      {selectedFlight && (
+        <BookingModal
+          isOpen={bookingModalOpen}
+          onClose={() => {
+            setBookingModalOpen(false);
+            setSelectedFlight(null);
+          }}
+          bookingKey={selectedFlight.booking_key_departure || ""}
+          bookingKeyReturn={selectedFlight.booking_key_return}
+          tripType={selectedFlight.is_round_trip ? "RT" : "OW"}
+          departureAirport={selectedFlight.departure_airport}
+          maxSeats={9}
+          onBookingSuccess={handleBookingSuccess}
+        />
+      )}
     </div>
   );
 }
