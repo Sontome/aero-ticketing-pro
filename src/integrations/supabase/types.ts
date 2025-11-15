@@ -54,6 +54,7 @@ export type Database = {
         Row: {
           airline: string
           arrival_airport: string
+          auto_hold_enabled: boolean | null
           booking_key_departure: string | null
           booking_key_return: string | null
           check_interval_minutes: number | null
@@ -77,6 +78,7 @@ export type Database = {
         Insert: {
           airline: string
           arrival_airport: string
+          auto_hold_enabled?: boolean | null
           booking_key_departure?: string | null
           booking_key_return?: string | null
           check_interval_minutes?: number | null
@@ -100,6 +102,7 @@ export type Database = {
         Update: {
           airline?: string
           arrival_airport?: string
+          auto_hold_enabled?: boolean | null
           booking_key_departure?: string | null
           booking_key_return?: string | null
           check_interval_minutes?: number | null
