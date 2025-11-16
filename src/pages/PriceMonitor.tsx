@@ -136,12 +136,17 @@ export default function PriceMonitor() {
         
         // Check if any active flight needs auto-check
         prev.forEach((flight) => {
-          // Only auto-check if last_checked_at is not null (already checked at least once)
-          if (flight.is_active && !checkingFlightId && flight.last_checked_at) {
-            const progress = calculateProgress(flight.last_checked_at, flight.check_interval_minutes);
-            if (progress >= 100) {
-              // Auto-trigger check when timer reaches 0
+          if (flight.is_active && !checkingFlightId) {
+            // Auto-check flights that have never been checked (last_checked_at is null)
+            if (!flight.last_checked_at) {
               handleManualCheck(flight.id);
+            }
+            // Auto-check if timer has completed
+            else if (flight.last_checked_at) {
+              const progress = calculateProgress(flight.last_checked_at, flight.check_interval_minutes);
+              if (progress >= 100) {
+                handleManualCheck(flight.id);
+              }
             }
           }
         });
@@ -295,7 +300,7 @@ export default function PriceMonitor() {
         insertData.departure_date = vnaSegments[0].departure_date;
       }
 
-      const { error } = await supabase.from("monitored_flights").insert(insertData);
+      const { data: newFlight, error } = await supabase.from("monitored_flights").insert(insertData).select().single();
 
       if (error) throw error;
 
@@ -317,7 +322,16 @@ export default function PriceMonitor() {
         { departure_airport: "", arrival_airport: "", departure_date: "", departure_time: "", ticket_class: "economy" },
       ]);
       setIsAddModalOpen(false);
-      fetchMonitoredFlights();
+      
+      // Fetch updated list first
+      await fetchMonitoredFlights();
+      
+      // Then automatically check price for the new flight
+      if (newFlight) {
+        setTimeout(() => {
+          handleManualCheck(newFlight.id);
+        }, 500);
+      }
     } catch (error) {
       console.error("Error adding flight:", error);
       toast({
