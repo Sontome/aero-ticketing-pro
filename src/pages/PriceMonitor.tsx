@@ -136,17 +136,12 @@ export default function PriceMonitor() {
         
         // Check if any active flight needs auto-check
         prev.forEach((flight) => {
-          if (flight.is_active && !checkingFlightId) {
-            // Auto-check flights that have never been checked (last_checked_at is null)
-            if (!flight.last_checked_at) {
+          // Only auto-check if flight has been checked at least once (last_checked_at is not null)
+          if (flight.is_active && !checkingFlightId && flight.last_checked_at) {
+            const progress = calculateProgress(flight.last_checked_at, flight.check_interval_minutes);
+            if (progress >= 100) {
+              // Auto-trigger check when timer reaches 100%
               handleManualCheck(flight.id);
-            }
-            // Auto-check if timer has completed
-            else if (flight.last_checked_at) {
-              const progress = calculateProgress(flight.last_checked_at, flight.check_interval_minutes);
-              if (progress >= 100) {
-                handleManualCheck(flight.id);
-              }
             }
           }
         });
@@ -489,8 +484,10 @@ export default function PriceMonitor() {
 
       const newPrice = parseInt(matchingFlight["thông_tin_chung"]?.giá_vé || "0");
       const oldPrice = flight.current_price;
-      const bookingKeyDeparture = matchingFlight["chiều_đi"]?.booking_key;
-      const bookingKeyReturn = flight.is_round_trip ? matchingFlight["chiều_về"]?.booking_key : null;
+      const bookingKeyDeparture = matchingFlight["chiều_đi"]?.BookingKey || matchingFlight["chiều_đi"]?.booking_key;
+      const bookingKeyReturn = flight.is_round_trip ? (matchingFlight["chiều_về"]?.BookingKey || matchingFlight["chiều_về"]?.booking_key) : null;
+
+      console.log("Booking Keys:", { bookingKeyDeparture, bookingKeyReturn });
 
       // Update database with new price, booking keys, and last_checked_at
       const { error: updateError } = await supabase
