@@ -753,18 +753,30 @@ export default function PriceMonitor() {
 
     const data = await response.json();
 
-    if (!data.bookingCode) {
-      throw new Error(data.message || 'Giữ vé thất bại');
+    if (!data.mã_giữ_vé || data.mess !== 'Thành công') {
+      throw new Error('Giữ vé thất bại');
     }
 
     // Save to held_tickets
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('Không tìm thấy thông tin người dùng');
 
+    // Parse expire date from "18:02 17/11/2025" format
+    let expireDate = null;
+    if (data.hạn_thanh_toán) {
+      try {
+        const [time, dateStr] = data.hạn_thanh_toán.split(' ');
+        const [day, month, year] = dateStr.split('/');
+        expireDate = `${year}-${month}-${day}T${time}:00`;
+      } catch (e) {
+        console.error('Error parsing expire date:', e);
+      }
+    }
+
     const { error: insertError } = await supabase
       .from('held_tickets')
       .insert({
-        pnr: data.bookingCode,
+        pnr: data.mã_giữ_vé,
         user_id: user.id,
         flight_details: {
           airline: flight.airline,
@@ -775,7 +787,7 @@ export default function PriceMonitor() {
           price: flight.current_price,
           passengers: flight.passengers,
         } as any,
-        expire_date: data.expireDate || null,
+        expire_date: expireDate,
       });
 
     if (insertError) throw insertError;
@@ -790,7 +802,7 @@ export default function PriceMonitor() {
 
     toast({
       title: "Đã tự động giữ vé thành công! 🎉",
-      description: `PNR: ${data.bookingCode}. Hành trình đã được chuyển vào giỏ vé.`,
+      description: `PNR: ${data.mã_giữ_vé}. Hành trình đã được chuyển vào giỏ vé.`,
       className: "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800",
     });
 
