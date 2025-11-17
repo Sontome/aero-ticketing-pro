@@ -540,11 +540,14 @@ export default function PriceMonitor() {
       await fetchMonitoredFlights();
     } catch (error) {
       console.error("Error checking price:", error);
-      toast({
-        variant: "destructive",
-        title: "Lỗi",
-        description: error instanceof Error ? error.message : "Không thể kiểm tra giá vé",
-      });
+      // Only show toast if it's not the "flight not found" error (which happens on initial load)
+      if (error instanceof Error && error.message !== "Không tìm thấy thông tin chuyến bay") {
+        toast({
+          variant: "destructive",
+          title: "Lỗi",
+          description: error.message,
+        });
+      }
     } finally {
       setCheckingFlightId(null);
     }
@@ -714,21 +717,24 @@ export default function PriceMonitor() {
     });
 
     const requestBody: any = {
-      booking_key: bookingKeyDeparture,
-      tripType: flight.is_round_trip ? 'RT' : 'OW',
-      người_lớn: adults,
+      ds_khach: {
+        người_lớn: adults,
+      },
+      bookingkey: bookingKeyDeparture,
+      sochieu: flight.is_round_trip ? 'RT' : 'OW',
+      sanbaydi: flight.departure_airport,
     };
 
     if (children.length > 0) {
-      requestBody.trẻ_em = children;
+      requestBody.ds_khach.trẻ_em = children;
     }
 
     if (infants.length > 0) {
-      requestBody.trẻ_sơ_sinh = infants;
+      requestBody.ds_khach.em_bé = infants;
     }
 
     if (flight.is_round_trip && bookingKeyReturn) {
-      requestBody.booking_key_return = bookingKeyReturn;
+      requestBody.bookingkeychieuve = bookingKeyReturn;
     }
 
     // Call VJ booking API
