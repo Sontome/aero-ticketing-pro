@@ -93,15 +93,6 @@ export default function PriceMonitor() {
   const [editingFlightId, setEditingFlightId] = useState<string | null>(null);
   const [editCheckInterval, setEditCheckInterval] = useState("60");
   const [checkingFlightId, setCheckingFlightId] = useState<string | null>(null);
-  const [passengerModalFlightId, setPassengerModalFlightId] = useState<string | null>(null);
-  const [passengers, setPassengers] = useState<PassengerWithType[]>([{ 
-    Họ: '', 
-    Tên: '', 
-    Hộ_chiếu: 'B12345678', 
-    Giới_tính: 'nam', 
-    Quốc_tịch: 'VN',
-    type: 'người_lớn'
-  }]);
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
   const [selectedFlight, setSelectedFlight] = useState<MonitoredFlight | null>(null);
 
@@ -646,23 +637,6 @@ export default function PriceMonitor() {
     }
   };
 
-  const handleOpenBookingModal = (flightId: string) => {
-    const flight = flights.find((f) => f.id === flightId);
-    if (!flight) return;
-    
-    if (!flight.booking_key_departure) {
-      toast({
-        title: "Lỗi",
-        description: "Chưa có thông tin booking key. Vui lòng kiểm tra giá trước",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    setSelectedFlight(flight);
-    setBookingModalOpen(true);
-  };
-
   const handleBookingSuccess = async (pnr: string) => {
     if (!selectedFlight) return;
     
@@ -817,78 +791,40 @@ export default function PriceMonitor() {
     await fetchMonitoredFlights();
   };
 
-  const handleSavePassengers = async (flightId: string) => {
+  const handleOpenBookingModal = (flightId: string) => {
+    const flight = flights.find(f => f.id === flightId);
+    if (!flight) return;
+
+    setSelectedFlight(flight);
+    setBookingModalOpen(true);
+  };
+
+  const handleSavePassengers = async (flightId: string, passengers: PassengerWithType[]) => {
     try {
       const { error } = await supabase
-        .from("monitored_flights")
+        .from('monitored_flights')
         .update({ passengers: passengers as any })
-        .eq("id", flightId);
+        .eq('id', flightId);
 
       if (error) throw error;
 
-      toast({
-        title: "Đã lưu",
-        description: "Thông tin hành khách đã được lưu",
-      });
+      // Cập nhật state local
+      setFlights(prev => prev.map(f => 
+        f.id === flightId ? { ...f, passengers } : f
+      ));
 
-      setPassengerModalFlightId(null);
-      setPassengers([{ 
-        Họ: '', 
-        Tên: '', 
-        Hộ_chiếu: 'B12345678', 
-        Giới_tính: 'nam', 
-        Quốc_tịch: 'VN',
-        type: 'người_lớn'
-      }]);
-      await fetchMonitoredFlights();
+      toast({
+        title: "Đã lưu thông tin hành khách",
+        description: "Thông tin hành khách đã được cập nhật"
+      });
     } catch (error) {
-      console.error("Error saving passengers:", error);
+      console.error('Error saving passengers:', error);
       toast({
         title: "Lỗi",
         description: "Không thể lưu thông tin hành khách",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
-  };
-
-  const handleOpenPassengerModal = (flightId: string) => {
-    const flight = flights.find((f) => f.id === flightId);
-    if (flight?.passengers && flight.passengers.length > 0) {
-      setPassengers(flight.passengers);
-    } else {
-      setPassengers([{ 
-        Họ: '', 
-        Tên: '', 
-        Hộ_chiếu: 'B12345678', 
-        Giới_tính: 'nam', 
-        Quốc_tịch: 'VN',
-        type: 'người_lớn'
-      }]);
-    }
-    setPassengerModalFlightId(flightId);
-  };
-
-  const addPassenger = () => {
-    setPassengers([...passengers, { 
-      Họ: '', 
-      Tên: '', 
-      Hộ_chiếu: 'B12345678', 
-      Giới_tính: 'nam', 
-      Quốc_tịch: 'VN',
-      type: 'người_lớn'
-    }]);
-  };
-
-  const removePassenger = (index: number) => {
-    if (passengers.length > 1) {
-      setPassengers(passengers.filter((_, i) => i !== index));
-    }
-  };
-
-  const updatePassenger = (index: number, field: keyof PassengerInfo, value: string) => {
-    const newPassengers = [...passengers];
-    newPassengers[index] = { ...newPassengers[index], [field]: value };
-    setPassengers(newPassengers);
   };
 
   const generatePNR = (flightId: string) => {
@@ -1384,14 +1320,6 @@ export default function PriceMonitor() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => handleOpenPassengerModal(flight.id)}
-                          title="Thông tin hành khách"
-                        >
-                          <Users className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
                           onClick={() => handleManualCheck(flight.id)}
                           disabled={checkingFlightId === flight.id}
                           title="Kiểm tra giá ngay"
@@ -1522,105 +1450,6 @@ export default function PriceMonitor() {
         </div>
       </div>
 
-      {/* Passenger Modal */}
-      <Dialog
-        open={passengerModalFlightId !== null}
-        onOpenChange={(open) => {
-          if (!open) {
-            setPassengerModalFlightId(null);
-            setPassengers([{ 
-              Họ: '', 
-              Tên: '', 
-              Hộ_chiếu: 'B12345678', 
-              Giới_tính: 'nam', 
-              Quốc_tịch: 'VN',
-              type: 'người_lớn'
-            }]);
-          }
-        }}
-      >
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Thông tin hành khách</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            {passengers.map((passenger, index) => (
-              <div key={index} className="border p-4 rounded-lg space-y-3">
-                <div className="flex justify-between items-center">
-                  <h4 className="font-semibold">Hành khách {index + 1}</h4>
-                  {passengers.length > 1 && (
-                    <Button size="sm" variant="ghost" onClick={() => removePassenger(index)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label>Họ (VD: NGUYEN)</Label>
-                    <Input
-                      value={passenger.Họ}
-                      onChange={(e) => updatePassenger(index, "Họ", e.target.value.toUpperCase())}
-                      placeholder="NGUYEN"
-                    />
-                  </div>
-                  <div>
-                    <Label>Tên (VD: VAN A)</Label>
-                    <Input
-                      value={passenger.Tên}
-                      onChange={(e) => updatePassenger(index, "Tên", e.target.value.toUpperCase())}
-                      placeholder="VAN A"
-                    />
-                  </div>
-                  <div>
-                    <Label>Giới tính</Label>
-                    <Select
-                      value={passenger.Giới_tính}
-                      onValueChange={(value: any) => updatePassenger(index, "Giới_tính", value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="nam">Nam</SelectItem>
-                        <SelectItem value="nữ">Nữ</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label>Hộ chiếu</Label>
-                    <Input
-                      value={passenger.Hộ_chiếu}
-                      onChange={(e) => updatePassenger(index, "Hộ_chiếu", e.target.value.toUpperCase())}
-                      placeholder="B12345678"
-                    />
-                  </div>
-                  <div>
-                    <Label>Quốc tịch</Label>
-                    <Input
-                      value={passenger.Quốc_tịch}
-                      onChange={(e) => updatePassenger(index, "Quốc_tịch", e.target.value.toUpperCase())}
-                      placeholder="VN"
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
-
-            <Button variant="outline" onClick={addPassenger} className="w-full">
-              <Plus className="h-4 w-4 mr-2" />
-              Thêm hành khách
-            </Button>
-
-            <Button
-              onClick={() => passengerModalFlightId && handleSavePassengers(passengerModalFlightId)}
-              className="w-full"
-            >
-              Lưu thông tin
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
       {/* Booking Modal */}
       {selectedFlight && (
         <BookingModal
@@ -1634,6 +1463,9 @@ export default function PriceMonitor() {
           tripType={selectedFlight.is_round_trip ? "RT" : "OW"}
           departureAirport={selectedFlight.departure_airport}
           maxSeats={9}
+          mode="save"
+          initialPassengers={selectedFlight.passengers}
+          onSavePassengers={(passengers) => handleSavePassengers(selectedFlight.id, passengers)}
           onBookingSuccess={handleBookingSuccess}
         />
       )}

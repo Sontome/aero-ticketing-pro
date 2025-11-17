@@ -29,7 +29,10 @@ interface BookingModalProps {
   tripType: 'OW' | 'RT';
   departureAirport: string;
   maxSeats: number;
+  mode?: 'save' | 'book'; // 'save' = lưu thông tin, 'book' = giữ vé ngay
+  initialPassengers?: PassengerWithType[]; // Dữ liệu hành khách ban đầu
   onBookingSuccess?: (pnr: string) => void;
+  onSavePassengers?: (passengers: PassengerWithType[]) => void; // Callback khi lưu thông tin
 }
 
 export const BookingModal = ({
@@ -40,18 +43,23 @@ export const BookingModal = ({
   tripType,
   departureAirport,
   maxSeats,
-  onBookingSuccess
+  mode = 'book',
+  initialPassengers,
+  onBookingSuccess,
+  onSavePassengers
 }: BookingModalProps) => {
-  const [passengers, setPassengers] = useState<PassengerWithType[]>([
-    {
-      Họ: '',
-      Tên: '',
-      Hộ_chiếu: 'B12345678',
-      Giới_tính: 'nam',
-      Quốc_tịch: 'VN',
-      type: 'người_lớn'
-    }
-  ]);
+  const [passengers, setPassengers] = useState<PassengerWithType[]>(
+    initialPassengers || [
+      {
+        Họ: '',
+        Tên: '',
+        Hộ_chiếu: 'B12345678',
+        Giới_tính: 'nam',
+        Quốc_tịch: 'VN',
+        type: 'người_lớn'
+      }
+    ]
+  );
   const [isLoading, setIsLoading] = useState(false);
 
   // Popup dữ liệu khi giữ vé thành công
@@ -216,6 +224,19 @@ export const BookingModal = ({
         }
         return result;
       });
+
+      // Nếu mode = 'save', chỉ lưu thông tin và không gọi API
+      if (mode === 'save') {
+        if (onSavePassengers) {
+          onSavePassengers(formattedPassengers);
+        }
+        toast({
+          title: "Đã lưu thông tin hành khách",
+          description: "Thông tin đã được lưu thành công"
+        });
+        onClose();
+        return;
+      }
 
       const ds_khach = { người_lớn: [], trẻ_em: [], em_bé: [] } as {
         người_lớn: PassengerInfo[];
@@ -449,7 +470,7 @@ export const BookingModal = ({
             </Button>
 
             <Button className="w-full" onClick={handleSubmit} disabled={isLoading}>
-              {isLoading ? 'Đang giữ vé...' : 'Giữ vé ngay'}
+              {isLoading ? 'Đang xử lý...' : (mode === 'save' ? 'Lưu thông tin' : 'Giữ vé ngay')}
             </Button>
           </div>
         </DialogContent>
