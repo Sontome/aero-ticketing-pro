@@ -1058,7 +1058,7 @@ export default function PriceMonitor() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800">
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-6">
           <Button
             variant="ghost"
             onClick={() => navigate("/")}
@@ -1067,8 +1067,12 @@ export default function PriceMonitor() {
             <ArrowLeft className="w-5 h-5 mr-2" />
             Quay lại
           </Button>
+        </div>
 
-          <div className="flex gap-2">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-6">Tool Check Vé Giảm</h1>
+          
+          <div className="flex gap-2 mb-6 justify-center">
             <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
               <DialogTrigger asChild>
                 <Button className="bg-blue-600 hover:bg-blue-700 text-white">
@@ -1435,9 +1439,6 @@ export default function PriceMonitor() {
           </Dialog>
         </div>
 
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-6">Tool Check Vé Giảm</h1>
-
           {flights.length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center">
@@ -1633,7 +1634,6 @@ export default function PriceMonitor() {
           onBookingSuccess={handleBookingSuccess}
         />
       )}
-      </div>
     </div>
   );
 }
