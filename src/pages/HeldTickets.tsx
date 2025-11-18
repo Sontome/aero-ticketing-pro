@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Copy, Trash2 } from 'lucide-react';
+import { ArrowLeft, Copy, Trash2, TrendingDown } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 interface HeldTicket {
@@ -22,6 +22,8 @@ export default function HeldTickets() {
   const { profile } = useAuth();
   const [tickets, setTickets] = useState<HeldTicket[]>([]);
   const [loading, setLoading] = useState(true);
+  const [monitoredPNRs, setMonitoredPNRs] = useState<Set<string>>(new Set());
+  const [addingToMonitor, setAddingToMonitor] = useState<string | null>(null);
 
   useEffect(() => {
     if (!profile?.perm_hold_ticket) {
@@ -29,6 +31,7 @@ export default function HeldTickets() {
       return;
     }
     fetchHeldTickets();
+    fetchMonitoredPNRs();
   }, [profile, navigate]);
 
   const fetchHeldTickets = async () => {
@@ -53,6 +56,30 @@ export default function HeldTickets() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchMonitoredPNRs = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('monitored_flights')
+        .select('booking_key_departure')
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+      
+      const pnrSet = new Set<string>();
+      data?.forEach(flight => {
+        if (flight.booking_key_departure) {
+          pnrSet.add(flight.booking_key_departure);
+        }
+      });
+      setMonitoredPNRs(pnrSet);
+    } catch (error) {
+      console.error('Error fetching monitored PNRs:', error);
     }
   };
 
@@ -100,6 +127,92 @@ export default function HeldTickets() {
 
   const isVNA = (ticket: HeldTicket) => {
     return ticket.flight_details?.airline === 'VNA';
+  };
+
+  const parseDate = (dateStr: string): string => {
+    const parts = dateStr.split('/');
+    if (parts.length === 3) {
+      return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+    }
+    return dateStr;
+  };
+
+  const handleAddToMonitor = async (pnr: string) => {
+    if (monitoredPNRs.has(pnr)) {
+      toast({
+        title: 'Thông báo',
+        description: 'PNR này đã được thêm vào danh sách theo dõi',
+        variant: 'default'
+      });
+      return;
+    }
+
+    setAddingToMonitor(pnr);
+    try {
+      const response = await fetch(`https://thuhongtour.com/vj/checkpnr?pnr=${pnr}`, {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json'
+        },
+        body: ''
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch PNR data');
+      }
+
+      const data = await response.json();
+
+      if (data.status !== 'OK') {
+        throw new Error('PNR data invalid');
+      }
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      const flightData: any = {
+        user_id: user.id,
+        airline: "VJ",
+        departure_airport: data.chieudi.departure,
+        arrival_airport: data.chieudi.arrival,
+        departure_date: parseDate(data.chieudi.ngaycatcanh),
+        departure_time: data.chieudi.giocatcanh,
+        check_interval_minutes: 5,
+        is_active: true,
+        ticket_class: data.chieudi.loaive === "ECO" ? "economy" : "business",
+        booking_key_departure: pnr,
+      };
+
+      if (data.chieuve) {
+        flightData.is_round_trip = true;
+        flightData.return_date = parseDate(data.chieuve.ngaycatcanh);
+        flightData.return_time = data.chieuve.giocatcanh;
+      }
+
+      const { error } = await supabase
+        .from("monitored_flights")
+        .insert(flightData);
+
+      if (error) throw error;
+
+      toast({
+        title: "Đã thêm vào theo dõi giá! 🎯",
+        description: `PNR ${pnr}: ${data.chieudi.departure} → ${data.chieudi.arrival}`,
+      });
+
+      setMonitoredPNRs(prev => new Set([...prev, pnr]));
+    } catch (error) {
+      console.error('Error adding to monitor:', error);
+      toast({
+        title: 'Lỗi',
+        description: 'Không thể thêm vào danh sách theo dõi giá',
+        variant: 'destructive'
+      });
+    } finally {
+      setAddingToMonitor(null);
+    }
   };
 
   if (loading) {
@@ -198,6 +311,25 @@ export default function HeldTickets() {
                           )}
                         </div>
                       </div>
+
+                      {!vnaTicket && !expired && (
+                        <Button
+                          onClick={() => handleAddToMonitor(ticket.pnr)}
+                          disabled={monitoredPNRs.has(ticket.pnr) || addingToMonitor === ticket.pnr}
+                          className={`w-full ${
+                            monitoredPNRs.has(ticket.pnr) 
+                              ? 'bg-gray-400 cursor-not-allowed' 
+                              : 'bg-green-600 hover:bg-green-700'
+                          }`}
+                        >
+                          <TrendingDown className="w-4 h-4 mr-2" />
+                          {addingToMonitor === ticket.pnr 
+                            ? 'Đang xử lý...' 
+                            : monitoredPNRs.has(ticket.pnr) 
+                              ? 'Đã theo dõi' 
+                              : 'Theo dõi giá giảm'}
+                        </Button>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
