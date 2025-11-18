@@ -95,6 +95,11 @@ export default function PriceMonitor() {
   const [checkingFlightId, setCheckingFlightId] = useState<string | null>(null);
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
   const [selectedFlight, setSelectedFlight] = useState<MonitoredFlight | null>(null);
+  const [isPnrModalOpen, setIsPnrModalOpen] = useState(false);
+  const [pnrCode, setPnrCode] = useState("");
+  const [pnrAirline, setPnrAirline] = useState<"VJ" | "VNA">("VJ");
+  const [exactTimeMatch, setExactTimeMatch] = useState(true);
+  const [isLoadingPnr, setIsLoadingPnr] = useState(false);
 
   // Form state
   const [airline, setAirline] = useState<"VJ" | "VNA">("VJ");
@@ -845,6 +850,98 @@ export default function PriceMonitor() {
     }
   };
 
+  const handleImportFromPnr = async () => {
+    if (!pnrCode || pnrCode.length !== 6) {
+      toast({
+        variant: "destructive",
+        title: "Lỗi",
+        description: "Vui lòng nhập mã PNR hợp lệ (6 ký tự)",
+      });
+      return;
+    }
+
+    if (pnrAirline === "VNA") {
+      toast({
+        variant: "destructive",
+        title: "Chưa hỗ trợ",
+        description: "Tính năng nhập PNR từ Vietnam Airlines đang được phát triển",
+      });
+      return;
+    }
+
+    setIsLoadingPnr(true);
+
+    try {
+      const response = await fetch(`https://thuhongtour.com/vj/checkpnr?pnr=${pnrCode}`, {
+        method: "POST",
+        headers: {
+          accept: "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Không thể lấy thông tin PNR");
+      }
+
+      const data = await response.json();
+
+      if (data.status !== "OK") {
+        throw new Error("PNR không hợp lệ hoặc không tìm thấy");
+      }
+
+      // Parse date from "07/02/2026" to "2026-02-07"
+      const parseDate = (dateStr: string) => {
+        const [day, month, year] = dateStr.split("/");
+        return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+      };
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Không tìm thấy thông tin người dùng");
+
+      // Create monitored flight from PNR data
+      const flightData: any = {
+        user_id: user.id,
+        airline: "VJ",
+        departure_airport: data.chieudi.departure,
+        arrival_airport: data.chieudi.arrival,
+        departure_date: parseDate(data.chieudi.ngaycatcanh),
+        departure_time: exactTimeMatch ? data.chieudi.giocatcanh : null,
+        check_interval_minutes: 5,
+        is_active: true,
+        ticket_class: data.chieudi.loaive === "ECO" ? "economy" : "business",
+      };
+
+      // Check if round trip
+      if (data.chieuve) {
+        flightData.is_round_trip = true;
+        flightData.return_date = parseDate(data.chieuve.ngaycatcanh);
+        flightData.return_time = exactTimeMatch ? data.chieuve.giocatcanh : null;
+      }
+
+      const { error } = await supabase.from("monitored_flights").insert(flightData);
+
+      if (error) throw error;
+
+      toast({
+        title: "Đã thêm hành trình từ PNR",
+        description: `PNR ${pnrCode}: ${data.chieudi.departure} → ${data.chieudi.arrival}`,
+      });
+
+      setIsPnrModalOpen(false);
+      setPnrCode("");
+      await fetchMonitoredFlights();
+    } catch (error) {
+      console.error("Error importing from PNR:", error);
+      toast({
+        variant: "destructive",
+        title: "Lỗi",
+        description: error instanceof Error ? error.message : "Không thể nhập hành trình từ PNR",
+      });
+    } finally {
+      setIsLoadingPnr(false);
+    }
+  };
+
   const generatePNR = (flightId: string) => {
     // Generate a consistent 6-character PNR from flight ID
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -971,13 +1068,14 @@ export default function PriceMonitor() {
             Quay lại
           </Button>
 
-          <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-                <Plus className="w-5 h-5 mr-2" />
-                Thêm hành trình
-              </Button>
-            </DialogTrigger>
+          <div className="flex gap-2">
+            <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                  <Plus className="w-5 h-5 mr-2" />
+                  Thêm hành trình thủ công
+                </Button>
+              </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Thêm hành trình theo dõi</DialogTitle>
@@ -1287,6 +1385,54 @@ export default function PriceMonitor() {
               </div>
             </DialogContent>
           </Dialog>
+
+          <Dialog open={isPnrModalOpen} onOpenChange={setIsPnrModalOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-green-600 hover:bg-green-700 text-white">
+                <Plus className="w-5 h-5 mr-2" />
+                Thêm hành trình từ PNR
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Thêm hành trình từ PNR</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label>Mã PNR</Label>
+                  <Input
+                    value={pnrCode}
+                    onChange={(e) => setPnrCode(e.target.value.toUpperCase())}
+                    placeholder="VD: CZ6B62"
+                    maxLength={6}
+                  />
+                </div>
+                <div>
+                  <Label>Hãng bay</Label>
+                  <Select value={pnrAirline} onValueChange={(value: "VJ" | "VNA") => setPnrAirline(value)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="VJ">VietJet</SelectItem>
+                      <SelectItem value="VNA">Vietnam Airlines</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="exact-time"
+                    checked={exactTimeMatch}
+                    onCheckedChange={setExactTimeMatch}
+                  />
+                  <Label htmlFor="exact-time">Bắt đúng giờ</Label>
+                </div>
+                <Button onClick={handleImportFromPnr} className="w-full" disabled={isLoadingPnr}>
+                  {isLoadingPnr ? "Đang xử lý..." : "Xác nhận"}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
 
         <div className="max-w-4xl mx-auto">
@@ -1297,7 +1443,7 @@ export default function PriceMonitor() {
               <CardContent className="py-12 text-center">
                 <Bell className="w-16 h-16 mx-auto mb-4 text-gray-400" />
                 <p className="text-gray-500">Chưa có chuyến bay nào trong danh sách theo dõi</p>
-                <p className="text-sm text-gray-400 mt-2">Nhấn "Thêm hành trình" để bắt đầu theo dõi giá vé</p>
+                <p className="text-sm text-gray-400 mt-2">Nhấn "Thêm hành trình thủ công" hoặc "Thêm hành trình từ PNR" để bắt đầu theo dõi giá vé</p>
               </CardContent>
             </Card>
           ) : (
@@ -1487,6 +1633,7 @@ export default function PriceMonitor() {
           onBookingSuccess={handleBookingSuccess}
         />
       )}
+      </div>
     </div>
   );
 }
