@@ -1478,7 +1478,6 @@ export default function PriceMonitor() {
                           variant="outline"
                           onClick={() => handleOpenBookingModal(flight.id)}
                           title="Giữ vé"
-                          disabled={!flight.booking_key_departure}
                         >
                           <ShoppingBasket className="h-4 w-4" />
                         </Button>

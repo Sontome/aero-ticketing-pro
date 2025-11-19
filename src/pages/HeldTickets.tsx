@@ -7,6 +7,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Copy, Trash2, TrendingDown } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 
 interface HeldTicket {
   id: string;
@@ -23,7 +28,11 @@ export default function HeldTickets() {
   const [tickets, setTickets] = useState<HeldTicket[]>([]);
   const [loading, setLoading] = useState(true);
   const [monitoredPNRs, setMonitoredPNRs] = useState<Set<string>>(new Set());
-  const [addingToMonitor, setAddingToMonitor] = useState<string | null>(null);
+  const [isPnrModalOpen, setIsPnrModalOpen] = useState(false);
+  const [selectedPnr, setSelectedPnr] = useState("");
+  const [pnrAirline, setPnrAirline] = useState<"VJ" | "VNA">("VJ");
+  const [exactTimeMatch, setExactTimeMatch] = useState(true);
+  const [isLoadingPnr, setIsLoadingPnr] = useState(false);
 
   useEffect(() => {
     if (!profile?.perm_hold_ticket) {
@@ -137,8 +146,33 @@ export default function HeldTickets() {
     return dateStr;
   };
 
-  const handleAddToMonitor = async (pnr: string) => {
-    if (monitoredPNRs.has(pnr)) {
+  const handleOpenPnrModal = (pnr: string) => {
+    setSelectedPnr(pnr);
+    setPnrAirline("VJ");
+    setExactTimeMatch(true);
+    setIsPnrModalOpen(true);
+  };
+
+  const handleImportFromPnr = async () => {
+    if (!selectedPnr || selectedPnr.length !== 6) {
+      toast({
+        title: "Lỗi",
+        description: "Vui lòng nhập mã PNR hợp lệ (6 ký tự)",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (pnrAirline === "VNA") {
+      toast({
+        title: "Thông báo",
+        description: "Chức năng nhập PNR của Vietnam Airlines đang được phát triển",
+        variant: "default",
+      });
+      return;
+    }
+
+    if (monitoredPNRs.has(selectedPnr)) {
       toast({
         title: 'Thông báo',
         description: 'PNR này đã được thêm vào danh sách theo dõi',
@@ -147,29 +181,29 @@ export default function HeldTickets() {
       return;
     }
 
-    setAddingToMonitor(pnr);
+    setIsLoadingPnr(true);
     try {
-      const response = await fetch(`https://thuhongtour.com/vj/checkpnr?pnr=${pnr}`, {
-        method: 'POST',
+      const response = await fetch(`https://thuhongtour.com/vj/checkpnr?pnr=${selectedPnr}`, {
+        method: "POST",
         headers: {
-          'accept': 'application/json'
+          accept: "application/json",
         },
-        body: ''
+        body: "",
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch PNR data');
+        throw new Error("Failed to fetch PNR data");
       }
 
       const data = await response.json();
 
-      if (data.status !== 'OK') {
-        throw new Error('PNR data invalid');
+      if (data.status !== "OK") {
+        throw new Error("PNR data invalid");
       }
 
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        throw new Error('User not authenticated');
+        throw new Error("User not authenticated");
       }
 
       const flightData: any = {
@@ -178,40 +212,40 @@ export default function HeldTickets() {
         departure_airport: data.chieudi.departure,
         arrival_airport: data.chieudi.arrival,
         departure_date: parseDate(data.chieudi.ngaycatcanh),
-        departure_time: data.chieudi.giocatcanh,
+        departure_time: exactTimeMatch ? data.chieudi.giocatcanh : null,
         check_interval_minutes: 5,
         is_active: true,
         ticket_class: data.chieudi.loaive === "ECO" ? "economy" : "business",
-        booking_key_departure: pnr,
+        booking_key_departure: selectedPnr,
       };
 
       if (data.chieuve) {
         flightData.is_round_trip = true;
         flightData.return_date = parseDate(data.chieuve.ngaycatcanh);
-        flightData.return_time = data.chieuve.giocatcanh;
+        flightData.return_time = exactTimeMatch ? data.chieuve.giocatcanh : null;
       }
 
-      const { error } = await supabase
-        .from("monitored_flights")
-        .insert(flightData);
+      const { error } = await supabase.from("monitored_flights").insert(flightData);
 
       if (error) throw error;
 
       toast({
         title: "Đã thêm vào theo dõi giá! 🎯",
-        description: `PNR ${pnr}: ${data.chieudi.departure} → ${data.chieudi.arrival}`,
+        description: `PNR ${selectedPnr}: ${data.chieudi.departure} → ${data.chieudi.arrival}`,
       });
 
-      setMonitoredPNRs(prev => new Set([...prev, pnr]));
+      setMonitoredPNRs(prev => new Set([...prev, selectedPnr]));
+      setIsPnrModalOpen(false);
+      setSelectedPnr("");
     } catch (error) {
-      console.error('Error adding to monitor:', error);
+      console.error("Error adding to monitor:", error);
       toast({
-        title: 'Lỗi',
-        description: 'Không thể thêm vào danh sách theo dõi giá',
-        variant: 'destructive'
+        title: "Lỗi",
+        description: "Không thể thêm vào danh sách theo dõi giá",
+        variant: "destructive",
       });
     } finally {
-      setAddingToMonitor(null);
+      setIsLoadingPnr(false);
     }
   };
 
@@ -314,8 +348,8 @@ export default function HeldTickets() {
 
                       {!vnaTicket && !expired && (
                         <Button
-                          onClick={() => handleAddToMonitor(ticket.pnr)}
-                          disabled={monitoredPNRs.has(ticket.pnr) || addingToMonitor === ticket.pnr}
+                          onClick={() => handleOpenPnrModal(ticket.pnr)}
+                          disabled={monitoredPNRs.has(ticket.pnr)}
                           className={`w-full ${
                             monitoredPNRs.has(ticket.pnr) 
                               ? 'bg-gray-400 cursor-not-allowed' 
@@ -323,9 +357,7 @@ export default function HeldTickets() {
                           }`}
                         >
                           <TrendingDown className="w-4 h-4 mr-2" />
-                          {addingToMonitor === ticket.pnr 
-                            ? 'Đang xử lý...' 
-                            : monitoredPNRs.has(ticket.pnr) 
+                          {monitoredPNRs.has(ticket.pnr)
                               ? 'Đã theo dõi' 
                               : 'Theo dõi giá giảm'}
                         </Button>
@@ -338,6 +370,48 @@ export default function HeldTickets() {
             </div>
           )}
         </div>
+
+        <Dialog open={isPnrModalOpen} onOpenChange={setIsPnrModalOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Thêm hành trình từ PNR vào theo dõi giá</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Mã PNR</Label>
+                <Input
+                  value={selectedPnr}
+                  onChange={(e) => setSelectedPnr(e.target.value.toUpperCase())}
+                  placeholder="VD: CZ6B62"
+                  maxLength={6}
+                />
+              </div>
+              <div>
+                <Label>Hãng bay</Label>
+                <Select value={pnrAirline} onValueChange={(value: "VJ" | "VNA") => setPnrAirline(value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="VJ">VietJet</SelectItem>
+                    <SelectItem value="VNA">Vietnam Airlines</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="exact-time"
+                  checked={exactTimeMatch}
+                  onCheckedChange={setExactTimeMatch}
+                />
+                <Label htmlFor="exact-time">Bắt đúng giờ</Label>
+              </div>
+              <Button onClick={handleImportFromPnr} className="w-full" disabled={isLoadingPnr}>
+                {isLoadingPnr ? "Đang xử lý..." : "Xác nhận"}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
