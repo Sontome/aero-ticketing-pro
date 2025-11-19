@@ -148,6 +148,23 @@ export default function PriceMonitor() {
     return () => clearInterval(interval);
   }, [profile, navigate, checkingFlightId]);
 
+  // Auto-check when entering page if needed
+  useEffect(() => {
+    if (loading || flights.length === 0 || checkingFlightId) return;
+
+    flights.forEach((flight) => {
+      if (!flight.is_active) return;
+
+      // Check if never checked OR time since last check exceeds interval
+      const shouldCheck = !flight.last_checked_at || 
+        (flight.last_checked_at && calculateProgress(flight.last_checked_at, flight.check_interval_minutes) >= 100);
+
+      if (shouldCheck) {
+        handleManualCheck(flight.id);
+      }
+    });
+  }, [loading, flights]);
+
   const fetchMonitoredFlights = async () => {
     try {
       const {
@@ -1468,7 +1485,7 @@ export default function PriceMonitor() {
                               : "text-red-700 dark:text-red-400"
                           }`}
                         >
-                          {generatePNR(flight.id)}
+                          {flight.booking_key_departure || generatePNR(flight.id)}
                           <Badge variant={flight.airline === "VNA" ? "default" : "destructive"}>{flight.airline}</Badge>
                         </CardTitle>
                       </div>
