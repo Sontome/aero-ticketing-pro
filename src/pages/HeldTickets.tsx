@@ -75,15 +75,15 @@ export default function HeldTickets() {
 
       const { data, error } = await supabase
         .from('monitored_flights')
-        .select('booking_key_departure')
+        .select('pnr')
         .eq('user_id', user.id);
 
       if (error) throw error;
       
       const pnrSet = new Set<string>();
       data?.forEach(flight => {
-        if (flight.booking_key_departure) {
-          pnrSet.add(flight.booking_key_departure);
+        if (flight.pnr) {
+          pnrSet.add(flight.pnr);
         }
       });
       setMonitoredPNRs(pnrSet);
@@ -216,7 +216,7 @@ export default function HeldTickets() {
         check_interval_minutes: 5,
         is_active: true,
         ticket_class: data.chieudi.loaive === "ECO" ? "economy" : "business",
-        booking_key_departure: selectedPnr,
+        pnr: selectedPnr,
       };
 
       if (data.chieuve) {

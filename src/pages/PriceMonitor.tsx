@@ -43,6 +43,7 @@ interface MonitoredFlight {
   booking_key_departure?: string;
   booking_key_return?: string;
   auto_hold_enabled?: boolean;
+  pnr?: string;
 }
 
 // Korean airports
@@ -290,6 +291,9 @@ export default function PriceMonitor() {
         user_id: user.id,
         airline,
         check_interval_minutes: parseInt(checkInterval),
+        pnr: Array.from({ length: 6 }, () => 
+          'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'[Math.floor(Math.random() * 36)]
+        ).join(''),
       };
 
       if (airline === "VJ") {
@@ -926,6 +930,7 @@ export default function PriceMonitor() {
         check_interval_minutes: 5,
         is_active: true,
         ticket_class: data.chieudi.loaive === "ECO" ? "economy" : "business",
+        pnr: pnrCode,
       };
 
       // Check if round trip
@@ -1485,7 +1490,7 @@ export default function PriceMonitor() {
                               : "text-red-700 dark:text-red-400"
                           }`}
                         >
-                          {flight.booking_key_departure || generatePNR(flight.id)}
+                          {flight.pnr || generatePNR(flight.id)}
                           <Badge variant={flight.airline === "VNA" ? "default" : "destructive"}>{flight.airline}</Badge>
                         </CardTitle>
                       </div>

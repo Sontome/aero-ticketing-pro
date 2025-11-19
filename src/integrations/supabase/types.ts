@@ -68,6 +68,7 @@ export type Database = {
           is_round_trip: boolean | null
           last_checked_at: string | null
           passengers: Json | null
+          pnr: string | null
           return_date: string | null
           return_time: string | null
           segments: Json | null
@@ -92,6 +93,7 @@ export type Database = {
           is_round_trip?: boolean | null
           last_checked_at?: string | null
           passengers?: Json | null
+          pnr?: string | null
           return_date?: string | null
           return_time?: string | null
           segments?: Json | null
@@ -116,6 +118,7 @@ export type Database = {
           is_round_trip?: boolean | null
           last_checked_at?: string | null
           passengers?: Json | null
+          pnr?: string | null
           return_date?: string | null
           return_time?: string | null
           segments?: Json | null
