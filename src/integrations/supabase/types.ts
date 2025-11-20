@@ -150,6 +150,8 @@ export type Database = {
           price_vj: number | null
           price_vna: number | null
           status: string | null
+          ticket_email: string | null
+          ticket_phone: string | null
           updated_at: string
         }
         Insert: {
@@ -173,6 +175,8 @@ export type Database = {
           price_vj?: number | null
           price_vna?: number | null
           status?: string | null
+          ticket_email?: string | null
+          ticket_phone?: string | null
           updated_at?: string
         }
         Update: {
@@ -196,6 +200,8 @@ export type Database = {
           price_vj?: number | null
           price_vna?: number | null
           status?: string | null
+          ticket_email?: string | null
+          ticket_phone?: string | null
           updated_at?: string
         }
         Relationships: []

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -61,9 +61,31 @@ export const BookingModal = ({
     ]
   );
   const [isLoading, setIsLoading] = useState(false);
+  const [ticketEmail, setTicketEmail] = useState('');
+  const [ticketPhone, setTicketPhone] = useState('');
 
   // Popup dữ liệu khi giữ vé thành công
   const [successData, setSuccessData] = useState<{ code: string, deadline: string } | null>(null);
+
+  // Load user profile data on mount
+  useEffect(() => {
+    const loadProfile = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('ticket_email, ticket_phone')
+          .eq('id', user.id)
+          .single();
+        
+        if (profile) {
+          setTicketEmail(profile.ticket_email || '');
+          setTicketPhone(profile.ticket_phone || '');
+        }
+      }
+    };
+    loadProfile();
+  }, []);
 
   // Remove Vietnamese diacritics
   const removeVietnameseDiacritics = (str: string) => {
@@ -202,6 +224,16 @@ export const BookingModal = ({
 
   const handleSubmit = async () => {
     try {
+      // Validate email and phone for booking mode
+      if (mode === 'book') {
+        if (!ticketEmail || !ticketEmail.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+          throw new Error("Vui lòng nhập địa chỉ email hợp lệ");
+        }
+        if (!ticketPhone || !ticketPhone.match(/^\+\d{10,15}$/)) {
+          throw new Error("Vui lòng nhập số điện thoại hợp lệ (ví dụ: +840764301092)");
+        }
+      }
+
       const formattedPassengers = passengers.map(passenger => {
         const formattedLastName = formatName(passenger.Họ, true);
         const formattedFirstName = formatName(passenger.Tên, false);
@@ -224,6 +256,18 @@ export const BookingModal = ({
         }
         return result;
       });
+
+      // Save email and phone to profile
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user && (ticketEmail || ticketPhone)) {
+        await supabase
+          .from('profiles')
+          .update({ 
+            ticket_email: ticketEmail,
+            ticket_phone: ticketPhone 
+          })
+          .eq('id', user.id);
+      }
 
       // Nếu mode = 'save', chỉ lưu thông tin và không gọi API
       if (mode === 'save') {
@@ -251,12 +295,22 @@ export const BookingModal = ({
         if (infant) ds_khach.em_bé.push(infant);
       });
 
+      // Parse phone number to extract country code and phone
+      const phoneMatch = ticketPhone.match(/^\+(\d{2,3})(\d+)$/);
+      const exten = phoneMatch ? phoneMatch[1] : '84';
+      const phone = phoneMatch ? phoneMatch[2] : ticketPhone.replace(/^\+/, '');
+      const iso = exten === '82' ? 'KR' : 'VN';
+
       const requestData = {
         ds_khach,
         bookingkey: bookingKey,
         bookingkeychieuve: tripType === 'RT' ? (bookingKeyReturn || '') : '',
         sochieu: tripType,
-        sanbaydi: departureAirport
+        sanbaydi: departureAirport,
+        iso,
+        exten,
+        phone,
+        email: ticketEmail
       };
 
       setIsLoading(true);
@@ -468,6 +522,33 @@ export const BookingModal = ({
             <Button variant="outline" onClick={addPassenger} className="w-full">
               <Plus className="w-4 h-4 mr-2" /> Thêm hành khách
             </Button>
+
+            {/* Contact fields for ticket sending */}
+            <div className="border rounded-lg p-4 space-y-4 bg-blue-50/50">
+              <h3 className="font-semibold text-sm">Thông tin gửi mặt vé</h3>
+              <div className="grid grid-cols-1 gap-4">
+                <div>
+                  <Label>Email gửi mặt vé *</Label>
+                  <Input
+                    type="email"
+                    value={ticketEmail}
+                    onChange={(e) => setTicketEmail(e.target.value)}
+                    placeholder="hanvietair247@gmail.com"
+                  />
+                </div>
+                <div>
+                  <Label>Số điện thoại gửi mặt vé *</Label>
+                  <Input
+                    value={ticketPhone}
+                    onChange={(e) => setTicketPhone(e.target.value)}
+                    placeholder="+840764301092 hoặc +821035463396"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Nhập số điện thoại có mã vùng (ví dụ: +84 cho Việt Nam, +82 cho Hàn Quốc)
+                  </p>
+                </div>
+              </div>
+            </div>
 
             <Button className="w-full" onClick={handleSubmit} disabled={isLoading}>
               {isLoading ? 'Đang xử lý...' : (mode === 'save' ? 'Lưu thông tin' : 'Giữ vé ngay')}
