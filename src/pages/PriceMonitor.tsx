@@ -950,9 +950,9 @@ export default function PriceMonitor() {
           const passenger: any = {
             Họ: p.lastName || "",
             Tên: p.firstName || "",
-            Hộ_chiếu: "",
-            Giới_tính: "nam",
-            Quốc_tịch: "VN",
+            Hộ_chiếu: p.passportNumber || "B12345678",
+            Giới_tính: p.gender === "Male" ? "nam" : "nu",
+            Quốc_tịch: p.quoctich,
             type: p.child ? "trẻ_em" : "người_lớn",
           };
 
@@ -963,8 +963,8 @@ export default function PriceMonitor() {
               Họ: infantData.lastName || "",
               Tên: infantData.firstName || "",
               Hộ_chiếu: "",
-              Giới_tính: infantData.gender === "Unknown" ? "nam" : infantData.gender,
-              Quốc_tịch: "VN",
+              Giới_tính: infantData.gender === "Unknown" ? "" : infantData.gender,
+              Quốc_tịch: p.quoctich,
             };
           }
 
