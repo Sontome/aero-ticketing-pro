@@ -944,6 +944,36 @@ export default function PriceMonitor() {
         flightData.return_time = exactTimeMatch ? data.chieuve.giocatcanh : null;
       }
 
+      // Extract and transform passengers data
+      if (data.passengers && Array.isArray(data.passengers) && data.passengers.length > 0) {
+        const transformedPassengers = data.passengers.map((p: any) => {
+          const passenger: any = {
+            Họ: p.lastName || "",
+            Tên: p.firstName || "",
+            Hộ_chiếu: "",
+            Giới_tính: "nam",
+            Quốc_tịch: "VN",
+            type: p.child ? "trẻ_em" : "người_lớn",
+          };
+
+          // Add infant if exists
+          if (p.infant && Array.isArray(p.infant) && p.infant.length > 0) {
+            const infantData = p.infant[0];
+            passenger.infant = {
+              Họ: infantData.lastName || "",
+              Tên: infantData.firstName || "",
+              Hộ_chiếu: "",
+              Giới_tính: infantData.gender === "Unknown" ? "nam" : infantData.gender,
+              Quốc_tịch: "VN",
+            };
+          }
+
+          return passenger;
+        });
+
+        flightData.passengers = transformedPassengers;
+      }
+
       const { error } = await supabase.from("monitored_flights").insert(flightData);
 
       if (error) throw error;
