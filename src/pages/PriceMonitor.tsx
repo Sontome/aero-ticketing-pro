@@ -951,7 +951,7 @@ export default function PriceMonitor() {
             Họ: p.lastName || "",
             Tên: p.firstName || "",
             Hộ_chiếu: p.passportNumber || "B12345678",
-            Giới_tính: p.gender === "Male" ? "nam" : "nu",
+            Giới_tính: p.gender === "Male" ? "nam" : "nữ",
             Quốc_tịch: p.quoctich,
             type: p.child ? "trẻ_em" : "người_lớn",
           };
