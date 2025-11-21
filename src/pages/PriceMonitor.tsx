@@ -786,7 +786,7 @@ export default function PriceMonitor() {
 
     const data = await response.json();
 
-    if (!data.mã_giữ_vé || data.mess !== "Thành công") {
+    if (!data.mã_giữ_vé || (data.mess !== "Thành công" && data.mess !== "Success")) {
       throw new Error("Giữ vé thất bại");
     }
 
