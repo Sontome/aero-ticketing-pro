@@ -825,6 +825,27 @@ export default function PriceMonitor() {
 
     if (insertError) throw insertError;
 
+    // Check if original PNR exists in held tickets and delete it
+    if (flight.pnr) {
+      const { data: existingTickets } = await supabase
+        .from("held_tickets")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("pnr", flight.pnr);
+
+      if (existingTickets && existingTickets.length > 0) {
+        const { error: deleteOldPnrError } = await supabase
+          .from("held_tickets")
+          .delete()
+          .eq("pnr", flight.pnr)
+          .eq("user_id", user.id);
+
+        if (deleteOldPnrError) {
+          console.error("Error deleting old PNR:", deleteOldPnrError);
+        }
+      }
+    }
+
     // Delete monitored flight
     const { error: deleteError } = await supabase.from("monitored_flights").delete().eq("id", flight.id);
 
