@@ -5,13 +5,15 @@ import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Copy, Trash2, TrendingDown } from 'lucide-react';
+import { ArrowLeft, Copy, Trash2, TrendingDown, Info } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { VJTicketModal } from '@/components/VJTicketModal';
+import { VNATicketModal } from '@/components/VNATicketModal';
 
 interface HeldTicket {
   id: string;
@@ -33,6 +35,9 @@ export default function HeldTickets() {
   const [pnrAirline, setPnrAirline] = useState<"VJ" | "VNA">("VJ");
   const [exactTimeMatch, setExactTimeMatch] = useState(true);
   const [isLoadingPnr, setIsLoadingPnr] = useState(false);
+  const [isVJTicketModalOpen, setIsVJTicketModalOpen] = useState(false);
+  const [isVNATicketModalOpen, setIsVNATicketModalOpen] = useState(false);
+  const [ticketPnr, setTicketPnr] = useState("");
 
   useEffect(() => {
     if (!profile?.perm_hold_ticket) {
@@ -151,6 +156,15 @@ export default function HeldTickets() {
     setPnrAirline("VJ");
     setExactTimeMatch(true);
     setIsPnrModalOpen(true);
+  };
+
+  const handleOpenTicketModal = (pnr: string, isVNA: boolean) => {
+    setTicketPnr(pnr);
+    if (isVNA) {
+      setIsVNATicketModalOpen(true);
+    } else {
+      setIsVJTicketModalOpen(true);
+    }
   };
 
   const handleImportFromPnr = async () => {
@@ -303,8 +317,18 @@ export default function HeldTickets() {
                           <Button
                             size="sm"
                             variant="ghost"
+                            onClick={() => handleOpenTicketModal(ticket.pnr, vnaTicket)}
+                            className="h-6 w-6 p-0"
+                            title="Xem mặt vé"
+                          >
+                            <Info className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
                             onClick={() => copyPNR(ticket.pnr)}
                             className="h-6 w-6 p-0"
+                            title="Copy PNR"
                           >
                             <Copy className="h-4 w-4" />
                           </Button>
@@ -350,16 +374,12 @@ export default function HeldTickets() {
                         <Button
                           onClick={() => handleOpenPnrModal(ticket.pnr)}
                           disabled={monitoredPNRs.has(ticket.pnr)}
-                          className={`w-full ${
-                            monitoredPNRs.has(ticket.pnr) 
-                              ? 'bg-gray-400 cursor-not-allowed' 
-                              : 'bg-green-600 hover:bg-green-700'
-                          }`}
+                          size="sm"
+                          variant={monitoredPNRs.has(ticket.pnr) ? "ghost" : "outline"}
+                          className="mt-2"
+                          title={monitoredPNRs.has(ticket.pnr) ? "Đang theo dõi giá" : "Theo dõi giá giảm"}
                         >
-                          <TrendingDown className="w-4 h-4 mr-2" />
-                          {monitoredPNRs.has(ticket.pnr)
-                              ? 'Đã theo dõi' 
-                              : 'Theo dõi giá giảm'}
+                          <TrendingDown className="h-4 w-4" />
                         </Button>
                       )}
                     </div>
@@ -412,6 +432,18 @@ export default function HeldTickets() {
             </div>
           </DialogContent>
         </Dialog>
+
+        <VJTicketModal 
+          isOpen={isVJTicketModalOpen}
+          onClose={() => setIsVJTicketModalOpen(false)}
+          initialPNR={ticketPnr}
+        />
+
+        <VNATicketModal 
+          isOpen={isVNATicketModalOpen}
+          onClose={() => setIsVNATicketModalOpen(false)}
+          initialPNR={ticketPnr}
+        />
       </div>
     </div>
   );

@@ -95,7 +95,7 @@ async function checkVJPrice(flight: MonitoredFlight): Promise<number | null> {
     }
 
     // Get the cheapest price
-    const prices = matchingFlights.map((f: any) => parseInt(f.thông_tin_chung?.giá_vé || 0)).filter(p => p > 0);
+    const prices = matchingFlights.map((f: any) => parseInt(f.thông_tin_chung?.giá_vé || 0)).filter((p: number) => p > 0);
     
     if (prices.length === 0) {
       return null;
@@ -280,7 +280,7 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error('Error:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error instanceof Error ? error.message : String(error) }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500 
