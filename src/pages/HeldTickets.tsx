@@ -48,6 +48,34 @@ export default function HeldTickets() {
     fetchMonitoredPNRs();
   }, [profile, navigate]);
 
+  const checkExpiredTicketsStatus = async (expiredTickets: HeldTicket[]) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    for (const ticket of expiredTickets) {
+      if (isVNA(ticket)) continue; // Only check VJ tickets
+      
+      try {
+        const response = await fetch(`https://thuhongtour.com/vj/checkpnr?pnr=${ticket.pnr}`, {
+          method: "POST",
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          const newStatus = data.paymentstatus === true ? 'issued' : 'cancelled';
+          
+          await supabase
+            .from('held_tickets')
+            .update({ status: newStatus })
+            .eq('id', ticket.id)
+            .eq('user_id', user.id);
+        }
+      } catch (error) {
+        console.error(`Error checking status for PNR ${ticket.pnr}:`, error);
+      }
+    }
+  };
+
   const fetchHeldTickets = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -61,15 +89,28 @@ export default function HeldTickets() {
 
       if (error) throw error;
       
-      // Filter out expired tickets with "holding" status
+      // Separate expired holding tickets and others
+      const expiredHoldingTickets: HeldTicket[] = [];
       const filteredTickets = (data || []).filter(ticket => {
+        // Don't show cancelled tickets
+        if (ticket.status === 'cancelled') return false;
+        
         if (ticket.status === 'holding' && ticket.expire_date) {
-          return !isExpired(ticket.expire_date);
+          const expired = isExpired(ticket.expire_date);
+          if (expired) {
+            expiredHoldingTickets.push(ticket);
+            return false;
+          }
         }
         return true;
       });
       
       setTickets(filteredTickets);
+      
+      // Check status of expired holding tickets
+      if (expiredHoldingTickets.length > 0) {
+        checkExpiredTicketsStatus(expiredHoldingTickets);
+      }
     } catch (error) {
       console.error('Error fetching held tickets:', error);
       toast({
@@ -108,9 +149,10 @@ export default function HeldTickets() {
 
   const handleDelete = async (id: string) => {
     try {
+      // Update expire_date to now instead of deleting
       const { error } = await supabase
         .from('held_tickets')
-        .delete()
+        .update({ expire_date: new Date().toISOString() })
         .eq('id', id);
 
       if (error) throw error;
