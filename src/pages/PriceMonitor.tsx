@@ -841,7 +841,7 @@ export default function PriceMonitor() {
       if (existingTickets && existingTickets.length > 0) {
         const { error: deleteOldPnrError } = await supabase
           .from("held_tickets")
-          .delete()
+          .update({ expire_date: new Date().toISOString() })
           .eq("pnr", flight.pnr)
           .eq("user_id", user.id);
 
