@@ -775,6 +775,48 @@ export default function PriceMonitor() {
       requestBody.bookingkeychieuve = bookingKeyReturn;
     }
 
+    // Check if old PNR is already issued before holding new ticket
+    if (flight.pnr) {
+      try {
+        const checkPnrResponse = await fetch(`https://thuhongtour.com/vj/checkpnr?pnr=${flight.pnr}`, {
+          method: 'POST',
+        });
+        
+        if (checkPnrResponse.ok) {
+          const pnrData = await checkPnrResponse.json();
+          if (pnrData && pnrData.paymentstatus === true) {
+            console.log("Old PNR is already issued, not holding new ticket");
+            toast({
+              title: "PNR cũ đã xuất vé",
+              description: `PNR ${flight.pnr} đã được xuất vé, không giữ vé mới`,
+            });
+            
+            // Delete from monitored_flights
+            const { error: deleteError } = await supabase
+              .from("monitored_flights")
+              .delete()
+              .eq("id", flight.id);
+
+            if (deleteError) {
+              console.error("Error deleting flight from monitoring:", deleteError);
+            } else {
+              console.log("Flight removed from monitoring");
+              toast({
+                title: "Đã xóa hành trình",
+                description: "Hành trình đã được xóa khỏi danh sách theo dõi",
+              });
+            }
+            
+            await fetchMonitoredFlights();
+            return;
+          }
+        }
+      } catch (checkError) {
+        console.error("Error checking old PNR status:", checkError);
+        // Continue with holding process if check fails
+      }
+    }
+
     // Call VJ booking API
     const response = await fetch("https://thuhongtour.com/vj/booking", {
       method: "POST",
@@ -936,6 +978,19 @@ export default function PriceMonitor() {
 
       if (data.status !== "OK") {
         throw new Error("PNR không hợp lệ hoặc không tìm thấy");
+      }
+
+      // Check if PNR is already issued
+      if (data && data.paymentstatus === true) {
+        toast({
+          variant: "destructive",
+          title: "Không thể thêm",
+          description: "PNR đã xuất không thể check giá giảm, vui lòng thêm hành trình thủ công nếu muốn",
+        });
+        setIsPnrModalOpen(false);
+        setPnrCode("");
+        setIsLoadingPnr(false);
+        return;
       }
 
       // Parse date from "07/02/2026" to "2026-02-07"
@@ -1460,7 +1515,12 @@ export default function PriceMonitor() {
                     <Input
                       type="number"
                       value={checkInterval}
-                      onChange={(e) => setCheckInterval(e.target.value)}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value);
+                        if (val >= 5 || e.target.value === "") {
+                          setCheckInterval(e.target.value);
+                        }
+                      }}
                       min="5"
                       placeholder="60"
                     />
@@ -1630,7 +1690,12 @@ export default function PriceMonitor() {
                                       <Input
                                         type="number"
                                         value={editCheckInterval}
-                                        onChange={(e) => setEditCheckInterval(e.target.value)}
+                                        onChange={(e) => {
+                                          const val = parseInt(e.target.value);
+                                          if (val >= 5 || e.target.value === "") {
+                                            setEditCheckInterval(e.target.value);
+                                          }
+                                        }}
                                         min="5"
                                         placeholder="60"
                                       />
