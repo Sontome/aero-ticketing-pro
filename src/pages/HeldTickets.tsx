@@ -60,7 +60,16 @@ export default function HeldTickets() {
         .order('hold_date', { ascending: false });
 
       if (error) throw error;
-      setTickets(data || []);
+      
+      // Filter out expired tickets with "holding" status
+      const filteredTickets = (data || []).filter(ticket => {
+        if (ticket.status === 'holding' && ticket.expire_date) {
+          return !isExpired(ticket.expire_date);
+        }
+        return true;
+      });
+      
+      setTickets(filteredTickets);
     } catch (error) {
       console.error('Error fetching held tickets:', error);
       toast({
@@ -158,8 +167,45 @@ export default function HeldTickets() {
     setIsPnrModalOpen(true);
   };
 
-  const handleOpenTicketModal = (pnr: string, isVNA: boolean) => {
+  const handleOpenTicketModal = async (pnr: string, isVNA: boolean) => {
     setTicketPnr(pnr);
+    
+    // Check payment status for VJ tickets
+    if (!isVNA) {
+      try {
+        const response = await fetch(`https://thuhongtour.com/vj/checkpnr?pnr=${pnr}`, {
+          method: "POST",
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          
+          // If payment status is true, update ticket status to "issued"
+          if (data.paymentstatus === true) {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+              const { error } = await supabase
+                .from('held_tickets')
+                .update({ status: 'issued' })
+                .eq('pnr', pnr)
+                .eq('user_id', user.id);
+              
+              if (!error) {
+                // Update local state
+                setTickets(prevTickets => 
+                  prevTickets.map(t => 
+                    t.pnr === pnr ? { ...t, status: 'issued' } : t
+                  )
+                );
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error checking payment status:', error);
+      }
+    }
+    
     if (isVNA) {
       setIsVNATicketModalOpen(true);
     } else {
@@ -378,9 +424,9 @@ export default function HeldTickets() {
                     <div className="space-y-3">
                       <div className="flex items-center gap-2">
                         <Badge variant={isVJExpired ? 'destructive' : 'default'}>
-                          {ticket.status === 'holding' ? 'Đang giữ' : ticket.status}
+                          {ticket.status === 'holding' ? 'Đang giữ' : ticket.status === 'issued' ? 'Đã xuất vé' : ticket.status}
                         </Badge>
-                        {isVJExpired && (
+                        {isVJExpired && ticket.status !== 'issued' && (
                           <Badge variant="destructive">Hết hạn</Badge>
                         )}
                       </div>
@@ -389,11 +435,6 @@ export default function HeldTickets() {
                         <div className="text-sm space-y-1">
                           {!vnaTicket && (
                             <p><strong>Hạn thanh toán:</strong> {ticket.flight_details?.deadline || formatDate(ticket.expire_date)}</p>
-                          )}
-                          <p><strong>Loại vé:</strong> {ticket.flight_details?.tripType === 'RT' ? 'Khứ hồi' : 'Một chiều'}</p>
-                          <p><strong>Sân bay đi:</strong> {ticket.flight_details?.departureAirport}</p>
-                          {ticket.flight_details?.passengers && (
-                            <p><strong>Số hành khách:</strong> {ticket.flight_details.passengers.length}</p>
                           )}
                         </div>
                       </div>
