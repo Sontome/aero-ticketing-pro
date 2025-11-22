@@ -796,13 +796,13 @@ export default function PriceMonitor() {
     } = await supabase.auth.getUser();
     if (!user) throw new Error("Không tìm thấy thông tin người dùng");
 
-    // Parse expire date from "18:02 17/11/2025" format
+    // Parse expire date from "18:02 17/11/2025" format (GMT+7)
     let expireDate = null;
     if (data.hạn_thanh_toán) {
       try {
         const [time, dateStr] = data.hạn_thanh_toán.split(" ");
         const [day, month, year] = dateStr.split("/");
-        expireDate = `${year}-${month}-${day}T${time}:00`;
+        expireDate = `${year}-${month}-${day}T${time}:00+07:00`;
       } catch (e) {
         console.error("Error parsing expire date:", e);
       }
