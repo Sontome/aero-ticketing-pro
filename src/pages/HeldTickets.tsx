@@ -334,7 +334,7 @@ export default function HeldTickets() {
             Họ: p.lastName || "",
             Tên: p.firstName || "",
             Hộ_chiếu: p.passportNumber || "",
-            Giới_tính: p.gender || "", // Default, as not in API response
+            Giới_tính: p.gender === "Female" ? "nữ" : "nam", // Default, as not in API response
             Quốc_tịch: p.quoctich || "", // Default, as not in API response
             type: p.child ? "trẻ_em" : "người_lớn",
           };
