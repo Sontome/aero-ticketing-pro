@@ -333,9 +333,9 @@ export default function HeldTickets() {
           const passenger: any = {
             Họ: p.lastName || "",
             Tên: p.firstName || "",
-            Hộ_chiếu: p.passportNumber,
-            Giới_tính: p.gender, // Default, as not in API response
-            Quốc_tịch: p.quoctich, // Default, as not in API response
+            Hộ_chiếu: p.passportNumber || "",
+            Giới_tính: p.gender || "", // Default, as not in API response
+            Quốc_tịch: p.quoctich || "", // Default, as not in API response
             type: p.child ? "trẻ_em" : "người_lớn",
           };
 
@@ -344,7 +344,7 @@ export default function HeldTickets() {
             passenger.infant = {
               Họ: infantData.lastName || "",
               Tên: infantData.firstName || "",
-              Hộ_chiếu: "",
+              Hộ_chiếu: "B123456",
               Giới_tính: infantData.gender === "Unknown" ? "nam" : infantData.gender,
               Quốc_tịch: p.quoctich,
             };
