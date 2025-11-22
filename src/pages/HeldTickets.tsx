@@ -62,7 +62,8 @@ export default function HeldTickets() {
         
         if (response.ok) {
           const data = await response.json();
-          const newStatus = data.paymentstatus === true ? 'issued' : 'cancelled';
+          // If body is null or paymentstatus is not true, mark as cancelled
+          const newStatus = (data && data.paymentstatus === true) ? 'issued' : 'cancelled';
           
           await supabase
             .from('held_tickets')
