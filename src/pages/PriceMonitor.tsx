@@ -98,6 +98,35 @@ export default function PriceMonitor() {
   const [selectedFlight, setSelectedFlight] = useState<MonitoredFlight | null>(null);
   const [isPnrModalOpen, setIsPnrModalOpen] = useState(false);
   const [pnrCode, setPnrCode] = useState("");
+
+  // Send Telegram notification
+  const sendTelegramNotification = async (flight: MonitoredFlight, newPrice: number, oldPrice: number) => {
+    try {
+      if (!profile?.apikey_telegram || !profile?.idchat_telegram) {
+        console.log('Telegram settings not configured');
+        return;
+      }
+
+      const priceDiff = Math.abs(newPrice - oldPrice);
+      const pnr = flight.pnr || 'N/A';
+      const message = `🎉 PNR ${pnr} đã giảm giá!\n\nGiá cũ: ${oldPrice.toLocaleString()} KRW\nGiá mới: ${newPrice.toLocaleString()} KRW\nGiảm: ${priceDiff.toLocaleString()} KRW`;
+
+      const telegramApiUrl = `https://api.telegram.org/bot${profile.apikey_telegram}/sendMessage`;
+      
+      await fetch(telegramApiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          chat_id: profile.idchat_telegram,
+          text: message,
+        }),
+      });
+    } catch (error) {
+      console.error('Failed to send Telegram notification:', error);
+    }
+  };
   const [pnrAirline, setPnrAirline] = useState<"VJ" | "VNA">("VJ");
   const [exactTimeMatch, setExactTimeMatch] = useState(true);
   const [isLoadingPnr, setIsLoadingPnr] = useState(false);
@@ -548,6 +577,11 @@ export default function PriceMonitor() {
           const audio = new Audio('data:audio/wav;base64,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');
           audio.volume = 0.5;
           audio.play().catch((e) => console.log('Could not play notification sound:', e));
+
+          // Send Telegram notification (non-blocking)
+          sendTelegramNotification(flight, newPrice, oldPrice).catch((e) => 
+            console.log('Could not send Telegram notification:', e)
+          );
 
           toast({
             title: "Giá vé giảm! 🎉",

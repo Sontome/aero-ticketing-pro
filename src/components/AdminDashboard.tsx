@@ -34,6 +34,8 @@ interface Profile {
   perm_get_pending_ticket: boolean;
   perm_check_discount: boolean;
   hold_ticket_quantity: number;
+  apikey_telegram: string | null;
+  idchat_telegram: string | null;
 }
 
 export const AdminDashboard = () => {
@@ -60,6 +62,8 @@ export const AdminDashboard = () => {
         perm_get_pending_ticket: false,
         perm_check_discount: false,
         hold_ticket_quantity: 0,
+    apikey_telegram: '',
+    idchat_telegram: '',
   });
 
   useEffect(() => {
@@ -133,6 +137,8 @@ export const AdminDashboard = () => {
         perm_get_pending_ticket: profile.perm_get_pending_ticket || false,
         perm_check_discount: profile.perm_check_discount || false,
         hold_ticket_quantity: profile.hold_ticket_quantity || 0,
+      apikey_telegram: profile.apikey_telegram || '',
+      idchat_telegram: profile.idchat_telegram || '',
     });
   };
 
@@ -164,6 +170,8 @@ export const AdminDashboard = () => {
         perm_check_discount: editForm.perm_check_discount,
         hold_ticket_quantity: editForm.hold_ticket_quantity,
           perm_hold_ticket: permHoldTicket,
+          apikey_telegram: editForm.apikey_telegram || null,
+          idchat_telegram: editForm.idchat_telegram || null,
           updated_at: new Date().toISOString(),
         })
         .eq('id', editingProfile.id);
@@ -595,6 +603,31 @@ export const AdminDashboard = () => {
                                     value={editForm.hold_ticket_quantity || 0}
                                     onChange={(e) => setEditForm(prev => ({ ...prev, hold_ticket_quantity: parseInt(e.target.value) || 0 }))}
                                     placeholder="0 = tắt, >0 = số vé tối đa"
+                                  />
+                                 </div>
+                               </div>
+
+                              {/* Telegram Settings */}
+                              <div className="space-y-4 pt-4 border-t">
+                                <h3 className="text-lg font-semibold">Cài đặt Telegram</h3>
+                                
+                                <div className="space-y-2">
+                                  <Label htmlFor="apikey_telegram">API Key Bot Telegram</Label>
+                                  <Input
+                                    id="apikey_telegram"
+                                    value={editForm.apikey_telegram}
+                                    onChange={(e) => setEditForm(prev => ({ ...prev, apikey_telegram: e.target.value }))}
+                                    placeholder="Nhập API Key của bot Telegram"
+                                  />
+                                </div>
+
+                                <div className="space-y-2">
+                                  <Label htmlFor="idchat_telegram">ID Chat Telegram</Label>
+                                  <Input
+                                    id="idchat_telegram"
+                                    value={editForm.idchat_telegram}
+                                    onChange={(e) => setEditForm(prev => ({ ...prev, idchat_telegram: e.target.value }))}
+                                    placeholder="Nhập ID nhóm chat Telegram"
                                   />
                                 </div>
                               </div>

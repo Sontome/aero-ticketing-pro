@@ -130,11 +130,13 @@ export type Database = {
       }
       profiles: {
         Row: {
+          apikey_telegram: string | null
           banner: string | null
           created_at: string
           full_name: string
           hold_ticket_quantity: number | null
           id: string
+          idchat_telegram: string | null
           linkfacebook: string | null
           perm_check_discount: boolean | null
           perm_check_vj: boolean | null
@@ -155,11 +157,13 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          apikey_telegram?: string | null
           banner?: string | null
           created_at?: string
           full_name: string
           hold_ticket_quantity?: number | null
           id: string
+          idchat_telegram?: string | null
           linkfacebook?: string | null
           perm_check_discount?: boolean | null
           perm_check_vj?: boolean | null
@@ -180,11 +184,13 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          apikey_telegram?: string | null
           banner?: string | null
           created_at?: string
           full_name?: string
           hold_ticket_quantity?: number | null
           id?: string
+          idchat_telegram?: string | null
           linkfacebook?: string | null
           perm_check_discount?: boolean | null
           perm_check_vj?: boolean | null
