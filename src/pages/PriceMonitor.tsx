@@ -1339,6 +1339,7 @@ export default function PriceMonitor() {
                             <SelectValue placeholder="Chọn giờ" />
                           </SelectTrigger>
                           <SelectContent className="max-h-[200px]">
+                            <SelectItem value="">Không chọn giờ</SelectItem>
                             {TIME_OPTIONS.map((time) => (
                               <SelectItem key={time} value={time}>
                                 {time}
@@ -1375,6 +1376,7 @@ export default function PriceMonitor() {
                                 <SelectValue placeholder="Chọn giờ" />
                               </SelectTrigger>
                               <SelectContent className="max-h-[200px]">
+                                <SelectItem value="">Không chọn giờ</SelectItem>
                                 {TIME_OPTIONS.map((time) => (
                                   <SelectItem key={time} value={time}>
                                     {time}
@@ -1509,6 +1511,7 @@ export default function PriceMonitor() {
                                     <SelectValue placeholder="Chọn giờ" />
                                   </SelectTrigger>
                                   <SelectContent className="max-h-[200px]">
+                                    <SelectItem value="">Không chọn giờ</SelectItem>
                                     {TIME_OPTIONS.map((time) => (
                                       <SelectItem key={time} value={time}>
                                         {time}
