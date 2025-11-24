@@ -6,6 +6,7 @@ import { FlightFilters, FilterOptions } from '@/components/FlightFilters';
 import { fetchVietJetFlights, fetchVietnamAirlinesFlights, Flight } from '@/services/flightApi';
 import { Button } from '@/components/ui/button';
 import { UserProfileDropdown } from '@/components/UserProfileDropdown';
+import { UserTelegramSettings } from '@/components/UserTelegramSettings';
 import { PNRCheckModal } from '../components/PNRCheckModal';
 import { EmailTicketModal } from '@/components/EmailTicketModal';
 import { VJTicketModal } from '@/components/VJTicketModal';
@@ -457,9 +458,10 @@ export default function Index() {
                             </DropdownMenuSubContent>
                           </DropdownMenuSub>
                         )}
-                      </DropdownMenuContent>
+                       </DropdownMenuContent>
                     </DropdownMenu>
                   )}
+                  <UserTelegramSettings />
                   <UserProfileDropdown />
                 </div>
               </div>
