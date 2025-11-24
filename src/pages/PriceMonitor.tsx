@@ -331,13 +331,16 @@ export default function PriceMonitor() {
         insertData.departure_airport = departureAirport;
         insertData.arrival_airport = arrivalAirport;
         insertData.departure_date = departureDate;
-        insertData.departure_time = departureTime || null;
+        insertData.departure_time = (departureTime && departureTime !== 'none') ? departureTime : null;
         insertData.is_round_trip = isRoundTrip;
         insertData.return_date = isRoundTrip ? returnDate : null;
-        insertData.return_time = isRoundTrip ? returnTime || null : null;
+        insertData.return_time = isRoundTrip ? ((returnTime && returnTime !== 'none') ? returnTime : null) : null;
       } else {
         // For VNA, use segments
-        insertData.segments = vnaSegments;
+        insertData.segments = vnaSegments.map(seg => ({
+          ...seg,
+          departure_time: (seg.departure_time && seg.departure_time !== 'none') ? seg.departure_time : null,
+        }));
         insertData.departure_airport = vnaSegments[0].departure_airport;
         insertData.arrival_airport = vnaSegments[vnaSegments.length - 1].arrival_airport;
         insertData.departure_date = vnaSegments[0].departure_date;
@@ -1339,7 +1342,7 @@ export default function PriceMonitor() {
                             <SelectValue placeholder="Chọn giờ" />
                           </SelectTrigger>
                           <SelectContent className="max-h-[200px]">
-                            <SelectItem value="">Không chọn giờ</SelectItem>
+                            <SelectItem value="none">Không chọn giờ</SelectItem>
                             {TIME_OPTIONS.map((time) => (
                               <SelectItem key={time} value={time}>
                                 {time}
@@ -1376,7 +1379,7 @@ export default function PriceMonitor() {
                                 <SelectValue placeholder="Chọn giờ" />
                               </SelectTrigger>
                               <SelectContent className="max-h-[200px]">
-                                <SelectItem value="">Không chọn giờ</SelectItem>
+                                <SelectItem value="none">Không chọn giờ</SelectItem>
                                 {TIME_OPTIONS.map((time) => (
                                   <SelectItem key={time} value={time}>
                                     {time}
@@ -1511,7 +1514,7 @@ export default function PriceMonitor() {
                                     <SelectValue placeholder="Chọn giờ" />
                                   </SelectTrigger>
                                   <SelectContent className="max-h-[200px]">
-                                    <SelectItem value="">Không chọn giờ</SelectItem>
+                                    <SelectItem value="none">Không chọn giờ</SelectItem>
                                     {TIME_OPTIONS.map((time) => (
                                       <SelectItem key={time} value={time}>
                                         {time}
