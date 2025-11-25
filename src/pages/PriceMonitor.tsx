@@ -145,9 +145,9 @@ export default function PriceMonitor() {
 
   // VNA segments state - simplified to 2 segments like VJ
   const [vnaTicketClass, setVnaTicketClass] = useState<"economy" | "business">("economy");
-  const [vnaStopoverAirport, setVnaStopoverAirport] = useState("");
+  const [vnaStopoverAirport, setVnaStopoverAirport] = useState("none");
   const [vnaReturnTicketClass, setVnaReturnTicketClass] = useState<"economy" | "business">("economy");
-  const [vnaReturnStopoverAirport, setVnaReturnStopoverAirport] = useState("");
+  const [vnaReturnStopoverAirport, setVnaReturnStopoverAirport] = useState("none");
 
   useEffect(() => {
     if (!profile?.perm_check_discount) {
@@ -351,7 +351,7 @@ export default function PriceMonitor() {
             departure_date: departureDate,
             departure_time: (departureTime && departureTime !== 'none') ? departureTime : null,
             ticket_class: vnaTicketClass,
-            stopover_airport: vnaStopoverAirport || undefined,
+            stopover_airport: (vnaStopoverAirport && vnaStopoverAirport !== 'none') ? vnaStopoverAirport : undefined,
           },
         ];
         
@@ -362,7 +362,7 @@ export default function PriceMonitor() {
             departure_date: returnDate,
             departure_time: (returnTime && returnTime !== 'none') ? returnTime : null,
             ticket_class: vnaReturnTicketClass,
-            stopover_airport: vnaReturnStopoverAirport || undefined,
+            stopover_airport: (vnaReturnStopoverAirport && vnaReturnStopoverAirport !== 'none') ? vnaReturnStopoverAirport : undefined,
           });
         }
         
@@ -393,9 +393,9 @@ export default function PriceMonitor() {
       setReturnTime("");
       setCheckInterval("60");
       setVnaTicketClass("economy");
-      setVnaStopoverAirport("");
+      setVnaStopoverAirport("none");
       setVnaReturnTicketClass("economy");
-      setVnaReturnStopoverAirport("");
+      setVnaReturnStopoverAirport("none");
       setIsAddModalOpen(false);
 
       // Fetch updated list first
@@ -1308,9 +1308,9 @@ export default function PriceMonitor() {
                         setReturnDate("");
                         setReturnTime("");
                         setVnaTicketClass("economy");
-                        setVnaStopoverAirport("");
+                        setVnaStopoverAirport("none");
                         setVnaReturnTicketClass("economy");
-                        setVnaReturnStopoverAirport("");
+                        setVnaReturnStopoverAirport("none");
                       }}
                     >
                       <SelectTrigger>
@@ -1506,22 +1506,22 @@ export default function PriceMonitor() {
                            </Select>
                          </div>
 
-                         <div>
-                           <Label className="text-xs">Chặng dừng (tùy chọn)</Label>
-                           <Select value={vnaStopoverAirport} onValueChange={setVnaStopoverAirport}>
-                             <SelectTrigger>
-                               <SelectValue placeholder="Không có" />
-                             </SelectTrigger>
-                             <SelectContent>
-                               <SelectItem value="">Không có</SelectItem>
-                               {ALL_AIRPORTS.map((code) => (
-                                 <SelectItem key={code} value={code}>
-                                   {code}
-                                 </SelectItem>
-                               ))}
-                             </SelectContent>
-                           </Select>
-                         </div>
+                          <div>
+                            <Label className="text-xs">Chặng dừng (tùy chọn)</Label>
+                            <Select value={vnaStopoverAirport} onValueChange={setVnaStopoverAirport}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Không có" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="none">Không có</SelectItem>
+                                {ALL_AIRPORTS.map((code) => (
+                                  <SelectItem key={code} value={code}>
+                                    {code}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
                        </div>
 
                        {/* Chặng 2 - Chiều về */}
@@ -1569,22 +1569,22 @@ export default function PriceMonitor() {
                                </Select>
                              </div>
 
-                             <div>
-                               <Label className="text-xs">Chặng dừng (tùy chọn)</Label>
-                               <Select value={vnaReturnStopoverAirport} onValueChange={setVnaReturnStopoverAirport}>
-                                 <SelectTrigger>
-                                   <SelectValue placeholder="Không có" />
-                                 </SelectTrigger>
-                                 <SelectContent>
-                                   <SelectItem value="">Không có</SelectItem>
-                                   {ALL_AIRPORTS.map((code) => (
-                                     <SelectItem key={code} value={code}>
-                                       {code}
-                                     </SelectItem>
-                                   ))}
-                                 </SelectContent>
-                               </Select>
-                             </div>
+                              <div>
+                                <Label className="text-xs">Chặng dừng (tùy chọn)</Label>
+                                <Select value={vnaReturnStopoverAirport} onValueChange={setVnaReturnStopoverAirport}>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Không có" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="none">Không có</SelectItem>
+                                    {ALL_AIRPORTS.map((code) => (
+                                      <SelectItem key={code} value={code}>
+                                        {code}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
                            </div>
                          </>
                        )}
