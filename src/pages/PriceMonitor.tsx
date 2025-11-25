@@ -21,6 +21,7 @@ interface FlightSegment {
   departure_date: string;
   departure_time?: string;
   ticket_class: "economy" | "business";
+  stopover_airport?: string; // Chặng dừng (tùy chọn)
 }
 
 interface MonitoredFlight {
@@ -142,10 +143,11 @@ export default function PriceMonitor() {
   const [returnTime, setReturnTime] = useState("");
   const [checkInterval, setCheckInterval] = useState("60");
 
-  // VNA segments state
-  const [vnaSegments, setVnaSegments] = useState<FlightSegment[]>([
-    { departure_airport: "", arrival_airport: "", departure_date: "", departure_time: "", ticket_class: "economy" },
-  ]);
+  // VNA segments state - simplified to 2 segments like VJ
+  const [vnaTicketClass, setVnaTicketClass] = useState<"economy" | "business">("economy");
+  const [vnaStopoverAirport, setVnaStopoverAirport] = useState("");
+  const [vnaReturnTicketClass, setVnaReturnTicketClass] = useState<"economy" | "business">("economy");
+  const [vnaReturnStopoverAirport, setVnaReturnStopoverAirport] = useState("");
 
   useEffect(() => {
     if (!profile?.perm_check_discount) {
@@ -276,20 +278,17 @@ export default function PriceMonitor() {
       }
     } else {
       // VNA validation
-      const invalidSegment = vnaSegments.find(
-        (seg) => !seg.departure_airport || !seg.arrival_airport || !seg.departure_date,
-      );
-      if (invalidSegment) {
+      if (!departureAirport || !arrivalAirport || !departureDate) {
         toast({
           title: "Lỗi",
-          description: "Vui lòng điền đầy đủ thông tin cho tất cả hành trình",
+          description: "Vui lòng điền đầy đủ thông tin",
           variant: "destructive",
         });
         return;
       }
 
-      // Validate first segment date is in the future
-      if (vnaSegments[0].departure_date <= today) {
+      // Validate departure date is in the future
+      if (departureDate <= today) {
         toast({
           title: "Lỗi",
           description: "Ngày đi phải lớn hơn ngày hiện tại",
@@ -298,12 +297,20 @@ export default function PriceMonitor() {
         return;
       }
 
-      // Validate sequential dates for multi-segment
-      for (let i = 1; i < vnaSegments.length; i++) {
-        if (vnaSegments[i].departure_date <= vnaSegments[i - 1].departure_date) {
+      if (isRoundTrip) {
+        if (!returnDate) {
           toast({
             title: "Lỗi",
-            description: `Ngày đi chặng ${i + 1} phải lớn hơn ngày đi chặng ${i}`,
+            description: "Vui lòng chọn ngày về",
+            variant: "destructive",
+          });
+          return;
+        }
+        // Validate return date is after departure date
+        if (returnDate <= departureDate) {
+          toast({
+            title: "Lỗi",
+            description: "Ngày về phải lớn hơn ngày đi",
             variant: "destructive",
           });
           return;
@@ -336,14 +343,35 @@ export default function PriceMonitor() {
         insertData.return_date = isRoundTrip ? returnDate : null;
         insertData.return_time = isRoundTrip ? ((returnTime && returnTime !== 'none') ? returnTime : null) : null;
       } else {
-        // For VNA, use segments
-        insertData.segments = vnaSegments.map(seg => ({
-          ...seg,
-          departure_time: (seg.departure_time && seg.departure_time !== 'none') ? seg.departure_time : null,
-        }));
-        insertData.departure_airport = vnaSegments[0].departure_airport;
-        insertData.arrival_airport = vnaSegments[vnaSegments.length - 1].arrival_airport;
-        insertData.departure_date = vnaSegments[0].departure_date;
+        // For VNA, use 2 segments like VJ (departure + optional return)
+        const segments: FlightSegment[] = [
+          {
+            departure_airport: departureAirport,
+            arrival_airport: arrivalAirport,
+            departure_date: departureDate,
+            departure_time: (departureTime && departureTime !== 'none') ? departureTime : null,
+            ticket_class: vnaTicketClass,
+            stopover_airport: vnaStopoverAirport || undefined,
+          },
+        ];
+        
+        if (isRoundTrip && returnDate) {
+          segments.push({
+            departure_airport: arrivalAirport,
+            arrival_airport: departureAirport,
+            departure_date: returnDate,
+            departure_time: (returnTime && returnTime !== 'none') ? returnTime : null,
+            ticket_class: vnaReturnTicketClass,
+            stopover_airport: vnaReturnStopoverAirport || undefined,
+          });
+        }
+        
+        insertData.segments = segments;
+        insertData.departure_airport = departureAirport;
+        insertData.arrival_airport = arrivalAirport;
+        insertData.departure_date = departureDate;
+        insertData.is_round_trip = isRoundTrip;
+        insertData.return_date = isRoundTrip ? returnDate : null;
       }
 
       const { data: newFlight, error } = await supabase.from("monitored_flights").insert(insertData).select().single();
@@ -364,9 +392,10 @@ export default function PriceMonitor() {
       setReturnDate("");
       setReturnTime("");
       setCheckInterval("60");
-      setVnaSegments([
-        { departure_airport: "", arrival_airport: "", departure_date: "", departure_time: "", ticket_class: "economy" },
-      ]);
+      setVnaTicketClass("economy");
+      setVnaStopoverAirport("");
+      setVnaReturnTicketClass("economy");
+      setVnaReturnStopoverAirport("");
       setIsAddModalOpen(false);
 
       // Fetch updated list first
@@ -1136,12 +1165,12 @@ export default function PriceMonitor() {
       return (
         <div className="text-sm">
           <strong>
-            {flight.segments.length > 1 ? `Hành trình đa chặng (${flight.segments.length} chặng):` : "Hành trình:"}
+            {flight.segments.length > 1 ? `Hành trình khứ hồi (${flight.segments.length} chặng):` : "Hành trình:"}
           </strong>
           <div className="mt-2 space-y-2">
             {flight.segments.map((seg: FlightSegment, idx: number) => (
               <div key={idx} className="ml-2">
-                <span className="font-medium">Chặng {idx + 1}</span>
+                <span className="font-medium">Chặng {idx + 1} {idx === 0 ? "- Chiều đi" : "- Chiều về"}</span>
                 <div className="ml-2 text-gray-700 dark:text-gray-300">
                   <div className="flex items-center gap-2">
                     <span>
@@ -1153,6 +1182,11 @@ export default function PriceMonitor() {
                       </Badge>
                     )}
                   </div>
+                  {seg.stopover_airport && (
+                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                      Chặng dừng: {seg.stopover_airport}
+                    </div>
+                  )}
                   <div className="text-xs text-gray-500 dark:text-gray-400">
                     {formatFlightDate(seg.departure_date)}
                     {seg.departure_time && ` | ${seg.departure_time}`}
@@ -1273,15 +1307,10 @@ export default function PriceMonitor() {
                         setIsRoundTrip(false);
                         setReturnDate("");
                         setReturnTime("");
-                        setVnaSegments([
-                          {
-                            departure_airport: "",
-                            arrival_airport: "",
-                            departure_date: "",
-                            departure_time: "",
-                            ticket_class: "economy",
-                          },
-                        ]);
+                        setVnaTicketClass("economy");
+                        setVnaStopoverAirport("");
+                        setVnaReturnTicketClass("economy");
+                        setVnaReturnStopoverAirport("");
                       }}
                     >
                       <SelectTrigger>
@@ -1391,164 +1420,176 @@ export default function PriceMonitor() {
                         </>
                       )}
                     </>
-                  ) : (
-                    <>
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <Label>Hành trình</Label>
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            onClick={() =>
-                              setVnaSegments([
-                                ...vnaSegments,
-                                {
-                                  departure_airport: "",
-                                  arrival_airport: "",
-                                  departure_date: "",
-                                  departure_time: "",
-                                  ticket_class: "economy",
-                                },
-                              ])
-                            }
-                            disabled={vnaSegments.length >= 4}
-                          >
-                            <Plus className="w-4 h-4 mr-1" />
-                            Thêm chặng
-                          </Button>
-                        </div>
+                   ) : (
+                     <>
+                       <div>
+                         <Label>Sân bay đi</Label>
+                         <Select value={departureAirport} onValueChange={setDepartureAirport}>
+                           <SelectTrigger>
+                             <SelectValue placeholder="Chọn sân bay" />
+                           </SelectTrigger>
+                           <SelectContent>
+                             {ALL_AIRPORTS.map((code) => (
+                               <SelectItem key={code} value={code}>
+                                 {code}
+                               </SelectItem>
+                             ))}
+                           </SelectContent>
+                         </Select>
+                       </div>
+                       <div>
+                         <Label>Sân bay đến</Label>
+                         <Select value={arrivalAirport} onValueChange={setArrivalAirport}>
+                           <SelectTrigger>
+                             <SelectValue placeholder="Chọn sân bay" />
+                           </SelectTrigger>
+                           <SelectContent>
+                             {ALL_AIRPORTS.map((code) => (
+                               <SelectItem key={code} value={code}>
+                                 {code}
+                               </SelectItem>
+                             ))}
+                           </SelectContent>
+                         </Select>
+                       </div>
+                       <div>
+                         <Label>Ngày bay</Label>
+                         <Input
+                           type="date"
+                           value={departureDate}
+                           onChange={(e) => setDepartureDate(e.target.value)}
+                           min={getTodayString()}
+                         />
+                       </div>
+                       <div>
+                         <Label>Giờ đi (tùy chọn)</Label>
+                         <Select value={departureTime} onValueChange={setDepartureTime}>
+                           <SelectTrigger>
+                             <SelectValue placeholder="Chọn giờ" />
+                           </SelectTrigger>
+                           <SelectContent className="max-h-[200px]">
+                             <SelectItem value="none">Không chọn giờ</SelectItem>
+                             {TIME_OPTIONS.map((time) => (
+                               <SelectItem key={time} value={time}>
+                                 {time}
+                               </SelectItem>
+                             ))}
+                           </SelectContent>
+                         </Select>
+                       </div>
 
-                        {vnaSegments.map((segment, index) => (
-                          <div key={index} className="p-4 border rounded-lg space-y-3 bg-blue-50 dark:bg-blue-950/20">
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="font-medium text-sm">Chặng {index + 1}</span>
-                              {vnaSegments.length > 1 && (
-                                <Button
-                                  type="button"
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => setVnaSegments(vnaSegments.filter((_, i) => i !== index))}
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              )}
-                            </div>
+                       <div className="flex items-center space-x-2">
+                         <input
+                           type="checkbox"
+                           id="roundTripVNA"
+                           checked={isRoundTrip}
+                           onChange={(e) => setIsRoundTrip(e.target.checked)}
+                           className="rounded"
+                         />
+                         <Label htmlFor="roundTripVNA">Khứ hồi</Label>
+                       </div>
 
-                            <div className="grid grid-cols-2 gap-2">
-                              <div>
-                                <Label className="text-xs">Nơi đi</Label>
-                                <Select
-                                  value={segment.departure_airport}
-                                  onValueChange={(value) => {
-                                    const newSegments = [...vnaSegments];
-                                    newSegments[index].departure_airport = value;
-                                    setVnaSegments(newSegments);
-                                  }}
-                                >
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Chọn" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {ALL_AIRPORTS.map((code) => (
-                                      <SelectItem key={code} value={code}>
-                                        {code}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                              <div>
-                                <Label className="text-xs">Nơi đến</Label>
-                                <Select
-                                  value={segment.arrival_airport}
-                                  onValueChange={(value) => {
-                                    const newSegments = [...vnaSegments];
-                                    newSegments[index].arrival_airport = value;
-                                    setVnaSegments(newSegments);
-                                  }}
-                                >
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Chọn" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {ALL_AIRPORTS.map((code) => (
-                                      <SelectItem key={code} value={code}>
-                                        {code}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                            </div>
+                       {/* Chặng 1 - Chiều đi */}
+                       <div className="p-4 border rounded-lg space-y-3 bg-blue-50 dark:bg-blue-950/20">
+                         <div className="font-medium text-sm mb-2">Chặng 1 - Chiều đi</div>
 
-                            <div className="grid grid-cols-2 gap-2">
-                              <div>
-                                <Label className="text-xs">Ngày đi</Label>
-                                <Input
-                                  type="date"
-                                  value={segment.departure_date}
-                                  onChange={(e) => {
-                                    const newSegments = [...vnaSegments];
-                                    newSegments[index].departure_date = e.target.value;
-                                    setVnaSegments(newSegments);
-                                  }}
-                                  min={
-                                    index === 0
-                                      ? getTodayString()
-                                      : vnaSegments[index - 1]?.departure_date || getTodayString()
-                                  }
-                                />
-                              </div>
-                              <div>
-                                <Label className="text-xs">Giờ đi (tùy chọn)</Label>
-                                <Select
-                                  value={segment.departure_time}
-                                  onValueChange={(value) => {
-                                    const newSegments = [...vnaSegments];
-                                    newSegments[index].departure_time = value;
-                                    setVnaSegments(newSegments);
-                                  }}
-                                >
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Chọn giờ" />
-                                  </SelectTrigger>
-                                  <SelectContent className="max-h-[200px]">
-                                    <SelectItem value="none">Không chọn giờ</SelectItem>
-                                    {TIME_OPTIONS.map((time) => (
-                                      <SelectItem key={time} value={time}>
-                                        {time}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                            </div>
+                         <div>
+                           <Label className="text-xs">Hạng vé</Label>
+                           <Select value={vnaTicketClass} onValueChange={(value: "economy" | "business") => setVnaTicketClass(value)}>
+                             <SelectTrigger>
+                               <SelectValue />
+                             </SelectTrigger>
+                             <SelectContent>
+                               <SelectItem value="economy">Phổ thông</SelectItem>
+                               <SelectItem value="business">Thương gia</SelectItem>
+                             </SelectContent>
+                           </Select>
+                         </div>
 
-                            <div>
-                              <Label className="text-xs">Hạng vé</Label>
-                              <Select
-                                value={segment.ticket_class}
-                                onValueChange={(value: "economy" | "business") => {
-                                  const newSegments = [...vnaSegments];
-                                  newSegments[index].ticket_class = value;
-                                  setVnaSegments(newSegments);
-                                }}
-                              >
-                                <SelectTrigger>
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="economy">Phổ thông</SelectItem>
-                                  <SelectItem value="business">Thương gia</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </>
-                  )}
+                         <div>
+                           <Label className="text-xs">Chặng dừng (tùy chọn)</Label>
+                           <Select value={vnaStopoverAirport} onValueChange={setVnaStopoverAirport}>
+                             <SelectTrigger>
+                               <SelectValue placeholder="Không có" />
+                             </SelectTrigger>
+                             <SelectContent>
+                               <SelectItem value="">Không có</SelectItem>
+                               {ALL_AIRPORTS.map((code) => (
+                                 <SelectItem key={code} value={code}>
+                                   {code}
+                                 </SelectItem>
+                               ))}
+                             </SelectContent>
+                           </Select>
+                         </div>
+                       </div>
+
+                       {/* Chặng 2 - Chiều về */}
+                       {isRoundTrip && (
+                         <>
+                           <div>
+                             <Label>Ngày về</Label>
+                             <Input
+                               type="date"
+                               value={returnDate}
+                               onChange={(e) => setReturnDate(e.target.value)}
+                               min={departureDate || getTodayString()}
+                             />
+                           </div>
+                           <div>
+                             <Label>Giờ về (tùy chọn)</Label>
+                             <Select value={returnTime} onValueChange={setReturnTime}>
+                               <SelectTrigger>
+                                 <SelectValue placeholder="Chọn giờ" />
+                               </SelectTrigger>
+                               <SelectContent className="max-h-[200px]">
+                                 <SelectItem value="none">Không chọn giờ</SelectItem>
+                                 {TIME_OPTIONS.map((time) => (
+                                   <SelectItem key={time} value={time}>
+                                     {time}
+                                   </SelectItem>
+                                 ))}
+                               </SelectContent>
+                             </Select>
+                           </div>
+
+                           <div className="p-4 border rounded-lg space-y-3 bg-blue-50 dark:bg-blue-950/20">
+                             <div className="font-medium text-sm mb-2">Chặng 2 - Chiều về</div>
+
+                             <div>
+                               <Label className="text-xs">Hạng vé</Label>
+                               <Select value={vnaReturnTicketClass} onValueChange={(value: "economy" | "business") => setVnaReturnTicketClass(value)}>
+                                 <SelectTrigger>
+                                   <SelectValue />
+                                 </SelectTrigger>
+                                 <SelectContent>
+                                   <SelectItem value="economy">Phổ thông</SelectItem>
+                                   <SelectItem value="business">Thương gia</SelectItem>
+                                 </SelectContent>
+                               </Select>
+                             </div>
+
+                             <div>
+                               <Label className="text-xs">Chặng dừng (tùy chọn)</Label>
+                               <Select value={vnaReturnStopoverAirport} onValueChange={setVnaReturnStopoverAirport}>
+                                 <SelectTrigger>
+                                   <SelectValue placeholder="Không có" />
+                                 </SelectTrigger>
+                                 <SelectContent>
+                                   <SelectItem value="">Không có</SelectItem>
+                                   {ALL_AIRPORTS.map((code) => (
+                                     <SelectItem key={code} value={code}>
+                                       {code}
+                                     </SelectItem>
+                                   ))}
+                                 </SelectContent>
+                               </Select>
+                             </div>
+                           </div>
+                         </>
+                       )}
+                     </>
+                   )}
 
                   <div>
                     <Label>Kiểm tra mỗi (phút)</Label>
