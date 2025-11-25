@@ -12,6 +12,7 @@ import { ArrowLeft, Plus, Trash2, RefreshCw, Bell, Pencil, Users, ShoppingBasket
 import { toast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { PassengerWithType, PassengerInfo, BookingModal } from "@/components/VJBookingModal";
 import { Switch } from "@/components/ui/switch";
 
@@ -141,7 +142,7 @@ export default function PriceMonitor() {
   const [isRoundTrip, setIsRoundTrip] = useState(false);
   const [returnDate, setReturnDate] = useState("");
   const [returnTime, setReturnTime] = useState("");
-  const [checkInterval, setCheckInterval] = useState("60");
+  const [checkInterval, setCheckInterval] = useState("5");
 
   // VNA segments state - simplified to 2 segments like VJ
   const [vnaTicketClass, setVnaTicketClass] = useState<"economy" | "business">("economy");
@@ -1288,11 +1289,12 @@ export default function PriceMonitor() {
                   Thêm hành trình thủ công
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="max-w-2xl max-h-[90vh]">
                 <DialogHeader>
                   <DialogTitle>Thêm hành trình theo dõi</DialogTitle>
                 </DialogHeader>
-                <div className="space-y-4">
+                <ScrollArea className="max-h-[calc(90vh-120px)] pr-4">
+                  <div className="space-y-4">
                   <div>
                     <Label>Hãng bay</Label>
                     <Select
@@ -1610,6 +1612,7 @@ export default function PriceMonitor() {
                     Thêm vào danh sách
                   </Button>
                 </div>
+                </ScrollArea>
               </DialogContent>
             </Dialog>
 
