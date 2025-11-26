@@ -1018,18 +1018,161 @@ export default function PriceMonitor() {
       return;
     }
 
-    if (pnrAirline === "VNA") {
-      toast({
-        variant: "destructive",
-        title: "Chưa hỗ trợ",
-        description: "Tính năng nhập PNR từ Vietnam Airlines đang được phát triển",
-      });
-      return;
-    }
-
     setIsLoadingPnr(true);
 
     try {
+      // Handle VNA PNR
+      if (pnrAirline === "VNA") {
+        const response = await fetch(`https://thuhongtour.com/checkvechoVNA?pnr=${pnrCode}`, {
+          method: "GET",
+          headers: {
+            accept: "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Không thể lấy thông tin PNR");
+        }
+
+        const data = await response.json();
+
+        if (data.status !== "OK" || !data.chang || data.chang.length === 0) {
+          throw new Error("PNR không hợp lệ hoặc không tìm thấy");
+        }
+
+        // Check if PNR is already issued
+        if (data.paymentstatus === true) {
+          toast({
+            variant: "destructive",
+            title: "Không thể thêm",
+            description: "PNR đã xuất không thể check giá giảm, vui lòng thêm hành trình thủ công nếu muốn",
+          });
+          setIsPnrModalOpen(false);
+          setPnrCode("");
+          setIsLoadingPnr(false);
+          return;
+        }
+
+        // Validate segments
+        const segments = data.chang;
+        
+        // Check if more than 2 segments
+        if (segments.length > 2) {
+          toast({
+            variant: "destructive",
+            title: "Không hỗ trợ",
+            description: "Chuyến bay nối chuyến chưa hỗ trợ check giá giảm",
+          });
+          setIsPnrModalOpen(false);
+          setPnrCode("");
+          setIsLoadingPnr(false);
+          return;
+        }
+
+        // Check if 2 segments have same departure date
+        if (segments.length === 2) {
+          const date1 = segments[0].ngaycatcanh;
+          const date2 = segments[1].ngaycatcanh;
+          if (date1 === date2) {
+            toast({
+              variant: "destructive",
+              title: "Không hỗ trợ",
+              description: "Chuyến bay nối chuyến chưa hỗ trợ check giá giảm",
+            });
+            setIsPnrModalOpen(false);
+            setPnrCode("");
+            setIsLoadingPnr(false);
+            return;
+          }
+        }
+
+        // Parse VNA date from "03/02/2026" to "2026-02-03"
+        const parseVNADate = (dateStr: string) => {
+          const [day, month, year] = dateStr.split("/");
+          return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+        };
+
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) throw new Error("Không tìm thấy thông tin người dùng");
+
+        // Create VNA monitored flight from PNR data
+        const firstSegment = segments[0];
+        const flightData: any = {
+          user_id: user.id,
+          airline: "VNA",
+          departure_airport: firstSegment.departure,
+          arrival_airport: firstSegment.arrival,
+          departure_date: parseVNADate(firstSegment.ngaycatcanh),
+          departure_time: exactTimeMatch ? firstSegment.giocatcanh : null,
+          check_interval_minutes: 5,
+          is_active: true,
+          ticket_class: "economy", // Default to economy
+          pnr: pnrCode,
+          segments: [
+            {
+              departure_airport: firstSegment.departure,
+              arrival_airport: firstSegment.arrival,
+              departure_date: parseVNADate(firstSegment.ngaycatcanh),
+              departure_time: exactTimeMatch ? firstSegment.giocatcanh : null,
+              ticket_class: "economy",
+              stopover_airport: undefined,
+            },
+          ],
+        };
+
+        // Check if round trip (2 segments)
+        if (segments.length === 2) {
+          const secondSegment = segments[1];
+          flightData.is_round_trip = true;
+          flightData.return_date = parseVNADate(secondSegment.ngaycatcanh);
+          flightData.return_time = exactTimeMatch ? secondSegment.giocatcanh : null;
+          
+          flightData.segments.push({
+            departure_airport: secondSegment.departure,
+            arrival_airport: secondSegment.arrival,
+            departure_date: parseVNADate(secondSegment.ngaycatcanh),
+            departure_time: exactTimeMatch ? secondSegment.giocatcanh : null,
+            ticket_class: "economy",
+            stopover_airport: undefined,
+          });
+        }
+
+        // Extract and transform passengers data
+        if (data.passengers && Array.isArray(data.passengers) && data.passengers.length > 0) {
+          const transformedPassengers = data.passengers.map((p: any) => {
+            const passenger: any = {
+              Họ: p.lastName || "",
+              Tên: p.firstName || "",
+              Hộ_chiếu: "B12345678",
+              Giới_tính: p.loaikhach === "ADT" ? "nam" : "nữ",
+              Quốc_tịch: "VN",
+              type: p.loaikhach === "ADT" ? "người_lớn" : p.loaikhach === "CHD" ? "trẻ_em" : "em_bé",
+            };
+            return passenger;
+          });
+
+          flightData.passengers = transformedPassengers;
+        }
+
+        const { error } = await supabase.from("monitored_flights").insert(flightData);
+
+        if (error) throw error;
+
+        toast({
+          title: "Đã thêm hành trình từ PNR",
+          description: `PNR ${pnrCode}: ${firstSegment.departure} → ${firstSegment.arrival}${segments.length === 2 ? " (Khứ hồi)" : ""}`,
+        });
+
+        setIsPnrModalOpen(false);
+        setPnrCode("");
+        await fetchMonitoredFlights();
+        setIsLoadingPnr(false);
+        return;
+      }
+
+      // Handle VJ PNR
       const response = await fetch(`https://thuhongtour.com/vj/checkpnr?pnr=${pnrCode}`, {
         method: "POST",
         headers: {
