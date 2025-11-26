@@ -21,7 +21,7 @@ interface FlightSegment {
   arrival_airport: string;
   departure_date: string;
   departure_time?: string;
-  ticket_class: "economy" | "business";
+  ticket_class: "ADT" | "VFR" | "STU";
   stopover_airport?: string; // Chặng dừng (tùy chọn)
 }
 
@@ -145,9 +145,9 @@ export default function PriceMonitor() {
   const [checkInterval, setCheckInterval] = useState("5");
 
   // VNA segments state - simplified to 2 segments like VJ
-  const [vnaTicketClass, setVnaTicketClass] = useState<"economy" | "business">("economy");
+  const [vnaTicketClass, setVnaTicketClass] = useState<"ADT" | "VFR" | "STU">("ADT");
   const [vnaStopoverAirport, setVnaStopoverAirport] = useState("none");
-  const [vnaReturnTicketClass, setVnaReturnTicketClass] = useState<"economy" | "business">("economy");
+  const [vnaReturnTicketClass, setVnaReturnTicketClass] = useState<"ADT" | "VFR" | "STU">("ADT");
   const [vnaReturnStopoverAirport, setVnaReturnStopoverAirport] = useState("none");
 
   useEffect(() => {
@@ -393,9 +393,9 @@ export default function PriceMonitor() {
       setReturnDate("");
       setReturnTime("");
       setCheckInterval("60");
-      setVnaTicketClass("economy");
+      setVnaTicketClass("ADT");
       setVnaStopoverAirport("none");
-      setVnaReturnTicketClass("economy");
+      setVnaReturnTicketClass("ADT");
       setVnaReturnStopoverAirport("none");
       setIsAddModalOpen(false);
 
@@ -1095,7 +1095,7 @@ export default function PriceMonitor() {
           departure_time: exactTimeMatch ? firstSegment.giocatcanh : null,
           check_interval_minutes: 5,
           is_active: true,
-          ticket_class: "economy", // Default to economy
+          ticket_class: data.doituong || "ADT",
           pnr: pnrCode,
           segments: [
             {
@@ -1103,7 +1103,7 @@ export default function PriceMonitor() {
               arrival_airport: firstSegment.arrival,
               departure_date: parseVNADate(firstSegment.ngaycatcanh),
               departure_time: exactTimeMatch ? firstSegment.giocatcanh : null,
-              ticket_class: "economy",
+              ticket_class: data.doituong || "ADT",
               stopover_airport: undefined,
             },
           ],
@@ -1121,7 +1121,7 @@ export default function PriceMonitor() {
             arrival_airport: secondSegment.arrival,
             departure_date: parseVNADate(secondSegment.ngaycatcanh),
             departure_time: exactTimeMatch ? secondSegment.giocatcanh : null,
-            ticket_class: "economy",
+            ticket_class: data.doituong || "ADT",
             stopover_airport: undefined,
           });
         }
@@ -1307,11 +1307,9 @@ export default function PriceMonitor() {
                     <span>
                       {seg.departure_airport} → {seg.arrival_airport}
                     </span>
-                    {seg.ticket_class === "business" && (
-                      <Badge variant="secondary" className="text-xs">
-                        Thương gia
-                      </Badge>
-                    )}
+                    <Badge variant="secondary" className="text-xs">
+                      {seg.ticket_class}
+                    </Badge>
                   </div>
                   {seg.stopover_airport && (
                     <div className="text-xs text-gray-500 dark:text-gray-400">
@@ -1439,9 +1437,9 @@ export default function PriceMonitor() {
                         setIsRoundTrip(false);
                         setReturnDate("");
                         setReturnTime("");
-                        setVnaTicketClass("economy");
+                        setVnaTicketClass("ADT");
                         setVnaStopoverAirport("none");
-                        setVnaReturnTicketClass("economy");
+                        setVnaReturnTicketClass("ADT");
                         setVnaReturnStopoverAirport("none");
                       }}
                     >
@@ -1625,18 +1623,19 @@ export default function PriceMonitor() {
                        <div className="p-4 border rounded-lg space-y-3 bg-blue-50 dark:bg-blue-950/20">
                          <div className="font-medium text-sm mb-2">Chặng 1 - Chiều đi</div>
 
-                         <div>
-                           <Label className="text-xs">Hạng vé</Label>
-                           <Select value={vnaTicketClass} onValueChange={(value: "economy" | "business") => setVnaTicketClass(value)}>
-                             <SelectTrigger>
-                               <SelectValue />
-                             </SelectTrigger>
-                             <SelectContent>
-                               <SelectItem value="economy">Phổ thông</SelectItem>
-                               <SelectItem value="business">Thương gia</SelectItem>
-                             </SelectContent>
-                           </Select>
-                         </div>
+                          <div>
+                            <Label className="text-xs">Hạng vé</Label>
+                            <Select value={vnaTicketClass} onValueChange={(value: "ADT" | "VFR" | "STU") => setVnaTicketClass(value)}>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="ADT">ADT</SelectItem>
+                                <SelectItem value="VFR">VFR</SelectItem>
+                                <SelectItem value="STU">STU</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
 
                           <div>
                             <Label className="text-xs">Chặng dừng (tùy chọn)</Label>
@@ -1688,18 +1687,19 @@ export default function PriceMonitor() {
                            <div className="p-4 border rounded-lg space-y-3 bg-blue-50 dark:bg-blue-950/20">
                              <div className="font-medium text-sm mb-2">Chặng 2 - Chiều về</div>
 
-                             <div>
-                               <Label className="text-xs">Hạng vé</Label>
-                               <Select value={vnaReturnTicketClass} onValueChange={(value: "economy" | "business") => setVnaReturnTicketClass(value)}>
-                                 <SelectTrigger>
-                                   <SelectValue />
-                                 </SelectTrigger>
-                                 <SelectContent>
-                                   <SelectItem value="economy">Phổ thông</SelectItem>
-                                   <SelectItem value="business">Thương gia</SelectItem>
-                                 </SelectContent>
-                               </Select>
-                             </div>
+                              <div>
+                                <Label className="text-xs">Hạng vé</Label>
+                                <Select value={vnaReturnTicketClass} onValueChange={(value: "ADT" | "VFR" | "STU") => setVnaReturnTicketClass(value)}>
+                                  <SelectTrigger>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="ADT">ADT</SelectItem>
+                                    <SelectItem value="VFR">VFR</SelectItem>
+                                    <SelectItem value="STU">STU</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
 
                               <div>
                                 <Label className="text-xs">Chặng dừng (tùy chọn)</Label>
