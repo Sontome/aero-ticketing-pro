@@ -1040,19 +1040,6 @@ export default function PriceMonitor() {
           throw new Error("PNR không hợp lệ hoặc không tìm thấy");
         }
 
-        // Check if PNR is already issued
-        if (data.paymentstatus === true) {
-          toast({
-            variant: "destructive",
-            title: "Không thể thêm",
-            description: "PNR đã xuất không thể check giá giảm, vui lòng thêm hành trình thủ công nếu muốn",
-          });
-          setIsPnrModalOpen(false);
-          setPnrCode("");
-          setIsLoadingPnr(false);
-          return;
-        }
-
         // Validate segments
         const segments = data.chang;
         
