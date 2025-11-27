@@ -1127,24 +1127,30 @@ export default function PriceMonitor() {
 
         // Extract and transform passengers data
         if (data.passengers && Array.isArray(data.passengers) && data.passengers.length > 0) {
-          // Helper function to remove title prefixes
-          const removeTitlePrefix = (name: string) => {
-            if (!name) return "";
-            // Remove title prefixes: MISS, MR, MRS, MSTR, MS (case-insensitive, with or without space)
-            return name.replace(/^(MISS|MR|MRS|MSTR|MS)\s*/i, "").trim();
+          // Helper function to parse firstName and detect gender from suffix
+          const parseFirstName = (firstName: string) => {
+            if (!firstName) return { name: "", gender: "nam" as const };
+            
+            const upperName = firstName.toUpperCase();
+            // Check for gender suffix at the END of firstName
+            const isFemale = /\s*(MISS|MS)\s*$/i.test(upperName);
+            const isMale = /\s*(MR|MSTR)\s*$/i.test(upperName);
+            
+            // Remove title suffix from the end
+            const cleanName = firstName.replace(/\s*(MISS|MS|MR|MSTR)\s*$/i, "").trim();
+            
+            return {
+              name: cleanName,
+              gender: isFemale ? "nữ" as const : "nam" as const
+            };
           };
 
           const transformedPassengers = data.passengers.map((p: any) => {
+            const parsed = parseFirstName(p.firstName || "");
             const passenger: any = {
-              Họ: removeTitlePrefix(p.lastName || ""),
-              Tên: removeTitlePrefix(p.firstName || ""),
-              Giới_tính: p.loaikhach === "CHD" && p.firstName?.toUpperCase().startsWith("MSTR") 
-                ? "nam" 
-                : p.loaikhach === "CHD" && p.firstName?.toUpperCase().startsWith("MISS")
-                ? "nữ"
-                : p.loaikhach === "ADT" && (p.firstName?.toUpperCase().startsWith("MR") || p.firstName?.toUpperCase().startsWith("MSTR"))
-                ? "nam"
-                : "nữ",
+              Họ: p.lastName || "",
+              Tên: parsed.name,
+              Giới_tính: parsed.gender,
               type: p.loaikhach === "ADT" ? "người_lớn" : "trẻ_em",
             };
             return passenger;
