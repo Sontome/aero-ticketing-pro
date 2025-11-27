@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { PassengerWithType, PassengerInfo, BookingModal } from "@/components/VJBookingModal";
+import { VNABookingModalPriceMonitor } from "@/components/VNABookingModalPriceMonitor";
 import { Switch } from "@/components/ui/switch";
 
 interface FlightSegment {
@@ -1126,14 +1127,25 @@ export default function PriceMonitor() {
 
         // Extract and transform passengers data
         if (data.passengers && Array.isArray(data.passengers) && data.passengers.length > 0) {
+          // Helper function to remove title prefixes
+          const removeTitlePrefix = (name: string) => {
+            if (!name) return "";
+            // Remove title prefixes: MISS, MR, MRS, MSTR, MS (case-insensitive, with or without space)
+            return name.replace(/^(MISS|MR|MRS|MSTR|MS)\s*/i, "").trim();
+          };
+
           const transformedPassengers = data.passengers.map((p: any) => {
             const passenger: any = {
-              Họ: p.lastName || "",
-              Tên: p.firstName || "",
-              Hộ_chiếu: "B12345678",
-              Giới_tính: p.loaikhach === "ADT" ? "nam" : "nữ",
-              Quốc_tịch: "VN",
-              type: p.loaikhach === "ADT" ? "người_lớn" : p.loaikhach === "CHD" ? "trẻ_em" : "em_bé",
+              Họ: removeTitlePrefix(p.lastName || ""),
+              Tên: removeTitlePrefix(p.firstName || ""),
+              Giới_tính: p.loaikhach === "CHD" && p.firstName?.toUpperCase().startsWith("MSTR") 
+                ? "nam" 
+                : p.loaikhach === "CHD" && p.firstName?.toUpperCase().startsWith("MISS")
+                ? "nữ"
+                : p.loaikhach === "ADT" && (p.firstName?.toUpperCase().startsWith("MR") || p.firstName?.toUpperCase().startsWith("MSTR"))
+                ? "nam"
+                : "nữ",
+              type: p.loaikhach === "ADT" ? "người_lớn" : "trẻ_em",
             };
             return passenger;
           });
@@ -1955,7 +1967,7 @@ export default function PriceMonitor() {
       </div>
 
       {/* Booking Modal */}
-      {selectedFlight && (
+      {selectedFlight && selectedFlight.airline === "VJ" && (
         <BookingModal
           isOpen={bookingModalOpen}
           onClose={() => {
@@ -1971,6 +1983,21 @@ export default function PriceMonitor() {
           initialPassengers={selectedFlight.passengers}
           onSavePassengers={(passengers) => handleSavePassengers(selectedFlight.id, passengers)}
           onBookingSuccess={handleBookingSuccess}
+        />
+      )}
+
+      {/* VNA Booking Modal */}
+      {selectedFlight && selectedFlight.airline === "VNA" && (
+        <VNABookingModalPriceMonitor
+          isOpen={bookingModalOpen}
+          onClose={() => {
+            setBookingModalOpen(false);
+            setSelectedFlight(null);
+          }}
+          mode="save"
+          initialPassengers={selectedFlight.passengers}
+          onSavePassengers={(passengers) => handleSavePassengers(selectedFlight.id, passengers)}
+          doiTuong={(selectedFlight.ticket_class as 'VFR' | 'ADT' | 'STU') || 'ADT'}
         />
       )}
     </div>
