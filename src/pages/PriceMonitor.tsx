@@ -470,24 +470,34 @@ export default function PriceMonitor() {
         throw new Error("Không tìm thấy thông tin chuyến bay");
       }
 
-      // Only support VJ for now
+      // Handle VNA flights
+      if (flight.airline === "VNA") {
+        return await handleCheckVNAPrice(flightId, flight);
+      }
+
+      // VJ logic continues below
       if (flight.airline !== "VJ") {
         toast({
           variant: "destructive",
           title: "Lỗi",
-          description: "Hiện tại chỉ hỗ trợ kiểm tra giá VietJet",
+          description: "Hiện tại chỉ hỗ trợ kiểm tra giá VietJet và Vietnam Airlines",
         });
         return;
       }
 
       // Build request body for VJ API
+      const passengers = flight.passengers || [];
+      const adt = passengers.filter((p: PassengerWithType) => p.type === "người_lớn").length;
+      const chd = passengers.filter((p: PassengerWithType) => p.type === "trẻ_em").length;
+      const inf = passengers.filter((p: PassengerWithType) => p.infant).length;
+
       const requestBody: any = {
         dep0: flight.departure_airport,
         arr0: flight.arrival_airport,
         depdate0: flight.departure_date,
-        adt: "1",
-        chd: "0",
-        inf: "0",
+        adt: adt.toString(),
+        chd: chd.toString(),
+        inf: inf.toString(),
         sochieu: flight.is_round_trip ? "RT" : "OW",
       };
 
@@ -652,6 +662,165 @@ export default function PriceMonitor() {
       }
     } finally {
       setCheckingFlightId(null);
+    }
+  };
+
+  const handleCheckVNAPrice = async (flightId: string, flight: MonitoredFlight) => {
+    try {
+      const passengers = flight.passengers || [];
+      const adt = passengers.filter((p: PassengerWithType) => p.type === "người_lớn" && !p.infant).length;
+      const chd = passengers.filter((p: PassengerWithType) => p.type === "trẻ_em").length;
+      const inf = passengers.filter((p: PassengerWithType) => p.infant).length;
+
+      // Get segments info
+      const segments = flight.segments || [];
+      if (segments.length === 0) {
+        throw new Error("Không có thông tin chặng bay");
+      }
+
+      const segment1 = segments[0];
+      const segment2 = segments.length > 1 ? segments[1] : null;
+
+      // Format time to HHMM (remove colon)
+      const formatTimeForAPI = (time?: string) => {
+        if (!time) return undefined;
+        return time.replace(":", "");
+      };
+
+      const requestBody: any = {
+        dep0: segment1.departure_airport,
+        arr0: segment1.arrival_airport,
+        depdate0: segment1.departure_date,
+        activedVia: "0",
+        activedIDT: segment1.ticket_class === "ADT" ? "ADT" : "VFR",
+        adt: adt.toString(),
+        chd: chd.toString(),
+        inf: inf.toString(),
+        page: "1",
+        sochieu: segment2 ? "RT" : "OW",
+        session_key: "",
+      };
+
+      // Add departure time filter if specified
+      if (segment1.departure_time) {
+        const formattedTime = formatTimeForAPI(segment1.departure_time);
+        requestBody.filterTimeSlideMin0 = formattedTime;
+        requestBody.filterTimeSlideMax0 = formattedTime;
+      }
+
+      // Add return segment if exists
+      if (segment2) {
+        requestBody.depdate1 = segment2.departure_date;
+        if (segment2.departure_time) {
+          const formattedTime = formatTimeForAPI(segment2.departure_time);
+          requestBody.filterTimeSlideMin1 = formattedTime;
+          requestBody.filterTimeSlideMax1 = formattedTime;
+        }
+      }
+
+      console.log("VNA API Request:", requestBody);
+
+      const response = await fetch("https://thuhongtour.com/vna/check-ve-v2", {
+        method: "POST",
+        headers: {
+          accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        throw new Error("Không thể kết nối API Vietnam Airlines");
+      }
+
+      const data = await response.json();
+      console.log("VNA API Response:", data);
+
+      if (!data.body || data.body.length === 0) {
+        // Update last_checked_at even when no flight found
+        await supabase
+          .from("monitored_flights")
+          .update({ last_checked_at: new Date().toISOString() })
+          .eq("id", flightId);
+
+        toast({
+          variant: "destructive",
+          title: "Không tìm thấy chuyến bay",
+          description: "Không có chuyến bay nào phù hợp với hành trình này",
+        });
+        fetchMonitoredFlights();
+        return;
+      }
+
+      // Get first result (cheapest or matching time)
+      const matchingFlight = data.body[0];
+      const newPrice = parseInt(matchingFlight["thông_tin_chung"]?.giá_vé || "0");
+      const oldPrice = flight.current_price;
+
+      // Update only last_checked_at (NOT the price for VNA)
+      const { error: updateError } = await supabase
+        .from("monitored_flights")
+        .update({
+          last_checked_at: new Date().toISOString(),
+        })
+        .eq("id", flightId);
+
+      if (updateError) throw updateError;
+
+      // Show notification if price dropped (but don't update database)
+      if (oldPrice !== null && oldPrice !== undefined && oldPrice > 0) {
+        const priceDiff = newPrice - oldPrice;
+
+        if (priceDiff < 0) {
+          // Play notification sound for price drop
+          const audio = new Audio('data:audio/wav;base64,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');
+          audio.volume = 0.5;
+          audio.play().catch((e) => console.log('Could not play notification sound:', e));
+
+          // Send Telegram notification (non-blocking)
+          sendTelegramNotification(flight, newPrice, oldPrice).catch((e) => 
+            console.log('Could not send Telegram notification:', e)
+          );
+
+          toast({
+            title: "Giá vé VNA giảm! 🎉",
+            description: `Giá mới: ${newPrice.toLocaleString()} KRW (giảm ${Math.abs(priceDiff).toLocaleString()} KRW) - Chú ý: Giá không tự động cập nhật vào danh sách`,
+            className: "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800",
+          });
+        } else if (priceDiff > 0) {
+          toast({
+            title: "Giá vé VNA tăng",
+            description: `Giá mới: ${newPrice.toLocaleString()} KRW (tăng ${priceDiff.toLocaleString()} KRW)`,
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Giá vé VNA không đổi",
+            description: `Giá hiện tại: ${newPrice.toLocaleString()} KRW`,
+          });
+        }
+      } else {
+        // First time checking or no previous price
+        // Update current_price in database for first time check
+        await supabase
+          .from("monitored_flights")
+          .update({ current_price: newPrice })
+          .eq("id", flightId);
+        
+        toast({
+          title: "Đã kiểm tra giá VNA",
+          description: `Giá hiện tại: ${newPrice.toLocaleString()} KRW`,
+        });
+      }
+
+      await fetchMonitoredFlights();
+    } catch (error) {
+      console.error("Error checking VNA price:", error);
+      toast({
+        variant: "destructive",
+        title: "Lỗi kiểm tra giá VNA",
+        description: error instanceof Error ? error.message : "Đã xảy ra lỗi",
+      });
     }
   };
 
