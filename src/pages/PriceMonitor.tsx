@@ -807,6 +807,19 @@ export default function PriceMonitor() {
                 }).catch(e => console.log('Could not send failure notification:', e));
               }
             }
+          } else if (!flight.auto_hold_enabled) {
+            // Send Telegram notification when auto-hold is not enabled
+            if (profile?.apikey_telegram && profile?.idchat_telegram) {
+              const message = `📉 Hành trình PNR ${flight.pnr || 'N/A'} đã có giá giảm, vui lòng giữ vé\n\nGiá mới: ${newPrice.toLocaleString()} KRW\nGiảm: ${Math.abs(priceDiff).toLocaleString()} KRW`;
+              fetch(`https://api.telegram.org/bot${profile.apikey_telegram}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  chat_id: profile.idchat_telegram,
+                  text: message,
+                }),
+              }).catch(e => console.log('Could not send Telegram notification:', e));
+            }
           }
         } else if (priceDiff > 0) {
           toast({
