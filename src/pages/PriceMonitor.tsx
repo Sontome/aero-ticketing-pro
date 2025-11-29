@@ -1153,6 +1153,17 @@ export default function PriceMonitor() {
               Giới_tính: parsed.gender,
               type: p.loaikhach === "ADT" ? "người_lớn" : "trẻ_em",
             };
+            
+            // Check if passenger has infant
+            if (p.inf) {
+              const infantParsed = parseFirstName(p.inf.firstName || "");
+              passenger.infant = {
+                Họ: p.inf.lastName || "",
+                Tên: infantParsed.name,
+                Giới_tính: infantParsed.gender
+              };
+            }
+            
             return passenger;
           });
 
