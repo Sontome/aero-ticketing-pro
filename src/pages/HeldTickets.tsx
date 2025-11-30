@@ -210,10 +210,10 @@ export default function HeldTickets() {
   };
 
   const handleOpenPnrModalVNA = (pnr: string) => {
-    setSelectedPnr(pnr);
-    setPnrAirline("VNA");
-    setExactTimeMatch(true);
-    setIsPnrModalOpen(true);
+    // Navigate to PriceMonitor page with PNR pre-filled
+    navigate("/price-monitor", {
+      state: { pnr, airline: "VNA", exactTimeMatch: true }
+    });
   };
 
   const handleOpenTicketModal = async (pnr: string, isVNA: boolean) => {
