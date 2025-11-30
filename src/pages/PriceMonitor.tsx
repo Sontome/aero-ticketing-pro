@@ -757,6 +757,22 @@ export default function PriceMonitor() {
       const newPrice = parseInt(matchingFlight["thông_tin_chung"]?.giá_vé || "0");
       const oldPrice = flight.current_price;
 
+      // Skip if price is 0 (invalid/error - couldn't fetch real price)
+      if (newPrice === 0) {
+        await supabase
+          .from("monitored_flights")
+          .update({ last_checked_at: new Date().toISOString() })
+          .eq("id", flightId);
+        
+        toast({
+          title: "Lỗi kiểm tra giá",
+          description: `PNR ${flight.pnr || 'N/A'}: Không lấy được giá mới`,
+          variant: "destructive"
+        });
+        fetchMonitoredFlights();
+        return;
+      }
+
       // Update only last_checked_at (NOT the price for VNA)
       const { error: updateError } = await supabase
         .from("monitored_flights")
