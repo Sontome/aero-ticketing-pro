@@ -209,6 +209,13 @@ export default function HeldTickets() {
     setIsPnrModalOpen(true);
   };
 
+  const handleOpenPnrModalVNA = (pnr: string) => {
+    setSelectedPnr(pnr);
+    setPnrAirline("VNA");
+    setExactTimeMatch(true);
+    setIsPnrModalOpen(true);
+  };
+
   const handleOpenTicketModal = async (pnr: string, isVNA: boolean) => {
     setTicketPnr(pnr);
 
@@ -488,6 +495,18 @@ export default function HeldTickets() {
                         {!vnaTicket && !expired && (
                           <Button
                             onClick={() => handleOpenPnrModal(ticket.pnr)}
+                            disabled={monitoredPNRs.has(ticket.pnr)}
+                            size="sm"
+                            variant={monitoredPNRs.has(ticket.pnr) ? "ghost" : "outline"}
+                            className="mt-2"
+                            title={monitoredPNRs.has(ticket.pnr) ? "Đang theo dõi giá" : "Theo dõi giá giảm"}
+                          >
+                            <TrendingDown className="h-4 w-4" />
+                          </Button>
+                        )}
+                        {vnaTicket && !expired && (
+                          <Button
+                            onClick={() => handleOpenPnrModalVNA(ticket.pnr)}
                             disabled={monitoredPNRs.has(ticket.pnr)}
                             size="sm"
                             variant={monitoredPNRs.has(ticket.pnr) ? "ghost" : "outline"}
