@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -90,6 +90,7 @@ const getTodayString = () => {
 
 export default function PriceMonitor() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { profile } = useAuth();
   const [flights, setFlights] = useState<MonitoredFlight[]>([]);
   const [loading, setLoading] = useState(true);
@@ -156,6 +157,16 @@ export default function PriceMonitor() {
       return;
     }
     fetchMonitoredFlights();
+
+    // Check if navigated from held tickets with PNR
+    if (location.state && location.state.pnr) {
+      setPnrCode(location.state.pnr);
+      setPnrAirline(location.state.airline || "VNA");
+      setExactTimeMatch(location.state.exactTimeMatch !== undefined ? location.state.exactTimeMatch : true);
+      setIsPnrModalOpen(true);
+      // Clear location state
+      window.history.replaceState({}, document.title);
+    }
 
     // Refresh every second to update progress bars and check if auto-check is needed
     const interval = setInterval(() => {
