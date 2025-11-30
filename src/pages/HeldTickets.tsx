@@ -271,11 +271,148 @@ export default function HeldTickets() {
     }
 
     if (pnrAirline === "VNA") {
-      toast({
-        title: "Thông báo",
-        description: "Chức năng nhập PNR của Vietnam Airlines đang được phát triển",
-        variant: "default",
-      });
+      // Handle VNA PNR import
+      setIsLoadingPnr(true);
+      try {
+        const response = await fetch(`https://thuhongtour.com/checkvechoVNA?pnr=${selectedPnr}`);
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch VNA PNR data");
+        }
+
+        const data = await response.json();
+
+        // Validate segments
+        if (!data.chang || !Array.isArray(data.chang)) {
+          throw new Error("Invalid VNA PNR data");
+        }
+
+        const segments = data.chang;
+
+        // Check for connecting flights (>2 segments or same departure dates)
+        if (segments.length > 2) {
+          toast({
+            title: "Lỗi",
+            description: "Chuyến bay nối chuyến chưa hỗ trợ check giá giảm",
+            variant: "destructive",
+          });
+          setIsLoadingPnr(false);
+          return;
+        }
+
+        if (segments.length === 2) {
+          const date1 = segments[0].ngaycatcanh;
+          const date2 = segments[1].ngaycatcanh;
+          if (date1 === date2) {
+            toast({
+              title: "Lỗi",
+              description: "Chuyến bay nối chuyến chưa hỗ trợ check giá giảm",
+              variant: "destructive",
+            });
+            setIsLoadingPnr(false);
+            return;
+          }
+        }
+
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) {
+          throw new Error("User not authenticated");
+        }
+
+        // Helper function to detect gender and remove title prefix
+        const processName = (firstName: string) => {
+          const upperName = firstName.toUpperCase();
+          let gender = "nam";
+          let cleanName = firstName;
+
+          if (upperName.endsWith("MISS") || upperName.endsWith("MS")) {
+            gender = "nữ";
+            cleanName = firstName.replace(/\s*(MISS|MS)\s*$/i, "").trim();
+          } else if (upperName.includes("MR") || upperName.includes("MSTR")) {
+            gender = "nam";
+            cleanName = firstName.replace(/\s*(MR|MSTR)\s*/gi, "").trim();
+          }
+
+          return { gender, cleanName };
+        };
+
+        // Build flight data
+        const flightData: any = {
+          user_id: user.id,
+          airline: "VNA",
+          departure_airport: segments[0].departure,
+          arrival_airport: segments[0].arrival,
+          departure_date: segments[0].ngaycatcanh,
+          departure_time: exactTimeMatch ? segments[0].giocatcanh : null,
+          check_interval_minutes: 5,
+          is_active: true,
+          ticket_class: segments[0].doituong || "ADT",
+          pnr: selectedPnr,
+        };
+
+        if (segments.length === 2) {
+          flightData.is_round_trip = true;
+          flightData.return_date = segments[1].ngaycatcanh;
+          flightData.return_time = exactTimeMatch ? segments[1].giocatcanh : null;
+        }
+
+        // Transform and save passenger information
+        if (data.passengers && Array.isArray(data.passengers) && data.passengers.length > 0) {
+          const transformedPassengers = data.passengers.map((p: any) => {
+            const { gender, cleanName } = processName(p.firstName || "");
+            
+            const passenger: any = {
+              Họ: p.lastName || "",
+              Tên: cleanName,
+              Hộ_chiếu: p.passportNumber || "",
+              Giới_tính: gender,
+              Quốc_tịch: p.quoctich || "VN",
+              type: p.child ? "trẻ_em" : "người_lớn",
+            };
+
+            // Handle infant
+            if (p.inf && typeof p.inf === "object") {
+              const infantFirstName = p.inf.firstName || "";
+              const { gender: infantGender, cleanName: infantCleanName } = processName(infantFirstName);
+              
+              passenger.infant = {
+                Họ: p.inf.lastName || "",
+                Tên: infantCleanName,
+                Hộ_chiếu: "B123456",
+                Giới_tính: infantGender,
+                Quốc_tịch: p.quoctich || "VN",
+              };
+            }
+
+            return passenger;
+          });
+          flightData.passengers = transformedPassengers;
+        }
+
+        const { error } = await supabase.from("monitored_flights").insert(flightData);
+
+        if (error) throw error;
+
+        toast({
+          title: "Đã thêm vào theo dõi giá! 🎯",
+          description: `PNR ${selectedPnr}: ${segments[0].departure} → ${segments[0].arrival}`,
+        });
+
+        setMonitoredPNRs((prev) => new Set([...prev, selectedPnr]));
+        setIsPnrModalOpen(false);
+        setSelectedPnr("");
+      } catch (error) {
+        console.error("Error adding VNA to monitor:", error);
+        toast({
+          title: "Lỗi",
+          description: "Không thể thêm vào danh sách theo dõi giá",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoadingPnr(false);
+      }
       return;
     }
 
