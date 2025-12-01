@@ -154,40 +154,43 @@ export const FlightSearchForm: React.FC<FlightSearchFormProps> = ({ onSearch, lo
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8">
+    <div className="bg-white rounded-2xl shadow-2xl p-8 animate-fade-in">
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Trip Type Selector */}
-        <div className="flex space-x-4">
-          <label className="flex items-center space-x-2 cursor-pointer">
+        <div className="flex space-x-6 pb-4 border-b border-gray-200">
+          <label className="flex items-center space-x-2 cursor-pointer group">
             <input
               type="radio"
               name="tripType"
               value="round_trip"
               checked={formData.tripType === 'round_trip'}
               onChange={(e) => setFormData(prev => ({ ...prev, tripType: e.target.value as 'round_trip' }))}
-              className="text-blue-600"
+              className="text-blue-600 w-4 h-4"
             />
-            <span className="text-gray-700 dark:text-gray-300">Khứ hồi</span>
+            <span className="text-gray-700 dark:text-gray-300 font-medium group-hover:text-blue-600 transition-colors">Khứ hồi</span>
           </label>
-          <label className="flex items-center space-x-2 cursor-pointer">
+          <label className="flex items-center space-x-2 cursor-pointer group">
             <input
               type="radio"
               name="tripType"
               value="one_way"
               checked={formData.tripType === 'one_way'}
               onChange={(e) => setFormData(prev => ({ ...prev, tripType: e.target.value as 'one_way' }))}
-              className="text-blue-600"
+              className="text-blue-600 w-4 h-4"
             />
-            <span className="text-gray-700 dark:text-gray-300">Một chiều</span>
+            <span className="text-gray-700 dark:text-gray-300 font-medium group-hover:text-blue-600 transition-colors">Một chiều</span>
           </label>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* From Airport */}
           <div className="space-y-2">
-            <Label htmlFor="from">Nơi đi</Label>
+            <Label htmlFor="from" className="text-sm text-gray-600 font-medium flex items-center gap-2">
+              <Plane className="w-4 h-4 text-blue-600" />
+              Từ
+            </Label>
             <Select value={formData.from} onValueChange={handleFromChange}>
-              <SelectTrigger>
+              <SelectTrigger className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500">
                 <SelectValue placeholder="Chọn sân bay đi" />
               </SelectTrigger>
               <SelectContent>
@@ -202,9 +205,12 @@ export const FlightSearchForm: React.FC<FlightSearchFormProps> = ({ onSearch, lo
 
           {/* To Airport */}
           <div className="space-y-2">
-            <Label htmlFor="to">Nơi đến</Label>
+            <Label htmlFor="to" className="text-sm text-gray-600 font-medium flex items-center gap-2">
+              <Plane className="w-4 h-4 text-blue-600 rotate-90" />
+              Đến
+            </Label>
             <Select value={formData.to} onValueChange={(value) => setFormData(prev => ({ ...prev, to: value }))}>
-              <SelectTrigger>
+              <SelectTrigger className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500">
                 <SelectValue placeholder="Chọn sân bay đến" />
               </SelectTrigger>
               <SelectContent>
@@ -219,14 +225,17 @@ export const FlightSearchForm: React.FC<FlightSearchFormProps> = ({ onSearch, lo
 
           {/* Departure Date */}
           <div className="space-y-2">
-            <Label>Ngày đi</Label>
+            <Label className="text-sm text-gray-600 font-medium flex items-center gap-2">
+              <CalendarIcon className="w-4 h-4 text-blue-600" />
+              Ngày đi
+            </Label>
             <div className="flex space-x-2">
               <Popover open={departureDateOpen} onOpenChange={handleDepartureDateOpenChange}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
                     className={cn(
-                      "flex-1 justify-start text-left font-normal",
+                      "flex-1 justify-start text-left font-normal h-12 text-base border-gray-300 hover:border-blue-500",
                       !formData.departureDate && "text-muted-foreground"
                     )}
                   >
@@ -254,27 +263,44 @@ export const FlightSearchForm: React.FC<FlightSearchFormProps> = ({ onSearch, lo
                 variant="outline"
                 size="icon"
                 onClick={handleRefreshDepartureDate}
-                className="shrink-0"
+                className="shrink-0 h-12 w-12 border-gray-300 hover:border-blue-500 hover:bg-blue-50"
               >
-                <RefreshCw className="h-4 w-4" />
+                <RefreshCw className="h-4 w-4 text-blue-600" />
               </Button>
             </div>
+          </div>
+
+          {/* Passengers */}
+          <div className="space-y-2">
+            <Label htmlFor="passengers" className="text-sm text-gray-600 font-medium">Số hành khách</Label>
+            <Input
+              id="passengers"
+              type="number"
+              min="1"
+              max="9"
+              value={formData.passengers}
+              onChange={(e) => setFormData(prev => ({ ...prev, passengers: parseInt(e.target.value) || 1 }))}
+              className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+            />
           </div>
         </div>
 
         {/* Return Date */}
         {formData.tripType === 'round_trip' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div></div>
             <div></div>
             <div className="space-y-2">
-              <Label>Ngày về</Label>
+              <Label className="text-sm text-gray-600 font-medium flex items-center gap-2">
+                <CalendarIcon className="w-4 h-4 text-blue-600" />
+                Ngày về
+              </Label>
               <Popover open={returnDateOpen} onOpenChange={handleReturnDateOpenChange}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
                     className={cn(
-                      "w-full justify-start text-left font-normal",
+                      "w-full justify-start text-left font-normal h-12 text-base border-gray-300 hover:border-blue-500",
                       !formData.returnDate && "text-muted-foreground"
                     )}
                   >
@@ -301,8 +327,12 @@ export const FlightSearchForm: React.FC<FlightSearchFormProps> = ({ onSearch, lo
           </div>
         )}
 
-        <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={loading}>
-          <Plane className="mr-2 h-4 w-4" />
+        <Button 
+          type="submit" 
+          className="w-full h-14 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all" 
+          disabled={loading}
+        >
+          <Plane className="mr-2 h-5 w-5" />
           {loading ? 'Đang tìm kiếm...' : 'Tìm chuyến bay'}
         </Button>
       </form>

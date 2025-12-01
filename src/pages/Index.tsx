@@ -6,6 +6,7 @@ import { FlightFilters, FilterOptions } from '@/components/FlightFilters';
 import { fetchVietJetFlights, fetchVietnamAirlinesFlights, Flight } from '@/services/flightApi';
 import { Button } from '@/components/ui/button';
 import { UserProfileDropdown } from '@/components/UserProfileDropdown';
+import backgroundBanner from '@/assets/vietnam-banner-bg.png';
 
 import { PNRCheckModal } from '../components/PNRCheckModal';
 import { EmailTicketModal } from '@/components/EmailTicketModal';
@@ -378,44 +379,41 @@ export default function Index() {
   return (
     <div className={`min-h-screen transition-all duration-100 ${
       showContent 
-        ? 'bg-gradient-to-br from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900' 
+        ? 'bg-white dark:from-gray-900 dark:via-gray-800 dark:to-gray-900' 
         : 'bg-white'
     }`}>
       {showContent && (
         <>
           <header className="sticky top-0 z-50 bg-white dark:bg-gray-900 shadow-md backdrop-blur-sm transition-all duration-100 animate-fade-in border-b border-blue-100 dark:border-gray-800">
-            <div className="container mx-auto px-4 py-6">
+            <div className="container mx-auto px-4 py-4">
               <div className="flex justify-between items-center">
                 <div className="transition-all duration-200">
-                  <h1 className="text-3xl font-bold text-blue-700 dark:text-blue-400">
+                  <h1 className="text-2xl font-bold text-blue-700 dark:text-blue-400">
                     Hàn Việt Air
                   </h1>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    Tìm kiếm và so sánh giá vé máy bay từ các hãng hàng không khác nhau.
-                  </p>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
                   {profile?.perm_check_discount === true && (
                     <Button
                       variant="outline"
-                      size="lg"
+                      size="sm"
                       onClick={() => navigate('/price-monitor')}
-                      className="h-12 px-6 text-lg text-blue-700 dark:text-blue-400 border-blue-300 dark:border-blue-600 rounded-xl
+                      className="text-blue-700 dark:text-blue-400 border-blue-300 dark:border-blue-600 rounded-lg
                        hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all"
                     >
-                      <TrendingDown className="w-5 h-5 mr-2" />
+                      <TrendingDown className="w-4 h-4 mr-2" />
                       Tool Check Vé Giảm
                     </Button>
                   )}
                   {profile?.perm_hold_ticket === true && (
                     <Button
                       variant="outline"
-                      size="lg"
+                      size="sm"
                       onClick={() => navigate('/cart')}
-                      className="h-12 px-6 text-lg text-blue-700 dark:text-blue-400 border-blue-300 dark:border-blue-600 rounded-xl
+                      className="text-blue-700 dark:text-blue-400 border-blue-300 dark:border-blue-600 rounded-lg
                        hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all"
                     >
-                      <ShoppingBasket className="w-5 h-5 mr-2" />
+                      <ShoppingBasket className="w-4 h-4 mr-2" />
                       Giỏ hàng
                     </Button>
                   )}
@@ -424,11 +422,11 @@ export default function Index() {
                       <DropdownMenuTrigger asChild>
                         <Button
                           variant="outline"
-                          size="lg"
-                          className="h-12 px-6 text-lg text-blue-700 dark:text-blue-400 border-blue-300 dark:border-blue-600 rounded-xl
+                          size="sm"
+                          className="text-blue-700 dark:text-blue-400 border-blue-300 dark:border-blue-600 rounded-lg
                            hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all"
                         >
-                          <Wrench className="w-5 h-5 mr-2" />
+                          <Wrench className="w-4 h-4 mr-2" />
                           Tiện ích
                         </Button>
                       </DropdownMenuTrigger>
@@ -467,10 +465,20 @@ export default function Index() {
             </div>
           </header>
 
+          {/* Hero Banner with Background Image */}
+          <div 
+            className="relative w-full h-[450px] bg-cover bg-center"
+            style={{ backgroundImage: `url(${backgroundBanner})` }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/20"></div>
+            <div className="container mx-auto px-4 h-full flex items-center justify-center relative z-10">
+              <div className="w-full max-w-5xl">
+                <FlightSearchForm onSearch={handleSearch} loading={loading} />
+              </div>
+            </div>
+          </div>
+
           <main className="container mx-auto px-4 py-8 animate-fade-in">
-        <div className="animate-fade-in">
-          <FlightSearchForm onSearch={handleSearch} loading={loading} />
-        </div>
         
         {flights.length > 0 && <div className="animate-fade-in" ref={resultsRef}>
             <FlightFilters filters={filters} onFiltersChange={setFilters} hasDirectFlights={hasDirectFlights} hasVfr2pc={hasVfr2pc} />
