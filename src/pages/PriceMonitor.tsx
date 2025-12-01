@@ -248,6 +248,19 @@ export default function PriceMonitor() {
   };
 
   const handleAddFlight = async () => {
+    // Check flight limit before adding
+    const activeFlightCount = flights.filter(f => f.is_active).length;
+    const maxFlights = profile?.hold_ticket_quantity || 0;
+    
+    if (activeFlightCount >= maxFlights) {
+      toast({
+        variant: "destructive",
+        title: "Đã đạt giới hạn",
+        description: `Bạn chỉ được phép theo dõi tối đa ${maxFlights} hành trình cùng lúc`,
+      });
+      return;
+    }
+
     const today = getTodayString();
 
     // Validate based on airline
@@ -1408,6 +1421,19 @@ export default function PriceMonitor() {
         variant: "destructive",
         title: "Lỗi",
         description: "Vui lòng nhập mã PNR hợp lệ (6 ký tự)",
+      });
+      return;
+    }
+
+    // Check flight limit before importing
+    const activeFlightCount = flights.filter(f => f.is_active).length;
+    const maxFlights = profile?.hold_ticket_quantity || 0;
+    
+    if (activeFlightCount >= maxFlights) {
+      toast({
+        variant: "destructive",
+        title: "Đã đạt giới hạn",
+        description: `Bạn chỉ được phép theo dõi tối đa ${maxFlights} hành trình cùng lúc`,
       });
       return;
     }
