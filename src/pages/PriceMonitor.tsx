@@ -16,6 +16,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { PassengerWithType, PassengerInfo, BookingModal } from "@/components/VJBookingModal";
 import { VNABookingModalPriceMonitor } from "@/components/VNABookingModalPriceMonitor";
 import { Switch } from "@/components/ui/switch";
+import { TopNavbar } from "@/components/TopNavbar";
 
 interface FlightSegment {
   departure_airport: string;
@@ -1847,6 +1848,7 @@ export default function PriceMonitor() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800">
+      <TopNavbar />
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
           <Button
