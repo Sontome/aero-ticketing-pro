@@ -98,6 +98,7 @@ export default function PriceMonitor() {
   const [editingFlightId, setEditingFlightId] = useState<string | null>(null);
   const [editCheckInterval, setEditCheckInterval] = useState("60");
   const [checkingFlightId, setCheckingFlightId] = useState<string | null>(null);
+  const [isAutoCheck, setIsAutoCheck] = useState(false);
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
   const [selectedFlight, setSelectedFlight] = useState<MonitoredFlight | null>(null);
   const [isPnrModalOpen, setIsPnrModalOpen] = useState(false);
@@ -205,7 +206,8 @@ export default function PriceMonitor() {
         (flight.last_checked_at && calculateProgress(flight.last_checked_at, flight.check_interval_minutes) >= 100);
 
       if (shouldCheck) {
-        handleManualCheck(flight.id);
+        setIsAutoCheck(true);
+        handleManualCheck(flight.id, true);
       }
     });
   }, [loading, flights]);
@@ -471,7 +473,7 @@ export default function PriceMonitor() {
     }
   };
 
-  const handleManualCheck = async (flightId: string) => {
+  const handleManualCheck = async (flightId: string, isAutomatic = false) => {
     setCheckingFlightId(flightId);
 
     try {
@@ -483,7 +485,7 @@ export default function PriceMonitor() {
 
       // Handle VNA flights
       if (flight.airline === "VNA") {
-        return await handleCheckVNAPrice(flightId, flight);
+        return await handleCheckVNAPrice(flightId, flight, isAutomatic);
       }
 
       // VJ logic continues below
@@ -642,22 +644,28 @@ export default function PriceMonitor() {
             className: "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800",
           });
         } else if (priceDiff > 0) {
-          toast({
-            title: "Giá vé tăng",
-            description: `Giá mới: ${newPrice.toLocaleString()} KRW (tăng ${priceDiff.toLocaleString()} KRW)`,
-            variant: "destructive",
-          });
+          if (!isAutomatic) {
+            toast({
+              title: "Giá vé tăng",
+              description: `Giá mới: ${newPrice.toLocaleString()} KRW (tăng ${priceDiff.toLocaleString()} KRW)`,
+              variant: "destructive",
+            });
+          }
         } else {
+          if (!isAutomatic) {
+            toast({
+              title: "Giá vé không đổi",
+              description: `Giá hiện tại: ${newPrice.toLocaleString()} KRW`,
+            });
+          }
+        }
+      } else {
+        if (!isAutomatic) {
           toast({
-            title: "Giá vé không đổi",
+            title: "Đã cập nhật giá",
             description: `Giá hiện tại: ${newPrice.toLocaleString()} KRW`,
           });
         }
-      } else {
-        toast({
-          title: "Đã cập nhật giá",
-          description: `Giá hiện tại: ${newPrice.toLocaleString()} KRW`,
-        });
       }
 
       await fetchMonitoredFlights();
@@ -673,10 +681,13 @@ export default function PriceMonitor() {
       }
     } finally {
       setCheckingFlightId(null);
+      if (isAutomatic) {
+        setIsAutoCheck(false);
+      }
     }
   };
 
-  const handleCheckVNAPrice = async (flightId: string, flight: MonitoredFlight) => {
+  const handleCheckVNAPrice = async (flightId: string, flight: MonitoredFlight, isAutomatic = false) => {
     try {
       const passengers = flight.passengers || [];
       const adt = passengers.filter((p: PassengerWithType) => p.type === "người_lớn" && !p.infant).length;
@@ -849,16 +860,20 @@ export default function PriceMonitor() {
             }
           }
         } else if (priceDiff > 0) {
-          toast({
-            title: "Giá vé VNA tăng",
-            description: `Giá mới: ${newPrice.toLocaleString()} KRW (tăng ${priceDiff.toLocaleString()} KRW)`,
-            variant: "destructive",
-          });
+          if (!isAutomatic) {
+            toast({
+              title: "Giá vé VNA tăng",
+              description: `Giá mới: ${newPrice.toLocaleString()} KRW (tăng ${priceDiff.toLocaleString()} KRW)`,
+              variant: "destructive",
+            });
+          }
         } else {
-          toast({
-            title: "Giá vé VNA không đổi",
-            description: `Giá hiện tại: ${newPrice.toLocaleString()} KRW`,
-          });
+          if (!isAutomatic) {
+            toast({
+              title: "Giá vé VNA không đổi",
+              description: `Giá hiện tại: ${newPrice.toLocaleString()} KRW`,
+            });
+          }
         }
       } else {
         // First time checking or no previous price
@@ -868,10 +883,12 @@ export default function PriceMonitor() {
           .update({ current_price: newPrice })
           .eq("id", flightId);
         
-        toast({
-          title: "Đã kiểm tra giá VNA",
-          description: `Giá hiện tại: ${newPrice.toLocaleString()} KRW`,
-        });
+        if (!isAutomatic) {
+          toast({
+            title: "Đã kiểm tra giá VNA",
+            description: `Giá hiện tại: ${newPrice.toLocaleString()} KRW`,
+          });
+        }
       }
 
       await fetchMonitoredFlights();
@@ -1546,6 +1563,11 @@ export default function PriceMonitor() {
           });
 
           flightData.passengers = transformedPassengers;
+        }
+
+        // Add initial price from giavegoc if available
+        if (data.giavegoc && typeof data.giavegoc === 'number') {
+          flightData.current_price = data.giavegoc;
         }
 
         const { error } = await supabase.from("monitored_flights").insert(flightData);
