@@ -17,6 +17,10 @@ import { PassengerWithType, PassengerInfo, BookingModal } from "@/components/VJB
 import { VNABookingModalPriceMonitor } from "@/components/VNABookingModalPriceMonitor";
 import { Switch } from "@/components/ui/switch";
 import { TopNavbar } from "@/components/TopNavbar";
+import { PNRCheckModal } from "@/components/PNRCheckModal";
+import { EmailTicketModal } from "@/components/EmailTicketModal";
+import { VJTicketModal } from "@/components/VJTicketModal";
+import { VNATicketModal } from "@/components/VNATicketModal";
 
 interface FlightSegment {
   departure_airport: string;
@@ -104,6 +108,10 @@ export default function PriceMonitor() {
   const [selectedFlight, setSelectedFlight] = useState<MonitoredFlight | null>(null);
   const [isPnrModalOpen, setIsPnrModalOpen] = useState(false);
   const [pnrCode, setPnrCode] = useState("");
+  const [showPNRModal, setShowPNRModal] = useState(false);
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
+  const [showVJTicketModal, setShowVJTicketModal] = useState(false);
+  const [showVNATicketModal, setShowVNATicketModal] = useState(false);
 
   // Send Telegram notification
   const sendTelegramNotification = async (flight: MonitoredFlight, newPrice: number, oldPrice: number) => {
@@ -1848,7 +1856,12 @@ export default function PriceMonitor() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800">
-      <TopNavbar />
+      <TopNavbar 
+        onShowPNRModal={() => setShowPNRModal(true)}
+        onShowEmailModal={() => setIsEmailModalOpen(true)}
+        onShowVJTicketModal={() => setShowVJTicketModal(true)}
+        onShowVNATicketModal={() => setShowVNATicketModal(true)}
+      />
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
           <Button
@@ -2445,6 +2458,29 @@ export default function PriceMonitor() {
           doiTuong={(selectedFlight.ticket_class as 'VFR' | 'ADT' | 'STU') || 'ADT'}
         />
       )}
+
+      {/* Utility Modals */}
+      <PNRCheckModal
+        isOpen={showPNRModal}
+        onClose={() => setShowPNRModal(false)}
+      />
+
+      <EmailTicketModal
+        isOpen={isEmailModalOpen}
+        onClose={() => setIsEmailModalOpen(false)}
+      />
+
+      <VJTicketModal
+        isOpen={showVJTicketModal}
+        onClose={() => setShowVJTicketModal(false)}
+        initialPNR=""
+      />
+
+      <VNATicketModal
+        isOpen={showVNATicketModal}
+        onClose={() => setShowVNATicketModal(false)}
+        initialPNR=""
+      />
     </div>
   );
 }

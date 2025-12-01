@@ -14,6 +14,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { VJTicketModal } from "@/components/VJTicketModal";
 import { VNATicketModal } from "@/components/VNATicketModal";
+import { PNRCheckModal } from "@/components/PNRCheckModal";
+import { EmailTicketModal } from "@/components/EmailTicketModal";
 import { TopNavbar } from "@/components/TopNavbar";
 
 interface HeldTicket {
@@ -39,6 +41,10 @@ export default function HeldTickets() {
   const [isVJTicketModalOpen, setIsVJTicketModalOpen] = useState(false);
   const [isVNATicketModalOpen, setIsVNATicketModalOpen] = useState(false);
   const [ticketPnr, setTicketPnr] = useState("");
+  const [showPNRModal, setShowPNRModal] = useState(false);
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
+  const [showVJTicketModal, setShowVJTicketModal] = useState(false);
+  const [showVNATicketModal, setShowVNATicketModal] = useState(false);
 
   useEffect(() => {
     if (!profile?.perm_hold_ticket) {
@@ -534,7 +540,12 @@ export default function HeldTickets() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800">
-      <TopNavbar />
+      <TopNavbar 
+        onShowPNRModal={() => setShowPNRModal(true)}
+        onShowEmailModal={() => setIsEmailModalOpen(true)}
+        onShowVJTicketModal={() => setShowVJTicketModal(true)}
+        onShowVNATicketModal={() => setShowVNATicketModal(true)}
+      />
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
           <Button
@@ -712,6 +723,28 @@ export default function HeldTickets() {
           isOpen={isVNATicketModalOpen}
           onClose={() => setIsVNATicketModalOpen(false)}
           initialPNR={ticketPnr}
+        />
+
+        <PNRCheckModal
+          isOpen={showPNRModal}
+          onClose={() => setShowPNRModal(false)}
+        />
+
+        <EmailTicketModal
+          isOpen={isEmailModalOpen}
+          onClose={() => setIsEmailModalOpen(false)}
+        />
+
+        <VJTicketModal
+          isOpen={showVJTicketModal}
+          onClose={() => setShowVJTicketModal(false)}
+          initialPNR=""
+        />
+
+        <VNATicketModal
+          isOpen={showVNATicketModal}
+          onClose={() => setShowVNATicketModal(false)}
+          initialPNR=""
         />
       </div>
     </div>

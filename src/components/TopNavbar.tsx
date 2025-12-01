@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { TrendingDown, ShoppingBasket, Wrench } from "lucide-react";
+import { TrendingDown, ShoppingBasket, Wrench, Home } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,6 +39,15 @@ export const TopNavbar = ({
             </h1>
           </div>
           <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/')}
+              className="text-white hover:bg-white/20 transition-all flex items-center gap-2 px-4 py-2"
+            >
+              <Home className="w-5 h-5" />
+              <span className="hidden sm:inline">Trang Chủ</span>
+            </Button>
             {profile?.perm_check_discount === true && (
               <Button
                 variant="ghost"
