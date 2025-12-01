@@ -18,6 +18,7 @@ import { InkSplashEffect } from '@/components/InkSplashEffect';
 import { useAuth } from '@/hooks/useAuth';
 import { ArrowUp, Mail, Wrench, ShoppingBasket, TrendingDown } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import { TopNavbar } from '@/components/TopNavbar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -384,83 +385,12 @@ export default function Index() {
     }`}>
       {showContent && (
         <>
-          <header className="sticky top-0 z-50 bg-gradient-to-r from-teal-700 to-teal-600 dark:from-teal-800 dark:to-teal-700 shadow-lg backdrop-blur-sm transition-all duration-100 animate-fade-in">
-            <div className="container mx-auto px-6 py-3">
-              <div className="flex justify-between items-center">
-                <div className="transition-all duration-200">
-                  <h1 className="text-2xl font-bold text-white">
-                    Hàn Việt Air
-                  </h1>
-                </div>
-                <div className="flex items-center gap-2">
-                  {profile?.perm_check_discount === true && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => navigate('/price-monitor')}
-                      className="text-white hover:bg-white/20 transition-all flex items-center gap-2 px-4 py-2"
-                    >
-                      <TrendingDown className="w-5 h-5" />
-                      <span className="hidden sm:inline">Tool Check Vé Giảm</span>
-                    </Button>
-                  )}
-                  {profile?.perm_hold_ticket === true && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => navigate('/cart')}
-                      className="text-white hover:bg-white/20 transition-all flex items-center gap-2 px-4 py-2"
-                    >
-                      <ShoppingBasket className="w-5 h-5" />
-                      <span className="hidden sm:inline">Giỏ hàng</span>
-                    </Button>
-                  )}
-                  {(profile?.perm_get_ticket_image || profile?.perm_send_ticket || profile?.perm_get_pending_ticket) && (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-white hover:bg-white/20 transition-all flex items-center gap-2 px-4 py-2"
-                        >
-                          <Wrench className="w-5 h-5" />
-                          <span className="hidden sm:inline">Tiện ích</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent className="w-56 bg-background z-[100]" align="end">
-                        {profile?.perm_get_ticket_image && (
-                          <DropdownMenuItem onClick={() => setShowPNRModal(true)}>
-                            Lấy ảnh mặt vé
-                          </DropdownMenuItem>
-                        )}
-                        {profile?.perm_send_ticket && (
-                          <DropdownMenuItem onClick={() => setIsEmailModalOpen(true)}>
-                            Gửi mặt vé
-                          </DropdownMenuItem>
-                        )}
-                        {profile?.perm_get_pending_ticket && (
-                          <DropdownMenuSub>
-                            <DropdownMenuSubTrigger>
-                              Lấy ảnh mặt vé chờ
-                            </DropdownMenuSubTrigger>
-                            <DropdownMenuSubContent className="bg-background z-[110]">
-                              <DropdownMenuItem onClick={() => setShowVJTicketModal(true)}>
-                                VietJet
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => setShowVNATicketModal(true)}>
-                                Vietnam Airlines
-                              </DropdownMenuItem>
-                            </DropdownMenuSubContent>
-                          </DropdownMenuSub>
-                        )}
-                       </DropdownMenuContent>
-                    </DropdownMenu>
-                  )}
-                  <UserProfileDropdown />
-                </div>
-              </div>
-            </div>
-          </header>
+          <TopNavbar
+            onShowPNRModal={() => setShowPNRModal(true)}
+            onShowEmailModal={() => setIsEmailModalOpen(true)}
+            onShowVJTicketModal={() => setShowVJTicketModal(true)}
+            onShowVNATicketModal={() => setShowVNATicketModal(true)}
+          />
 
           {/* Hero Banner with Background Image */}
           <div 

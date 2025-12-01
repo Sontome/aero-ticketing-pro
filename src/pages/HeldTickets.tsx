@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { VJTicketModal } from "@/components/VJTicketModal";
 import { VNATicketModal } from "@/components/VNATicketModal";
+import { TopNavbar } from "@/components/TopNavbar";
 
 interface HeldTicket {
   id: string;
@@ -533,6 +534,7 @@ export default function HeldTickets() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800">
+      <TopNavbar />
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
           <Button
