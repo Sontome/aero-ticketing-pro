@@ -73,7 +73,7 @@ export const TopNavbar = ({
                     <span className="hidden sm:inline">Tiện ích</span>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 bg-background z-[100]" align="end">
+                <DropdownMenuContent className="w-56 bg-background z-[200]" align="end">
                   {profile?.perm_get_ticket_image && onShowPNRModal && (
                     <DropdownMenuItem onClick={onShowPNRModal}>
                       Lấy ảnh mặt vé
@@ -89,7 +89,7 @@ export const TopNavbar = ({
                       <DropdownMenuSubTrigger>
                         Lấy ảnh mặt vé chờ
                       </DropdownMenuSubTrigger>
-                      <DropdownMenuSubContent className="bg-background z-[110]">
+                      <DropdownMenuSubContent className="bg-background z-[210]">
                         <DropdownMenuItem onClick={onShowVJTicketModal}>
                           VietJet
                         </DropdownMenuItem>
