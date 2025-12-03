@@ -616,11 +616,10 @@ export default function PriceMonitor() {
 
       console.log("Booking Keys:", { bookingKeyDeparture, bookingKeyReturn });
 
-      // Update database with new price, booking keys, and last_checked_at
+      // Update database with booking keys and last_checked_at (NOT the price)
       const { error: updateError } = await supabase
         .from("monitored_flights")
         .update({
-          current_price: newPrice,
           booking_key_departure: bookingKeyDeparture,
           booking_key_return: bookingKeyReturn,
           last_checked_at: new Date().toISOString(),
