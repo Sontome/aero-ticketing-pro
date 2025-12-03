@@ -17,22 +17,33 @@ export const useHoverSound = () => {
       
       const ctx = audioContextRef.current;
       
-      // Create a short "tick" sound
-      const oscillator = ctx.createOscillator();
+      // Create a clearer "tick" sound with two oscillators
+      const oscillator1 = ctx.createOscillator();
+      const oscillator2 = ctx.createOscillator();
       const gainNode = ctx.createGain();
       
-      oscillator.connect(gainNode);
+      oscillator1.connect(gainNode);
+      oscillator2.connect(gainNode);
       gainNode.connect(ctx.destination);
       
-      // Short click/tick sound
-      oscillator.frequency.setValueAtTime(800, ctx.currentTime);
-      oscillator.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.03);
+      // Higher frequency for sharper tick
+      oscillator1.frequency.setValueAtTime(1200, ctx.currentTime);
+      oscillator1.frequency.exponentialRampToValueAtTime(600, ctx.currentTime + 0.04);
+      oscillator1.type = 'square';
       
-      gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.05);
+      // Second oscillator for more body
+      oscillator2.frequency.setValueAtTime(800, ctx.currentTime);
+      oscillator2.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.05);
+      oscillator2.type = 'triangle';
       
-      oscillator.start(ctx.currentTime);
-      oscillator.stop(ctx.currentTime + 0.05);
+      // Louder and longer decay for clearer sound
+      gainNode.gain.setValueAtTime(0.2, ctx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.08);
+      
+      oscillator1.start(ctx.currentTime);
+      oscillator2.start(ctx.currentTime);
+      oscillator1.stop(ctx.currentTime + 0.08);
+      oscillator2.stop(ctx.currentTime + 0.08);
     } catch (e) {
       // Silently fail if audio context not supported
     }
