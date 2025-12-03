@@ -12,12 +12,14 @@ import { useNavigate } from 'react-router-dom';
 import { InkSplashEffect } from '@/components/InkSplashEffect';
 
 export default function Auth() {
-  const { signIn, signUp, user, loading } = useAuth();
+  const { signIn, signUp, user, loading, resetPassword } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [authLoading, setAuthLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('signin');
   const [inkSplash, setInkSplash] = useState({ active: false, x: 0, y: 0 });
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
   const loginButtonRef = useRef<HTMLButtonElement>(null);
 
   const [signInForm, setSignInForm] = useState({
@@ -72,6 +74,45 @@ export default function Auth() {
       }
     } catch (error) {
       console.error('Sign in error:', error);
+      toast({
+        variant: "destructive",
+        title: "Có lỗi xảy ra",
+        description: "Vui lòng thử lại sau.",
+      });
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!forgotPasswordEmail.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Lỗi",
+        description: "Vui lòng nhập email",
+      });
+      return;
+    }
+
+    setAuthLoading(true);
+    try {
+      const { error } = await resetPassword(forgotPasswordEmail);
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Lỗi",
+          description: error.message,
+        });
+      } else {
+        toast({
+          title: "Thành công",
+          description: "Email đặt lại mật khẩu đã được gửi. Vui lòng kiểm tra hộp thư.",
+        });
+        setShowForgotPassword(false);
+        setForgotPasswordEmail('');
+      }
+    } catch (error) {
       toast({
         variant: "destructive",
         title: "Có lỗi xảy ra",
@@ -232,7 +273,66 @@ export default function Auth() {
                     'Đăng nhập'
                   )}
                 </Button>
+
+                <Button
+                  type="button"
+                  variant="link"
+                  className="w-full text-blue-600"
+                  onClick={() => setShowForgotPassword(true)}
+                >
+                  Quên mật khẩu?
+                </Button>
               </form>
+
+              {/* Forgot Password Modal */}
+              {showForgotPassword && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                  <Card className="w-full max-w-md mx-4">
+                    <CardHeader>
+                      <CardTitle className="text-lg">Quên mật khẩu</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <form onSubmit={handleForgotPassword} className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="forgot-email">Email</Label>
+                          <div className="relative">
+                            <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                            <Input
+                              id="forgot-email"
+                              type="email"
+                              placeholder="your@email.com"
+                              className="pl-10"
+                              value={forgotPasswordEmail}
+                              onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                              required
+                            />
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="flex-1"
+                            onClick={() => {
+                              setShowForgotPassword(false);
+                              setForgotPasswordEmail('');
+                            }}
+                          >
+                            Hủy
+                          </Button>
+                          <Button type="submit" className="flex-1" disabled={authLoading}>
+                            {authLoading ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              'Gửi email'
+                            )}
+                          </Button>
+                        </div>
+                      </form>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="signup" className="space-y-4 mt-4">
