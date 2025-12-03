@@ -184,11 +184,11 @@ All colors MUST be HSL.
     border-radius: inherit;
     background: linear-gradient(
       var(--angle, 0deg),
-      hsl(217 91% 60%) 0%,
-      hsl(280 87% 65%) 25%,
-      hsl(340 82% 60%) 50%,
-      hsl(40 95% 55%) 75%,
-      hsl(217 91% 60%) 100%
+      hsl(0 0% 100%) 0%,
+      hsl(0 0% 70%) 25%,
+      hsl(0 0% 100%) 50%,
+      hsl(0 0% 70%) 75%,
+      hsl(0 0% 100%) 100%
     );
     background-size: 300% 300%;
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -197,7 +197,7 @@ All colors MUST be HSL.
     mask-composite: exclude;
     opacity: 0;
     transition: opacity 0.3s ease;
-    animation: chase-border 3s ease infinite, rotate-gradient 3s linear infinite;
+    animation: chase-border 5s ease infinite, rotate-gradient 5s linear infinite;
   }
 
   .chase-border-wrapper:hover::before {
@@ -218,11 +218,11 @@ All colors MUST be HSL.
     border-radius: calc(var(--radius) + 2px);
     background: linear-gradient(
       var(--angle, 0deg),
-      hsl(217 91% 60%) 0%,
-      hsl(280 87% 65%) 25%,
-      hsl(340 82% 60%) 50%,
-      hsl(40 95% 55%) 75%,
-      hsl(217 91% 60%) 100%
+      hsl(0 0% 100%) 0%,
+      hsl(0 0% 70%) 25%,
+      hsl(0 0% 100%) 50%,
+      hsl(0 0% 70%) 75%,
+      hsl(0 0% 100%) 100%
     );
     background-size: 300% 300%;
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -232,7 +232,7 @@ All colors MUST be HSL.
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease;
-    animation: chase-border 3s ease infinite, rotate-gradient 3s linear infinite;
+    animation: chase-border 5s ease infinite, rotate-gradient 5s linear infinite;
   }
 
   .chase-border-btn:hover::before {
@@ -253,11 +253,11 @@ All colors MUST be HSL.
     border-radius: calc(var(--radius) + 2px);
     background: linear-gradient(
       var(--angle, 0deg),
-      hsl(217 91% 60%) 0%,
-      hsl(280 87% 65%) 25%,
-      hsl(340 82% 60%) 50%,
-      hsl(40 95% 55%) 75%,
-      hsl(217 91% 60%) 100%
+      hsl(0 0% 100%) 0%,
+      hsl(0 0% 70%) 25%,
+      hsl(0 0% 100%) 50%,
+      hsl(0 0% 70%) 75%,
+      hsl(0 0% 100%) 100%
     );
     background-size: 300% 300%;
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -267,7 +267,7 @@ All colors MUST be HSL.
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease;
-    animation: chase-border 3s ease infinite, rotate-gradient 3s linear infinite;
+    animation: chase-border 5s ease infinite, rotate-gradient 5s linear infinite;
   }
 
   .chase-border-card:hover::before {
@@ -288,11 +288,11 @@ All colors MUST be HSL.
     border-radius: calc(var(--radius) + 2px);
     background: linear-gradient(
       var(--angle, 0deg),
-      hsl(217 91% 60%) 0%,
-      hsl(280 87% 65%) 25%,
-      hsl(340 82% 60%) 50%,
-      hsl(40 95% 55%) 75%,
-      hsl(217 91% 60%) 100%
+      hsl(0 0% 100%) 0%,
+      hsl(0 0% 70%) 25%,
+      hsl(0 0% 100%) 50%,
+      hsl(0 0% 70%) 75%,
+      hsl(0 0% 100%) 100%
     );
     background-size: 300% 300%;
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -301,6 +301,6 @@ All colors MUST be HSL.
     mask-composite: exclude;
     opacity: 0.7;
     pointer-events: none;
-    animation: chase-border 3s ease infinite, rotate-gradient 3s linear infinite;
+    animation: chase-border 5s ease infinite, rotate-gradient 5s linear infinite;
   }
 }
