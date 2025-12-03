@@ -577,7 +577,7 @@ export default function HeldTickets() {
                 return (
                   <Card
                     key={ticket.id}
-                    className={`${isVJExpired ? "opacity-50 grayscale" : ""} ${
+                    className={`chase-border-card ${isVJExpired ? "opacity-50 grayscale" : ""} ${
                       vnaTicket
                         ? "border-blue-500 bg-blue-50 dark:bg-blue-950/20"
                         : "border-red-500 bg-red-50 dark:bg-red-950/20"

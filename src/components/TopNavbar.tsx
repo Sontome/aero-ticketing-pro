@@ -43,7 +43,7 @@ export const TopNavbar = ({
               variant="ghost"
               size="sm"
               onClick={() => navigate('/')}
-              className="text-white hover:bg-white/20 transition-all flex items-center gap-2 px-4 py-2"
+              className="chase-border-btn text-white hover:bg-white/20 transition-all flex items-center gap-2 px-4 py-2"
             >
               <Home className="w-5 h-5" />
               <span className="hidden sm:inline">Trang Chủ</span>
@@ -53,7 +53,7 @@ export const TopNavbar = ({
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate('/price-monitor')}
-                className="text-white hover:bg-white/20 transition-all flex items-center gap-2 px-4 py-2"
+                className="chase-border-btn text-white hover:bg-white/20 transition-all flex items-center gap-2 px-4 py-2"
               >
                 <TrendingDown className="w-5 h-5" />
                 <span className="hidden sm:inline">Tool Check Vé Giảm</span>
@@ -64,7 +64,7 @@ export const TopNavbar = ({
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate('/cart')}
-                className="text-white hover:bg-white/20 transition-all flex items-center gap-2 px-4 py-2"
+                className="chase-border-btn text-white hover:bg-white/20 transition-all flex items-center gap-2 px-4 py-2"
               >
                 <ShoppingBasket className="w-5 h-5" />
                 <span className="hidden sm:inline">Giỏ hàng</span>
@@ -76,7 +76,7 @@ export const TopNavbar = ({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-white hover:bg-white/20 transition-all flex items-center gap-2 px-4 py-2"
+                    className="chase-border-btn text-white hover:bg-white/20 transition-all flex items-center gap-2 px-4 py-2"
                   >
                     <Wrench className="w-5 h-5" />
                     <span className="hidden sm:inline">Tiện ích</span>

@@ -154,7 +154,7 @@ export const FlightSearchForm: React.FC<FlightSearchFormProps> = ({ onSearch, lo
   };
 
   return (
-    <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-6 animate-fade-in max-w-5xl mx-auto">
+    <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-6 animate-fade-in max-w-5xl mx-auto chase-border-active">
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Trip Type Selector */}
         <div className="flex space-x-4 pb-3 border-b border-gray-200">
