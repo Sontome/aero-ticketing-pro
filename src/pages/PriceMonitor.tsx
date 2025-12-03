@@ -1714,6 +1714,11 @@ export default function PriceMonitor() {
         flightData.passengers = transformedPassengers;
       }
 
+      // Add initial price from giacoban if available
+      if (data.giacoban && typeof data.giacoban === 'number') {
+        flightData.current_price = data.giacoban;
+      }
+
       const { error } = await supabase.from("monitored_flights").insert(flightData);
 
       if (error) throw error;
