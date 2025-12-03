@@ -8,18 +8,23 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Mail, Lock, User, Plane, Phone, Facebook } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { InkSplashEffect } from '@/components/InkSplashEffect';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function Auth() {
-  const { signIn, signUp, user, loading, resetPassword } = useAuth();
+  const { signIn, signUp, user, loading, resetPassword, updatePassword } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
   const [authLoading, setAuthLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('signin');
   const [inkSplash, setInkSplash] = useState({ active: false, x: 0, y: 0 });
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
+  const [showPasswordUpdate, setShowPasswordUpdate] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const loginButtonRef = useRef<HTMLButtonElement>(null);
 
   const [signInForm, setSignInForm] = useState({
@@ -36,11 +41,120 @@ export default function Auth() {
     linkfacebook: '',
   });
 
-  // useEffect(() => {
-  //   if (user) {
-  //     navigate('/');
-  //   }
-  // }, [user, navigate]);
+  // Handle auth callback from URL (magic link, recovery, etc.)
+  useEffect(() => {
+    const handleAuthCallback = async () => {
+      const hashParams = new URLSearchParams(location.hash.substring(1));
+      const queryParams = new URLSearchParams(location.search);
+      
+      const accessToken = hashParams.get('access_token') || queryParams.get('access_token');
+      const refreshToken = hashParams.get('refresh_token') || queryParams.get('refresh_token');
+      const type = hashParams.get('type') || queryParams.get('type');
+      const errorDescription = hashParams.get('error_description') || queryParams.get('error_description');
+      
+      if (errorDescription) {
+        toast({
+          variant: "destructive",
+          title: "Lỗi xác thực",
+          description: decodeURIComponent(errorDescription.replace(/\+/g, ' ')),
+        });
+        return;
+      }
+      
+      if (accessToken && refreshToken) {
+        const { error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+        
+        if (error) {
+          toast({
+            variant: "destructive",
+            title: "Lỗi",
+            description: error.message,
+          });
+          return;
+        }
+        
+        // If it's a recovery (password reset) type, show password update form
+        if (type === 'recovery') {
+          setShowPasswordUpdate(true);
+          toast({
+            title: "Đăng nhập thành công",
+            description: "Vui lòng cập nhật mật khẩu mới của bạn.",
+          });
+        } else {
+          // Magic link login - redirect to home
+          toast({
+            title: "Đăng nhập thành công",
+            description: "Chào mừng bạn quay trở lại!",
+          });
+          navigate('/');
+        }
+        
+        // Clear the URL hash/query params
+        window.history.replaceState(null, '', window.location.pathname);
+      }
+    };
+    
+    handleAuthCallback();
+  }, [location, navigate, toast]);
+
+  // Redirect authenticated users to home (if not in password update mode)
+  useEffect(() => {
+    if (user && !loading && !showPasswordUpdate) {
+      navigate('/');
+    }
+  }, [user, loading, navigate, showPasswordUpdate]);
+
+  const handlePasswordUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (newPassword !== confirmNewPassword) {
+      toast({
+        variant: "destructive",
+        title: "Lỗi",
+        description: "Mật khẩu xác nhận không khớp",
+      });
+      return;
+    }
+    
+    if (newPassword.length < 6) {
+      toast({
+        variant: "destructive",
+        title: "Lỗi",
+        description: "Mật khẩu phải có ít nhất 6 ký tự",
+      });
+      return;
+    }
+    
+    setAuthLoading(true);
+    try {
+      const { error } = await updatePassword(newPassword);
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Lỗi",
+          description: error.message,
+        });
+      } else {
+        toast({
+          title: "Thành công",
+          description: "Mật khẩu đã được cập nhật.",
+        });
+        setShowPasswordUpdate(false);
+        navigate('/');
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Có lỗi xảy ra",
+        description: "Vui lòng thử lại sau.",
+      });
+    } finally {
+      setAuthLoading(false);
+    }
+  };
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -201,6 +315,69 @@ export default function Auth() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  // Show password update form when user comes from recovery link
+  if (showPasswordUpdate) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="flex items-center justify-center mb-4">
+              <Plane className="h-8 w-8 text-blue-600 mr-2" />
+              <CardTitle className="text-2xl font-bold text-blue-600">Cập nhật mật khẩu</CardTitle>
+            </div>
+            <p className="text-gray-600 dark:text-gray-400">
+              Nhập mật khẩu mới của bạn
+            </p>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handlePasswordUpdate} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="new-password">Mật khẩu mới</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input
+                    id="new-password"
+                    type="password"
+                    placeholder="••••••••"
+                    className="pl-10"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirm-new-password">Xác nhận mật khẩu</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input
+                    id="confirm-new-password"
+                    type="password"
+                    placeholder="••••••••"
+                    className="pl-10"
+                    value={confirmNewPassword}
+                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+              <Button type="submit" className="w-full" disabled={authLoading}>
+                {authLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Đang cập nhật...
+                  </>
+                ) : (
+                  'Cập nhật mật khẩu'
+                )}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     );
   }
