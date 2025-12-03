@@ -35,8 +35,8 @@ export const useHoverSound = () => {
       
       // Smooth envelope for pleasant sound
       gainNode.gain.setValueAtTime(0, currentTime);
-      gainNode.gain.linearRampToValueAtTime(0.25, currentTime + 0.01);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, currentTime + 0.12);
+      gainNode.gain.linearRampToValueAtTime(0.125, currentTime + 0.01);
+      gainNode.gain.exponentialRampToValueAtTime(0.005, currentTime + 0.12);
       
       // Connect nodes
       oscillator.connect(filter);
