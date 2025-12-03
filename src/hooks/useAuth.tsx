@@ -134,23 +134,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const resetPassword = async (email: string) => {
-    try {
-      const { data, error } = await supabase.functions.invoke('reset-password', {
-        body: { email }
-      });
-      
-      if (error) {
-        return { error };
-      }
-      
-      if (data?.error) {
-        return { error: { message: data.error } };
-      }
-      
-      return { error: null, message: data?.message };
-    } catch (err: any) {
-      return { error: { message: err.message || 'Có lỗi xảy ra' } };
-    }
+    const redirectUrl = `${window.location.origin}/auth`;
+    
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: redirectUrl,
+    });
+    
+    return { error };
   };
 
   const updatePassword = async (newPassword: string) => {

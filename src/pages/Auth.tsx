@@ -221,7 +221,7 @@ export default function Auth() {
       } else {
         toast({
           title: "Thành công",
-          description: "Mật khẩu mới đã được gửi đến email của bạn. Vui lòng kiểm tra hộp thư.",
+          description: "Link đặt lại mật khẩu đã được gửi đến email của bạn. Vui lòng kiểm tra hộp thư.",
         });
         setShowForgotPassword(false);
         setForgotPasswordEmail('');
