@@ -185,18 +185,23 @@ export default function PriceMonitor() {
         // Don't run auto-check if flights array is empty (still loading)
         if (prev.length === 0) return prev;
 
-        // Check if any active flight needs auto-check
-        prev.forEach((flight) => {
-          // Only auto-check if flight has been checked at least once (last_checked_at is not null)
-          // Use ref to prevent race conditions (state updates are async)
-          if (flight.is_active && !checkingFlightIdRef.current && flight.last_checked_at) {
-            const progress = calculateProgress(flight.last_checked_at, flight.check_interval_minutes);
-            if (progress >= 100) {
-              // Auto-trigger check when timer reaches 100%
-              handleManualCheck(flight.id, true);
-            }
-          }
+        // Only process ONE flight at a time to prevent race conditions
+        // Skip if any check is already in progress
+        if (checkingFlightIdRef.current) return [...prev];
+
+        // Find the first active flight that needs auto-check
+        const flightToCheck = prev.find((flight) => {
+          if (!flight.is_active || !flight.last_checked_at) return false;
+          const progress = calculateProgress(flight.last_checked_at, flight.check_interval_minutes);
+          return progress >= 100;
         });
+
+        if (flightToCheck) {
+          // Set ref immediately before async call to prevent race conditions
+          checkingFlightIdRef.current = flightToCheck.id;
+          handleManualCheck(flightToCheck.id, true);
+        }
+
         return [...prev];
       });
     }, 1000);
@@ -206,21 +211,22 @@ export default function PriceMonitor() {
 
   // Auto-check when entering page if needed
   useEffect(() => {
-    if (loading || flights.length === 0 || checkingFlightId) return;
+    if (loading || flights.length === 0 || checkingFlightIdRef.current) return;
 
-    flights.forEach((flight) => {
-      if (!flight.is_active) return;
-
+    // Find the first flight that needs checking (only process ONE at a time)
+    const flightToCheck = flights.find((flight) => {
+      if (!flight.is_active) return false;
       // Check if never checked OR time since last check exceeds interval
-      const shouldCheck =
-        !flight.last_checked_at ||
+      return !flight.last_checked_at ||
         (flight.last_checked_at && calculateProgress(flight.last_checked_at, flight.check_interval_minutes) >= 100);
-
-      if (shouldCheck) {
-        setIsAutoCheck(true);
-        handleManualCheck(flight.id, true);
-      }
     });
+
+    if (flightToCheck) {
+      setIsAutoCheck(true);
+      // Set ref immediately before async call to prevent race conditions
+      checkingFlightIdRef.current = flightToCheck.id;
+      handleManualCheck(flightToCheck.id, true);
+    }
   }, [loading, flights]);
 
   const fetchMonitoredFlights = async () => {
@@ -499,8 +505,11 @@ export default function PriceMonitor() {
 
   const handleManualCheck = async (flightId: string, isAutomatic = false) => {
     // Prevent concurrent checks using ref (state updates are async)
-    if (checkingFlightIdRef.current) {
-      console.log('Check already in progress, skipping');
+    // If ref is already set to a DIFFERENT flight, skip (another check in progress)
+    // If ref is already set to THIS flight, continue (was pre-set by auto-check)
+    // If ref is null, set it (manual check)
+    if (checkingFlightIdRef.current && checkingFlightIdRef.current !== flightId) {
+      console.log('Check already in progress for another flight, skipping');
       return;
     }
     checkingFlightIdRef.current = flightId;
