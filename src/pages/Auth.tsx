@@ -97,17 +97,17 @@ export default function Auth() {
 
     setAuthLoading(true);
     try {
-      const { error } = await resetPassword(forgotPasswordEmail);
-      if (error) {
+      const result = await resetPassword(forgotPasswordEmail);
+      if (result.error) {
         toast({
           variant: "destructive",
           title: "Lỗi",
-          description: error.message,
+          description: result.error.message,
         });
       } else {
         toast({
           title: "Thành công",
-          description: "Email đặt lại mật khẩu đã được gửi. Vui lòng kiểm tra hộp thư.",
+          description: "Mật khẩu mới đã được gửi đến email của bạn. Vui lòng kiểm tra hộp thư.",
         });
         setShowForgotPassword(false);
         setForgotPasswordEmail('');
