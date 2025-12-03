@@ -157,7 +157,7 @@ ${getBaggageInfo()}, giá vé = ${formatPrice(adjustedPrice)}w`;
   const isADT = flight.airline === 'VNA' && flight.baggageType === 'ADT';
 
   return (
-    <Card className={`hover:shadow-lg transition-all duration-300 mb-4 opacity-0 animate-fade-in relative ${isADT ? 'border-red-500 border-2' : ''}`}>
+    <Card className={`chase-border-card hover:shadow-lg transition-all duration-300 mb-4 opacity-0 animate-fade-in relative ${isADT ? 'border-red-500 border-2' : ''}`}>
       <CardContent className="p-6">
         {/* Hold Ticket Icon Button */}
         {onHoldTicket && (

@@ -2320,7 +2320,7 @@ export default function PriceMonitor() {
               {flights.map((flight) => (
                 <Card
                   key={flight.id}
-                  className={`${
+                  className={`chase-border-card ${
                     flight.airline === "VNA"
                       ? "border-blue-500 bg-blue-50 dark:bg-blue-950/20"
                       : "border-red-500 bg-red-50 dark:bg-red-950/20"

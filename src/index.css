@@ -132,6 +132,34 @@ All colors MUST be HSL.
   }
 }
 
+/* Chase border / running lights animation */
+@keyframes chase-border {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes rotate-gradient {
+  0% {
+    --angle: 0deg;
+  }
+  100% {
+    --angle: 360deg;
+  }
+}
+
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
 @layer utilities {
   .animate-fade-in {
     animation: fadeIn 0.5s ease-out forwards;
@@ -139,5 +167,126 @@ All colors MUST be HSL.
   
   .ink-splash-active {
     animation: inkSplash 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  }
+
+  /* Chase border effect - wrapper */
+  .chase-border-wrapper {
+    position: relative;
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .chase-border-wrapper::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 2px;
+    border-radius: inherit;
+    background: linear-gradient(
+      var(--angle, 0deg),
+      hsl(217 91% 60%) 0%,
+      hsl(280 87% 65%) 25%,
+      hsl(340 82% 60%) 50%,
+      hsl(40 95% 55%) 75%,
+      hsl(217 91% 60%) 100%
+    );
+    background-size: 300% 300%;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    animation: chase-border 3s ease infinite, rotate-gradient 3s linear infinite;
+  }
+
+  .chase-border-wrapper:hover::before {
+    opacity: 1;
+  }
+
+  /* Chase border for buttons */
+  .chase-border-btn {
+    position: relative;
+    overflow: visible;
+    isolation: isolate;
+  }
+
+  .chase-border-btn::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: calc(var(--radius) + 2px);
+    background: linear-gradient(
+      var(--angle, 0deg),
+      hsl(217 91% 60%) 0%,
+      hsl(280 87% 65%) 25%,
+      hsl(340 82% 60%) 50%,
+      hsl(40 95% 55%) 75%,
+      hsl(217 91% 60%) 100%
+    );
+    background-size: 300% 300%;
+    opacity: 0;
+    z-index: -1;
+    transition: opacity 0.3s ease;
+    animation: chase-border 3s ease infinite, rotate-gradient 3s linear infinite;
+  }
+
+  .chase-border-btn:hover::before {
+    opacity: 1;
+  }
+
+  /* Chase border for cards */
+  .chase-border-card {
+    position: relative;
+    overflow: visible;
+  }
+
+  .chase-border-card::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: calc(var(--radius) + 2px);
+    background: linear-gradient(
+      var(--angle, 0deg),
+      hsl(217 91% 60%) 0%,
+      hsl(280 87% 65%) 25%,
+      hsl(340 82% 60%) 50%,
+      hsl(40 95% 55%) 75%,
+      hsl(217 91% 60%) 100%
+    );
+    background-size: 300% 300%;
+    opacity: 0;
+    z-index: -1;
+    transition: opacity 0.3s ease;
+    animation: chase-border 3s ease infinite, rotate-gradient 3s linear infinite;
+  }
+
+  .chase-border-card:hover::before {
+    opacity: 1;
+  }
+
+  /* Always active chase border (for search form) */
+  .chase-border-active {
+    position: relative;
+    overflow: visible;
+  }
+
+  .chase-border-active::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: calc(var(--radius) + 2px);
+    background: linear-gradient(
+      var(--angle, 0deg),
+      hsl(217 91% 60%) 0%,
+      hsl(280 87% 65%) 25%,
+      hsl(340 82% 60%) 50%,
+      hsl(40 95% 55%) 75%,
+      hsl(217 91% 60%) 100%
+    );
+    background-size: 300% 300%;
+    opacity: 0.7;
+    z-index: -1;
+    animation: chase-border 3s ease infinite, rotate-gradient 3s linear infinite;
   }
 }
