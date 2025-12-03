@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -103,6 +103,7 @@ export default function PriceMonitor() {
   const [editingFlightId, setEditingFlightId] = useState<string | null>(null);
   const [editCheckInterval, setEditCheckInterval] = useState("60");
   const [checkingFlightId, setCheckingFlightId] = useState<string | null>(null);
+  const checkingFlightIdRef = useRef<string | null>(null); // Ref to prevent race conditions
   const [isAutoCheck, setIsAutoCheck] = useState(false);
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
   const [selectedFlight, setSelectedFlight] = useState<MonitoredFlight | null>(null);
@@ -187,11 +188,12 @@ export default function PriceMonitor() {
         // Check if any active flight needs auto-check
         prev.forEach((flight) => {
           // Only auto-check if flight has been checked at least once (last_checked_at is not null)
-          if (flight.is_active && !checkingFlightId && flight.last_checked_at) {
+          // Use ref to prevent race conditions (state updates are async)
+          if (flight.is_active && !checkingFlightIdRef.current && flight.last_checked_at) {
             const progress = calculateProgress(flight.last_checked_at, flight.check_interval_minutes);
             if (progress >= 100) {
               // Auto-trigger check when timer reaches 100%
-              handleManualCheck(flight.id);
+              handleManualCheck(flight.id, true);
             }
           }
         });
@@ -496,6 +498,12 @@ export default function PriceMonitor() {
   };
 
   const handleManualCheck = async (flightId: string, isAutomatic = false) => {
+    // Prevent concurrent checks using ref (state updates are async)
+    if (checkingFlightIdRef.current) {
+      console.log('Check already in progress, skipping');
+      return;
+    }
+    checkingFlightIdRef.current = flightId;
     setCheckingFlightId(flightId);
 
     try {
@@ -640,6 +648,18 @@ export default function PriceMonitor() {
           return; // Exit early as the flight is now held and deleted
         } catch (error) {
           console.error("Auto-hold failed:", error);
+          // Send Telegram notification about failure (similar to VNA)
+          if (profile?.apikey_telegram && profile?.idchat_telegram) {
+            const failMessage = `⚠️ Có hành trình VJ giảm chưa giữ vé thành công, hãy giữ vé thủ công\n\nPNR: ${flight.pnr || 'N/A'}\nHành trình: ${flight.departure_airport} → ${flight.arrival_airport}\nGiá mới: ${newPrice.toLocaleString()} KRW`;
+            fetch(`https://api.telegram.org/bot${profile.apikey_telegram}/sendMessage`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                chat_id: profile.idchat_telegram,
+                text: failMessage,
+              }),
+            }).catch(e => console.log('Could not send failure notification:', e));
+          }
           // Continue with normal flow if auto-hold fails
         }
       }
@@ -701,6 +721,7 @@ export default function PriceMonitor() {
         });
       }
     } finally {
+      checkingFlightIdRef.current = null;
       setCheckingFlightId(null);
       if (isAutomatic) {
         setIsAutoCheck(false);
@@ -1171,6 +1192,20 @@ export default function PriceMonitor() {
     const { error: deleteError } = await supabase.from("monitored_flights").delete().eq("id", flight.id);
     if (deleteError) throw deleteError;
 
+    // Send Telegram notification for successful auto-hold
+    if (profile?.apikey_telegram && profile?.idchat_telegram) {
+      const segment1 = segments[0];
+      const telegramMessage = `✅ Đã tự động giữ vé VNA thành công!\n\nPNR mới: ${data.pnr}\nHành trình: ${segment1.departure_airport} → ${segment1.arrival_airport}\nNgày bay: ${segment1.departure_date}${segment2 ? `\nNgày về: ${segment2.departure_date}` : ''}`;
+      fetch(`https://api.telegram.org/bot${profile.apikey_telegram}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: profile.idchat_telegram,
+          text: telegramMessage,
+        }),
+      }).catch(e => console.log('Could not send Telegram notification:', e));
+    }
+
     toast({
       title: "Đã tự động giữ vé VNA thành công! 🎉",
       description: `PNR: ${data.pnr}. Hành trình đã được chuyển vào giỏ vé.`,
@@ -1379,6 +1414,19 @@ export default function PriceMonitor() {
     const { error: deleteError } = await supabase.from("monitored_flights").delete().eq("id", flight.id);
 
     if (deleteError) throw deleteError;
+
+    // Send Telegram notification for successful auto-hold (similar to VNA)
+    if (profile?.apikey_telegram && profile?.idchat_telegram) {
+      const telegramMessage = `✅ Đã tự động giữ vé VJ thành công!\n\nPNR mới: ${data.mã_giữ_vé}\nHành trình: ${flight.departure_airport} → ${flight.arrival_airport}\nNgày bay: ${flight.departure_date}${flight.is_round_trip && flight.return_date ? `\nNgày về: ${flight.return_date}` : ''}\nHạn thanh toán: ${data.hạn_thanh_toán || 'N/A'}`;
+      fetch(`https://api.telegram.org/bot${profile.apikey_telegram}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: profile.idchat_telegram,
+          text: telegramMessage,
+        }),
+      }).catch(e => console.log('Could not send Telegram notification:', e));
+    }
 
     toast({
       title: "Đã tự động giữ vé thành công! 🎉",
