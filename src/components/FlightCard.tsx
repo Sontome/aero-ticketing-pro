@@ -6,6 +6,7 @@ import { Plane, Clock, Users, Copy, ShoppingCart } from 'lucide-react';
 import { Flight } from '@/services/flightApi';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useHoverSound } from '@/hooks/useHoverSound';
 
 interface FlightCardProps {
   flight: Flight;
@@ -16,6 +17,7 @@ interface FlightCardProps {
 export const FlightCard: React.FC<FlightCardProps> = ({ flight, priceMode, onHoldTicket }) => {
   const { profile } = useAuth();
   const { toast } = useToast();
+  const { playClickSound } = useHoverSound();
   const [adjustedPrice, setAdjustedPrice] = useState(flight.price);
 
   useEffect(() => {
@@ -157,7 +159,10 @@ ${getBaggageInfo()}, giá vé = ${formatPrice(adjustedPrice)}w`;
   const isADT = flight.airline === 'VNA' && flight.baggageType === 'ADT';
 
   return (
-    <Card className={`chase-border-card hover:shadow-lg transition-all duration-300 mb-4 opacity-0 animate-fade-in relative ${isADT ? 'border-red-500 border-2' : ''}`}>
+    <Card 
+      className={`chase-border-card hover:shadow-lg hover:scale-[1.02] transition-all duration-300 mb-4 opacity-0 animate-fade-in relative ${isADT ? 'border-red-500 border-2' : ''}`}
+      onMouseEnter={playClickSound}
+    >
       <CardContent className="p-6">
         {/* Hold Ticket Icon Button */}
         {onHoldTicket && (

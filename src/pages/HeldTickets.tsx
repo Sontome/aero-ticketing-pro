@@ -17,6 +17,7 @@ import { VNATicketModal } from "@/components/VNATicketModal";
 import { PNRCheckModal } from "@/components/PNRCheckModal";
 import { EmailTicketModal } from "@/components/EmailTicketModal";
 import { TopNavbar } from "@/components/TopNavbar";
+import { useHoverSound } from "@/hooks/useHoverSound";
 
 interface HeldTicket {
   id: string;
@@ -30,6 +31,7 @@ interface HeldTicket {
 export default function HeldTickets() {
   const navigate = useNavigate();
   const { profile } = useAuth();
+  const { playClickSound } = useHoverSound();
   const [tickets, setTickets] = useState<HeldTicket[]>([]);
   const [loading, setLoading] = useState(true);
   const [monitoredPNRs, setMonitoredPNRs] = useState<Set<string>>(new Set());
@@ -577,11 +579,12 @@ export default function HeldTickets() {
                 return (
                   <Card
                     key={ticket.id}
-                    className={`chase-border-card ${isVJExpired ? "opacity-50 grayscale" : ""} ${
+                    className={`chase-border-card hover:scale-[1.02] transition-all duration-300 ${isVJExpired ? "opacity-50 grayscale" : ""} ${
                       vnaTicket
                         ? "border-blue-500 bg-blue-50 dark:bg-blue-950/20"
                         : "border-red-500 bg-red-50 dark:bg-red-950/20"
                     }`}
+                    onMouseEnter={playClickSound}
                   >
                     <CardHeader>
                       <div className="flex items-start justify-between">

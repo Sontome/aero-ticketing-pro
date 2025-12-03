@@ -21,6 +21,7 @@ import { PNRCheckModal } from "@/components/PNRCheckModal";
 import { EmailTicketModal } from "@/components/EmailTicketModal";
 import { VJTicketModal } from "@/components/VJTicketModal";
 import { VNATicketModal } from "@/components/VNATicketModal";
+import { useHoverSound } from "@/hooks/useHoverSound";
 
 interface FlightSegment {
   departure_airport: string;
@@ -97,6 +98,7 @@ export default function PriceMonitor() {
   const navigate = useNavigate();
   const location = useLocation();
   const { profile } = useAuth();
+  const { playClickSound } = useHoverSound();
   const [flights, setFlights] = useState<MonitoredFlight[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -2320,11 +2322,12 @@ export default function PriceMonitor() {
               {flights.map((flight) => (
                 <Card
                   key={flight.id}
-                  className={`chase-border-card ${
+                  className={`chase-border-card hover:scale-[1.02] transition-all duration-300 ${
                     flight.airline === "VNA"
                       ? "border-blue-500 bg-blue-50 dark:bg-blue-950/20"
                       : "border-red-500 bg-red-50 dark:bg-red-950/20"
                   } ${!flight.is_active ? "opacity-50" : ""}`}
+                  onMouseEnter={playClickSound}
                 >
                   <CardHeader>
                     <div className="flex items-start justify-between">
