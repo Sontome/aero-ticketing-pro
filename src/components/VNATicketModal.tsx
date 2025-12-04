@@ -29,10 +29,17 @@ interface FlightSegment {
   sohieumaybay: string;
 }
 
+interface Infant {
+  lastName: string;
+  firstName: string;
+}
+
 interface Passenger {
   lastName: string;
   firstName: string;
   loaikhach: string;
+  ngaysinh?: string | null;
+  inf?: Infant;
 }
 
 interface VNAPNRData {
@@ -229,21 +236,30 @@ export const VNATicketModal: React.FC<VNATicketModalProps> = ({ isOpen, onClose,
                 </div>
 
                 <div className="flex flex-col gap-3">
-                  {pnrData.passengers.map((passenger, index) => (
-                    <div key={index} className="overflow-hidden bg-[#F3F6FA] px-2 lg:px-4">
-                      <div className="cursor-pointer">
-                        <div className="flex justify-between py-3 items-center">
-                          <div className="flex items-center gap-1">
-                            <div className="flex">
-                              <span className="font-bold text-sm lg:text-base relative -translate-y-[8px]">
-                                Hành Khách {index + 1} - {passenger.lastName} {passenger.firstName} 
-                              </span>
+                  {pnrData.passengers.map((passenger, index) => {
+                    const passengerType = passenger.loaikhach === 'ADT' ? 'Người lớn' : 
+                                          passenger.loaikhach === 'CHD' ? 'Trẻ em' : passenger.loaikhach;
+                    const infantInfo = passenger.inf 
+                      ? ` ( Em bé : ${passenger.inf.lastName} ${passenger.inf.firstName} )`
+                      : '';
+                    
+                    return (
+                      <div key={index} className="overflow-hidden bg-[#F3F6FA] px-2 lg:px-4">
+                        <div className="cursor-pointer">
+                          <div className="flex justify-between py-3 items-center">
+                            <div className="flex items-center gap-1">
+                              <div className="flex">
+                                <span className="font-bold text-sm lg:text-base relative -translate-y-[8px]">
+                                  {passengerType} - {passenger.lastName} {passenger.firstName}
+                                  {infantInfo && <span className="text-cyan-600 font-semibold">{infantInfo}</span>}
+                                </span>
+                              </div>
                             </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
               
