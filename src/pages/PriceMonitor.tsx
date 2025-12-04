@@ -811,7 +811,12 @@ export default function PriceMonitor() {
       const data = await response.json();
       console.log("VNA API Response:", data);
 
-      if (!data.body || data.body.length === 0) {
+      // Filter only direct flights (số_điểm_dừng = "0")
+      const directFlights = data.body?.filter((flight: any) => 
+        flight?.chiều_đi?.số_điểm_dừng === "0"
+      ) || [];
+
+      if (directFlights.length === 0) {
         // Update last_checked_at even when no flight found
         await supabase
           .from("monitored_flights")
@@ -821,14 +826,14 @@ export default function PriceMonitor() {
         toast({
           variant: "destructive",
           title: "Không tìm thấy chuyến bay",
-          description: "Không có chuyến bay nào phù hợp với hành trình này",
+          description: "Không có chuyến bay bay thẳng nào phù hợp với hành trình này",
         });
         fetchMonitoredFlights();
         return;
       }
 
-      // Get first result (cheapest or matching time)
-      const matchingFlight = data.body[0];
+      // Get first result (cheapest or matching time) from direct flights only
+      const matchingFlight = directFlights[0];
       const newPrice = parseInt(matchingFlight["thông_tin_chung"]?.giá_vé || "0");
       const oldPrice = flight.current_price;
 
