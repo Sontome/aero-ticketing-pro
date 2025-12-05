@@ -1079,6 +1079,49 @@ export default function PriceMonitor() {
       throw new Error("Không có thông tin chặng bay");
     }
 
+    // Check if old PNR is already issued (only if perm_check_vna_issued is enabled)
+    if (profile?.perm_check_vna_issued && flight.pnr) {
+      try {
+        const checkPnrResponse = await fetch(`https://thuhongtour.com/checkvechoVNA?pnr=${flight.pnr}`, {
+          method: 'GET',
+          headers: { accept: 'application/json' }
+        });
+        
+        if (checkPnrResponse.ok) {
+          const pnrData = await checkPnrResponse.json();
+          if (pnrData && pnrData.paymentstatus === true) {
+            console.log("Old VNA PNR is already issued, not holding new ticket");
+            toast({
+              title: "PNR cũ đã xuất vé",
+              description: `PNR ${flight.pnr} đã được xuất vé, không giữ vé mới`,
+            });
+            
+            // Delete from monitored_flights
+            const { error: deleteError } = await supabase
+              .from("monitored_flights")
+              .delete()
+              .eq("id", flight.id);
+
+            if (deleteError) {
+              console.error("Error deleting flight from monitoring:", deleteError);
+            } else {
+              console.log("VNA flight removed from monitoring");
+              toast({
+                title: "Đã xóa hành trình",
+                description: "Hành trình đã được xóa khỏi danh sách theo dõi",
+              });
+            }
+            
+            await fetchMonitoredFlights();
+            return;
+          }
+        }
+      } catch (checkError) {
+        console.error("Error checking old VNA PNR status:", checkError);
+        // Continue with holding process if check fails
+      }
+    }
+
     const segment1 = segments[0];
     const segment2 = segments.length > 1 ? segments[1] : null;
 
@@ -1530,6 +1573,19 @@ export default function PriceMonitor() {
 
         if (data.status !== "OK" || !data.chang || data.chang.length === 0) {
           throw new Error("PNR không hợp lệ hoặc không tìm thấy");
+        }
+
+        // Check if VNA PNR is already issued (only if perm_check_vna_issued is enabled)
+        if (profile?.perm_check_vna_issued && data.paymentstatus === true) {
+          toast({
+            variant: "destructive",
+            title: "Không thể thêm",
+            description: "PNR đã xuất không thể check giá giảm, vui lòng thêm hành trình thủ công nếu muốn",
+          });
+          setIsPnrModalOpen(false);
+          setPnrCode("");
+          setIsLoadingPnr(false);
+          return;
         }
 
         // Validate segments

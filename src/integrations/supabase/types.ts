@@ -141,6 +141,7 @@ export type Database = {
           perm_check_discount: boolean | null
           perm_check_vj: boolean | null
           perm_check_vna: boolean | null
+          perm_check_vna_issued: boolean | null
           perm_get_pending_ticket: boolean | null
           perm_get_ticket_image: boolean | null
           perm_hold_ticket: boolean | null
@@ -168,6 +169,7 @@ export type Database = {
           perm_check_discount?: boolean | null
           perm_check_vj?: boolean | null
           perm_check_vna?: boolean | null
+          perm_check_vna_issued?: boolean | null
           perm_get_pending_ticket?: boolean | null
           perm_get_ticket_image?: boolean | null
           perm_hold_ticket?: boolean | null
@@ -195,6 +197,7 @@ export type Database = {
           perm_check_discount?: boolean | null
           perm_check_vj?: boolean | null
           perm_check_vna?: boolean | null
+          perm_check_vna_issued?: boolean | null
           perm_get_pending_ticket?: boolean | null
           perm_get_ticket_image?: boolean | null
           perm_hold_ticket?: boolean | null
