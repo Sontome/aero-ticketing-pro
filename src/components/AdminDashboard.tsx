@@ -33,6 +33,7 @@ interface Profile {
   perm_get_ticket_image: boolean;
   perm_get_pending_ticket: boolean;
   perm_check_discount: boolean;
+  perm_check_vna_issued: boolean;
   hold_ticket_quantity: number;
   apikey_telegram: string | null;
   idchat_telegram: string | null;
@@ -58,10 +59,11 @@ export const AdminDashboard = () => {
     perm_check_vj: false,
     perm_check_vna: false,
     perm_send_ticket: false,
-        perm_get_ticket_image: false,
-        perm_get_pending_ticket: false,
-        perm_check_discount: false,
-        hold_ticket_quantity: 0,
+    perm_get_ticket_image: false,
+    perm_get_pending_ticket: false,
+    perm_check_discount: false,
+    perm_check_vna_issued: false,
+    hold_ticket_quantity: 0,
     apikey_telegram: '',
     idchat_telegram: '',
   });
@@ -130,13 +132,14 @@ export const AdminDashboard = () => {
       price_rt: profile.price_rt || 0,
       role: profile.role,
       status: profile.status,
-        perm_check_vj: profile.perm_check_vj || false,
-        perm_check_vna: profile.perm_check_vna || false,
-        perm_send_ticket: profile.perm_send_ticket || false,
-        perm_get_ticket_image: profile.perm_get_ticket_image || false,
-        perm_get_pending_ticket: profile.perm_get_pending_ticket || false,
-        perm_check_discount: profile.perm_check_discount || false,
-        hold_ticket_quantity: profile.hold_ticket_quantity || 0,
+      perm_check_vj: profile.perm_check_vj || false,
+      perm_check_vna: profile.perm_check_vna || false,
+      perm_send_ticket: profile.perm_send_ticket || false,
+      perm_get_ticket_image: profile.perm_get_ticket_image || false,
+      perm_get_pending_ticket: profile.perm_get_pending_ticket || false,
+      perm_check_discount: profile.perm_check_discount || false,
+      perm_check_vna_issued: profile.perm_check_vna_issued || false,
+      hold_ticket_quantity: profile.hold_ticket_quantity || 0,
       apikey_telegram: profile.apikey_telegram || '',
       idchat_telegram: profile.idchat_telegram || '',
     });
@@ -165,10 +168,11 @@ export const AdminDashboard = () => {
           perm_check_vj: editForm.perm_check_vj,
           perm_check_vna: editForm.perm_check_vna,
           perm_send_ticket: editForm.perm_send_ticket,
-        perm_get_ticket_image: editForm.perm_get_ticket_image,
-        perm_get_pending_ticket: editForm.perm_get_pending_ticket,
-        perm_check_discount: editForm.perm_check_discount,
-        hold_ticket_quantity: editForm.hold_ticket_quantity,
+          perm_get_ticket_image: editForm.perm_get_ticket_image,
+          perm_get_pending_ticket: editForm.perm_get_pending_ticket,
+          perm_check_discount: editForm.perm_check_discount,
+          perm_check_vna_issued: editForm.perm_check_vna_issued,
+          hold_ticket_quantity: editForm.hold_ticket_quantity,
           perm_hold_ticket: permHoldTicket,
           apikey_telegram: editForm.apikey_telegram || null,
           idchat_telegram: editForm.idchat_telegram || null,
@@ -589,6 +593,15 @@ export const AdminDashboard = () => {
                                     id="perm_check_discount"
                                     checked={editForm.perm_check_discount}
                                     onCheckedChange={(checked) => setEditForm(prev => ({ ...prev, perm_check_discount: checked }))}
+                                  />
+                                </div>
+
+                                <div className="flex items-center justify-between">
+                                  <Label htmlFor="perm_check_vna_issued">Check vé đã xuất VNA</Label>
+                                  <Switch
+                                    id="perm_check_vna_issued"
+                                    checked={editForm.perm_check_vna_issued}
+                                    onCheckedChange={(checked) => setEditForm(prev => ({ ...prev, perm_check_vna_issued: checked }))}
                                   />
                                 </div>
 
