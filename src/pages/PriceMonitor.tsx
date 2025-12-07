@@ -627,7 +627,7 @@ export default function PriceMonitor() {
       }
 
       const newPrice = parseInt(matchingFlight["thông_tin_chung"]?.giá_vé || "0");
-      const oldPrice = flight.current_price;
+      const oldPrice = flight.current_price -5000;
       const bookingKeyDeparture = matchingFlight["chiều_đi"]?.BookingKey || matchingFlight["chiều_đi"]?.booking_key;
       const bookingKeyReturn = flight.is_round_trip
         ? matchingFlight["chiều_về"]?.BookingKey || matchingFlight["chiều_về"]?.booking_key
@@ -835,7 +835,7 @@ export default function PriceMonitor() {
       // Get first result (cheapest or matching time) from direct flights only
       const matchingFlight = directFlights[0];
       const newPrice = parseInt(matchingFlight["thông_tin_chung"]?.giá_vé || "0");
-      const oldPrice = flight.current_price;
+      const oldPrice = flight.current_price -5000;
 
       // Skip if price is 0 (invalid/error - couldn't fetch real price)
       if (newPrice === 0) {
