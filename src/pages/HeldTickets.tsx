@@ -359,6 +359,7 @@ export default function HeldTickets() {
           is_active: true,
           ticket_class: segments[0].doituong || "ADT",
           pnr: selectedPnr,
+          reprice_pnr: selectedPnr, // Save original PNR for reprice
         };
 
         if (segments.length === 2) {
