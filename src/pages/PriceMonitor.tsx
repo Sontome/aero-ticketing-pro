@@ -821,11 +821,7 @@ export default function PriceMonitor() {
                 audio.volume = 0.5;
                 audio.play().catch((e) => console.log('Could not play notification sound:', e));
 
-                // Update current_price in database
-                await supabase
-                  .from("monitored_flights")
-                  .update({ current_price: newPrice })
-                  .eq("id", flightId);
+                // Note: Do NOT update current_price for VNA flights during periodic checks
 
                 // Send Telegram notification
                 if (profile?.apikey_telegram && profile?.idchat_telegram) {
