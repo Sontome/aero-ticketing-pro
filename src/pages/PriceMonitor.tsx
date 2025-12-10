@@ -836,7 +836,7 @@ export default function PriceMonitor() {
 
                 // Send Telegram notification
                 if (profile?.apikey_telegram && profile?.idchat_telegram) {
-                  const telegramMessage = `✅ Đã reprice (${repricePnr}) (${flight.pnr || 'N/A'}) ra giá rẻ hơn ${priceDiff.toLocaleString()} KRW\n\nGiá cũ: ${oldPrice.toLocaleString()} KRW\nGiá mới: ${newPrice.toLocaleString()} KRW`;
+                  const telegramMessage = `✅ Đã reprice ${repricePnr} (PNR gốc ${flight.pnr || 'N/A'}) ra giá rẻ hơn ${priceDiff.toLocaleString()} KRW\n\nGiá cũ: ${oldPrice.toLocaleString()} KRW\nGiá mới: ${newPrice.toLocaleString()} KRW`;
                   fetch(`https://api.telegram.org/bot${profile.apikey_telegram}/sendMessage`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
