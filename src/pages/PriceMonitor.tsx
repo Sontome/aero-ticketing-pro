@@ -774,6 +774,17 @@ export default function PriceMonitor() {
       const checkData = await checkResponse.json();
       console.log("VNA Check PNR Response:", checkData);
 
+      // If response is null or empty, skip this periodic check
+      if (!checkData || checkData === null) {
+        console.log("VNA Check: Response is null, skipping this check");
+        // Update last_checked_at only
+        await supabase
+          .from("monitored_flights")
+          .update({ last_checked_at: new Date().toISOString() })
+          .eq("id", flightId);
+        return;
+      }
+
       // Update last_checked_at
       await supabase
         .from("monitored_flights")
