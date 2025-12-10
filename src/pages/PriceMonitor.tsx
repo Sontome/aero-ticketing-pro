@@ -1871,6 +1871,7 @@ export default function PriceMonitor() {
           departure_time: exactTimeMatch ? firstSegment.giocatcanh : null,
           check_interval_minutes: 5,
           is_active: true,
+          auto_hold_enabled: true,
           ticket_class: data.doituong || "ADT",
           pnr: pnrCode,
           reprice_pnr: pnrCode, // Save original PNR for reprice
@@ -2021,6 +2022,7 @@ export default function PriceMonitor() {
         departure_time: exactTimeMatch ? data.chieudi.giocatcanh : null,
         check_interval_minutes: 5,
         is_active: true,
+        auto_hold_enabled: true,
         ticket_class: data.chieudi.loaive === "ECO" || data.chieudi.loaive === "DELUXE" ? "economy" : "business",
         pnr: pnrCode,
       };
