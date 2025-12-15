@@ -24,8 +24,10 @@ interface Profile {
   price_markup: number;
   price_vj: number;
   price_vna: number;
-  price_ow: number;
-  price_rt: number;
+  price_ow_vj: number;
+  price_rt_vj: number;
+  price_ow_vna: number;
+  price_rt_vna: number;
   status: string;
   created_at: string;
   perm_check_vj: boolean;
@@ -53,8 +55,10 @@ export const AdminDashboard = () => {
     price_markup: 0,
     price_vj: 0,
     price_vna: 0,
-    price_ow: 0,
-    price_rt: 0,
+    price_ow_vj: 0,
+    price_rt_vj: 0,
+    price_ow_vna: 0,
+    price_rt_vna: 0,
     role: 'user',
     status: 'active',
     perm_check_vj: false,
@@ -129,8 +133,10 @@ export const AdminDashboard = () => {
       price_markup: profile.price_markup || 0,
       price_vj: profile.price_vj || 0,
       price_vna: profile.price_vna || 0,
-      price_ow: profile.price_ow || 0,
-      price_rt: profile.price_rt || 0,
+      price_ow_vj: profile.price_ow_vj || 0,
+      price_rt_vj: profile.price_rt_vj || 0,
+      price_ow_vna: profile.price_ow_vna || 0,
+      price_rt_vna: profile.price_rt_vna || 0,
       role: profile.role,
       status: profile.status,
       perm_check_vj: profile.perm_check_vj || false,
@@ -163,8 +169,10 @@ export const AdminDashboard = () => {
           price_markup: editForm.price_markup,
           price_vj: editForm.price_vj,
           price_vna: editForm.price_vna,
-          price_ow: editForm.price_ow,
-          price_rt: editForm.price_rt,
+          price_ow_vj: editForm.price_ow_vj,
+          price_rt_vj: editForm.price_rt_vj,
+          price_ow_vna: editForm.price_ow_vna,
+          price_rt_vna: editForm.price_rt_vna,
           status: editForm.status,
           perm_check_vj: editForm.perm_check_vj,
           perm_check_vna: editForm.perm_check_vna,
@@ -366,8 +374,10 @@ export const AdminDashboard = () => {
                     <TableHead>Phí chung</TableHead>
                     <TableHead>Phí VJ</TableHead>
                     <TableHead>Phí VNA</TableHead>
-                    <TableHead>Phí 1 chiều</TableHead>
-                    <TableHead>Phí khứ hồi</TableHead>
+                    <TableHead>VJ 1C</TableHead>
+                    <TableHead>VJ KH</TableHead>
+                    <TableHead>VNA 1C</TableHead>
+                    <TableHead>VNA KH</TableHead>
                     <TableHead>Ngày tạo</TableHead>
                     <TableHead>Thao tác</TableHead>
                   </TableRow>
@@ -431,12 +441,22 @@ export const AdminDashboard = () => {
                       </TableCell>
                       <TableCell>
                         <span className="font-mono">
-                          {formatCurrency(profile.price_ow || 0)}
+                          {formatCurrency(profile.price_ow_vj || 0)}
                         </span>
                       </TableCell>
                       <TableCell>
                         <span className="font-mono">
-                          {formatCurrency(profile.price_rt || 0)}
+                          {formatCurrency(profile.price_rt_vj || 0)}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <span className="font-mono">
+                          {formatCurrency(profile.price_ow_vna || 0)}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <span className="font-mono">
+                          {formatCurrency(profile.price_rt_vna || 0)}
                         </span>
                       </TableCell>
                       <TableCell>{formatDate(profile.created_at)}</TableCell>
@@ -520,24 +540,48 @@ export const AdminDashboard = () => {
                                 />
                               </div>
                               <div className="space-y-2">
-                                <Label htmlFor="price_ow">Phí vé một chiều (KRW)</Label>
+                                <Label htmlFor="price_ow_vj">Phí VJ 1 chiều (KRW)</Label>
                                 <Input
-                                  id="price_ow"
+                                  id="price_ow_vj"
                                   type="number"
-                                  value={editForm.price_ow}
-                                  onChange={(e) => setEditForm(prev => ({ ...prev, price_ow: parseFloat(e.target.value) || 0 }))}
+                                  value={editForm.price_ow_vj}
+                                  onChange={(e) => setEditForm(prev => ({ ...prev, price_ow_vj: parseFloat(e.target.value) || 0 }))}
                                   placeholder="0"
                                   min="0"
                                   step="1000"
                                 />
                               </div>
                               <div className="space-y-2">
-                                <Label htmlFor="price_rt">Phí vé khứ hồi (KRW)</Label>
+                                <Label htmlFor="price_rt_vj">Phí VJ khứ hồi (KRW)</Label>
                                 <Input
-                                  id="price_rt"
+                                  id="price_rt_vj"
                                   type="number"
-                                  value={editForm.price_rt}
-                                  onChange={(e) => setEditForm(prev => ({ ...prev, price_rt: parseFloat(e.target.value) || 0 }))}
+                                  value={editForm.price_rt_vj}
+                                  onChange={(e) => setEditForm(prev => ({ ...prev, price_rt_vj: parseFloat(e.target.value) || 0 }))}
+                                  placeholder="0"
+                                  min="0"
+                                  step="1000"
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label htmlFor="price_ow_vna">Phí VNA 1 chiều (KRW)</Label>
+                                <Input
+                                  id="price_ow_vna"
+                                  type="number"
+                                  value={editForm.price_ow_vna}
+                                  onChange={(e) => setEditForm(prev => ({ ...prev, price_ow_vna: parseFloat(e.target.value) || 0 }))}
+                                  placeholder="0"
+                                  min="0"
+                                  step="1000"
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label htmlFor="price_rt_vna">Phí VNA khứ hồi (KRW)</Label>
+                                <Input
+                                  id="price_rt_vna"
+                                  type="number"
+                                  value={editForm.price_rt_vna}
+                                  onChange={(e) => setEditForm(prev => ({ ...prev, price_rt_vna: parseFloat(e.target.value) || 0 }))}
                                   placeholder="0"
                                   min="0"
                                   step="1000"

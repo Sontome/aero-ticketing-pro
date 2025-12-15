@@ -151,8 +151,10 @@ export type Database = {
           perm_send_ticket: boolean | null
           phone: string | null
           price_markup: number | null
-          price_ow: number | null
-          price_rt: number | null
+          price_ow_vj: number | null
+          price_ow_vna: number | null
+          price_rt_vj: number | null
+          price_rt_vna: number | null
           price_vj: number | null
           price_vna: number | null
           status: string | null
@@ -179,8 +181,10 @@ export type Database = {
           perm_send_ticket?: boolean | null
           phone?: string | null
           price_markup?: number | null
-          price_ow?: number | null
-          price_rt?: number | null
+          price_ow_vj?: number | null
+          price_ow_vna?: number | null
+          price_rt_vj?: number | null
+          price_rt_vna?: number | null
           price_vj?: number | null
           price_vna?: number | null
           status?: string | null
@@ -207,8 +211,10 @@ export type Database = {
           perm_send_ticket?: boolean | null
           phone?: string | null
           price_markup?: number | null
-          price_ow?: number | null
-          price_rt?: number | null
+          price_ow_vj?: number | null
+          price_ow_vna?: number | null
+          price_rt_vj?: number | null
+          price_rt_vna?: number | null
           price_vj?: number | null
           price_vna?: number | null
           status?: string | null
