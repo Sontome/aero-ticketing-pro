@@ -34,20 +34,26 @@ export const FlightCard: React.FC<FlightCardProps> = ({ flight, priceMode, onHol
       priceWithMarkup += vnaMarkup;
     }
     
-    // Apply trip type fees
+    // Apply trip type fees based on airline
     const isRoundTrip = !!flight.return;
-    if (isRoundTrip) {
-      // Round trip - add price_rt fee
-      priceWithMarkup += profile?.price_rt || 0;
-    } else {
-      // One way - add price_ow fee
-      priceWithMarkup += profile?.price_ow || 0;
+    if (flight.airline === 'VJ') {
+      if (isRoundTrip) {
+        priceWithMarkup += profile?.price_rt_vj || 0;
+      } else {
+        priceWithMarkup += profile?.price_ow_vj || 0;
+      }
+    } else if (flight.airline === 'VNA') {
+      if (isRoundTrip) {
+        priceWithMarkup += profile?.price_rt_vna || 0;
+      } else {
+        priceWithMarkup += profile?.price_ow_vna || 0;
+      }
     }
     
     // Round to nearest hundred
     const roundedPrice = Math.round(priceWithMarkup / 100) * 100;
     setAdjustedPrice(roundedPrice);
-  }, [flight.price, flight.airline, profile?.price_vj, profile?.price_vna, profile?.price_ow, profile?.price_rt, flight.return]);
+  }, [flight.price, flight.airline, profile?.price_vj, profile?.price_vna, profile?.price_ow_vj, profile?.price_rt_vj, profile?.price_ow_vna, profile?.price_rt_vna, flight.return]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('ko-KR').format(price);
