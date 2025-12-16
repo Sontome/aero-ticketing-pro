@@ -157,28 +157,28 @@ export const FlightSearchForm: React.FC<FlightSearchFormProps> = ({ onSearch, lo
     <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-6 animate-fade-in max-w-5xl mx-auto chase-border-active">
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Trip Type Selector */}
-        <div className="flex space-x-4 pb-3 border-b border-gray-200">
-          <label className="flex items-center space-x-2 cursor-pointer group">
+        <div className="flex flex-wrap gap-4 pb-3 border-b border-gray-200">
+          <label className="flex items-center gap-2 cursor-pointer group min-w-fit">
             <input
               type="radio"
               name="tripType"
               value="round_trip"
               checked={formData.tripType === 'round_trip'}
               onChange={(e) => setFormData(prev => ({ ...prev, tripType: e.target.value as 'round_trip' }))}
-              className="text-blue-600 w-4 h-4"
+              className="text-blue-600 w-4 h-4 shrink-0"
             />
-            <span className="text-gray-700 text-sm font-medium group-hover:text-blue-600 transition-colors">Khứ hồi</span>
+            <span className="text-gray-700 text-sm font-medium group-hover:text-blue-600 transition-colors whitespace-nowrap">Khứ hồi</span>
           </label>
-          <label className="flex items-center space-x-2 cursor-pointer group">
+          <label className="flex items-center gap-2 cursor-pointer group min-w-fit">
             <input
               type="radio"
               name="tripType"
               value="one_way"
               checked={formData.tripType === 'one_way'}
               onChange={(e) => setFormData(prev => ({ ...prev, tripType: e.target.value as 'one_way' }))}
-              className="text-blue-600 w-4 h-4"
+              className="text-blue-600 w-4 h-4 shrink-0"
             />
-            <span className="text-gray-700 text-sm font-medium group-hover:text-blue-600 transition-colors">Một chiều</span>
+            <span className="text-gray-700 text-sm font-medium group-hover:text-blue-600 transition-colors whitespace-nowrap">Một chiều</span>
           </label>
         </div>
 
