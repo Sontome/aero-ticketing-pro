@@ -408,11 +408,11 @@ export default function Index() {
 
           {/* Hero Banner with Background Image */}
           <div 
-            className="relative w-full h-[450px] bg-cover bg-center"
+            className="relative w-full min-h-[450px] bg-cover bg-center"
             style={{ backgroundImage: `url(${backgroundBanner})` }}
           >
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/20"></div>
-            <div className="container mx-auto px-4 h-full flex items-center justify-center relative z-10">
+            <div className="container mx-auto px-4 h-full flex items-start sm:items-center justify-center relative z-10 pt-24 sm:pt-0 pb-6">
               <div className="w-full max-w-5xl">
                 <FlightSearchForm onSearch={handleSearch} loading={loading} />
               </div>
