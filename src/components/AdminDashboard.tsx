@@ -40,6 +40,10 @@ interface Profile {
   hold_ticket_quantity: number;
   apikey_telegram: string | null;
   idchat_telegram: string | null;
+  banner: string | null;
+  agent_name: string | null;
+  address: string | null;
+  business_number: string | null;
 }
 
 export const AdminDashboard = () => {
@@ -71,6 +75,10 @@ export const AdminDashboard = () => {
     hold_ticket_quantity: 0,
     apikey_telegram: '',
     idchat_telegram: '',
+    banner: '',
+    agent_name: '',
+    address: '',
+    business_number: '',
   });
 
   useEffect(() => {
@@ -149,6 +157,10 @@ export const AdminDashboard = () => {
       hold_ticket_quantity: profile.hold_ticket_quantity || 0,
       apikey_telegram: profile.apikey_telegram || '',
       idchat_telegram: profile.idchat_telegram || '',
+      banner: profile.banner || '',
+      agent_name: profile.agent_name || '',
+      address: profile.address || '',
+      business_number: profile.business_number || '',
     });
   };
 
@@ -185,6 +197,10 @@ export const AdminDashboard = () => {
           perm_hold_ticket: permHoldTicket,
           apikey_telegram: editForm.apikey_telegram || null,
           idchat_telegram: editForm.idchat_telegram || null,
+          banner: editForm.banner || null,
+          agent_name: editForm.agent_name || null,
+          address: editForm.address || null,
+          business_number: editForm.business_number || null,
           updated_at: new Date().toISOString(),
         })
         .eq('id', editingProfile.id);
@@ -502,6 +518,63 @@ export const AdminDashboard = () => {
                                   onChange={(e) => setEditForm(prev => ({ ...prev, linkfacebook: e.target.value }))}
                                   placeholder="Nhập link Facebook"
                                 />
+                              </div>
+
+                              {/* Agent Information Section */}
+                              <div className="space-y-4 pt-4 border-t">
+                                <h3 className="text-lg font-semibold">Thông tin đại lý</h3>
+                                
+                                <div className="space-y-2">
+                                  <Label htmlFor="agent_name">Tên đại lý</Label>
+                                  <Input
+                                    id="agent_name"
+                                    value={editForm.agent_name}
+                                    onChange={(e) => setEditForm(prev => ({ ...prev, agent_name: e.target.value }))}
+                                    placeholder="Nhập tên đại lý"
+                                  />
+                                </div>
+
+                                <div className="space-y-2">
+                                  <Label htmlFor="address">Địa chỉ</Label>
+                                  <Input
+                                    id="address"
+                                    value={editForm.address}
+                                    onChange={(e) => setEditForm(prev => ({ ...prev, address: e.target.value }))}
+                                    placeholder="Nhập địa chỉ"
+                                  />
+                                </div>
+
+                                <div className="space-y-2">
+                                  <Label htmlFor="business_number">Mã số doanh nghiệp (사업자번호)</Label>
+                                  <Input
+                                    id="business_number"
+                                    value={editForm.business_number}
+                                    onChange={(e) => setEditForm(prev => ({ ...prev, business_number: e.target.value }))}
+                                    placeholder="Nhập mã số doanh nghiệp"
+                                  />
+                                </div>
+
+                                <div className="space-y-2">
+                                  <Label htmlFor="banner">Banner (URL hình ảnh)</Label>
+                                  <Input
+                                    id="banner"
+                                    value={editForm.banner}
+                                    onChange={(e) => setEditForm(prev => ({ ...prev, banner: e.target.value }))}
+                                    placeholder="Nhập URL banner của đại lý"
+                                  />
+                                  {editForm.banner && (
+                                    <div className="mt-2">
+                                      <img 
+                                        src={editForm.banner} 
+                                        alt="Banner preview" 
+                                        className="max-h-32 rounded-md object-cover"
+                                        onError={(e) => {
+                                          (e.target as HTMLImageElement).style.display = 'none';
+                                        }}
+                                      />
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                               <div className="space-y-2">
                                 <Label htmlFor="price_markup">Phí cộng thêm chung (KRW)</Label>
