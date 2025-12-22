@@ -9,7 +9,7 @@ interface AuthContextType {
   profile: any | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signUp: (email: string, password: string, fullName: string, phone: string, linkfacebook?: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, fullName: string, phone: string, linkfacebook?: string, agentName?: string, address?: string, businessNumber?: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: any }>;
   updatePassword: (newPassword: string) => Promise<{ error: any }>;
@@ -101,7 +101,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return { error };
   };
 
-  const signUp = async (email: string, password: string, fullName: string, phone: string, linkfacebook?: string) => {
+  const signUp = async (email: string, password: string, fullName: string, phone: string, linkfacebook?: string, agentName?: string, address?: string, businessNumber?: string) => {
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -110,6 +110,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           full_name: fullName,
           phone: phone,
           linkfacebook: linkfacebook || '',
+          agent_name: agentName || '',
+          address: address || '',
+          business_number: businessNumber || '',
         },
       },
     });

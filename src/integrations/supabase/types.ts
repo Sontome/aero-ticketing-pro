@@ -133,8 +133,11 @@ export type Database = {
       }
       profiles: {
         Row: {
+          address: string | null
+          agent_name: string | null
           apikey_telegram: string | null
           banner: string | null
+          business_number: string | null
           created_at: string
           full_name: string
           hold_ticket_quantity: number | null
@@ -163,8 +166,11 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          address?: string | null
+          agent_name?: string | null
           apikey_telegram?: string | null
           banner?: string | null
+          business_number?: string | null
           created_at?: string
           full_name: string
           hold_ticket_quantity?: number | null
@@ -193,8 +199,11 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          address?: string | null
+          agent_name?: string | null
           apikey_telegram?: string | null
           banner?: string | null
+          business_number?: string | null
           created_at?: string
           full_name?: string
           hold_ticket_quantity?: number | null

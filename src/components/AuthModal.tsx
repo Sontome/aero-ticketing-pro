@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/components/ui/use-toast';
-import { Loader2, Mail, Lock, User, Phone, Facebook } from 'lucide-react';
+import { Loader2, Mail, Lock, User, Phone, Facebook, Building2, MapPin, FileText } from 'lucide-react';
 
 interface AuthModalProps {
   open: boolean;
@@ -31,6 +31,9 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
     fullName: '',
     phone: '',
     linkfacebook: '',
+    agentName: '',
+    address: '',
+    businessNumber: '',
   });
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -105,7 +108,10 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
         signUpForm.password,
         signUpForm.fullName,
         signUpForm.phone,
-        signUpForm.linkfacebook
+        signUpForm.linkfacebook,
+        signUpForm.agentName,
+        signUpForm.address,
+        signUpForm.businessNumber
       );
 
       if (error) {
@@ -119,7 +125,7 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
       } else {
         toast({
           title: "Đăng ký thành công",
-          description: "Tài khoản của bạn đã được tạo thành công!",
+          description: "Bạn hãy vào email để xác nhận và liên hệ Admin để nâng cấp lên tài khoản đại lý",
         });
         onOpenChange(false);
       }
@@ -147,7 +153,7 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="signin">Đăng nhập</TabsTrigger>
-            <TabsTrigger value="signup">Đăng ký</TabsTrigger>
+            <TabsTrigger value="signup">Đăng ký đại lý</TabsTrigger>
           </TabsList>
 
           <TabsContent value="signin" className="space-y-4 mt-4">
@@ -200,7 +206,23 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
           <TabsContent value="signup" className="space-y-4 mt-4">
             <form onSubmit={handleSignUp} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="signup-name">Họ và tên</Label>
+                <Label htmlFor="signup-agent-name">Tên đại lý</Label>
+                <div className="relative">
+                  <Building2 className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input
+                    id="signup-agent-name"
+                    type="text"
+                    placeholder="Công ty ABC Travel"
+                    className="pl-10"
+                    value={signUpForm.agentName}
+                    onChange={(e) => setSignUpForm(prev => ({ ...prev, agentName: e.target.value }))}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="signup-name">Họ và tên người đại diện</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
@@ -211,6 +233,37 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
                     value={signUpForm.fullName}
                     onChange={(e) => setSignUpForm(prev => ({ ...prev, fullName: e.target.value }))}
                     required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="signup-address">Địa chỉ</Label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input
+                    id="signup-address"
+                    type="text"
+                    placeholder="123 Đường ABC, Quận 1, TP.HCM"
+                    className="pl-10"
+                    value={signUpForm.address}
+                    onChange={(e) => setSignUpForm(prev => ({ ...prev, address: e.target.value }))}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="signup-business-number">Mã số doanh nghiệp (사업자번호) - tùy chọn</Label>
+                <div className="relative">
+                  <FileText className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input
+                    id="signup-business-number"
+                    type="text"
+                    placeholder="123-45-67890"
+                    className="pl-10"
+                    value={signUpForm.businessNumber}
+                    onChange={(e) => setSignUpForm(prev => ({ ...prev, businessNumber: e.target.value }))}
                   />
                 </div>
               </div>
@@ -301,7 +354,7 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
                     Đang đăng ký...
                   </>
                 ) : (
-                  'Đăng ký'
+                  'Đăng ký đại lý'
                 )}
               </Button>
             </form>
