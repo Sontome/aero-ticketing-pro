@@ -48,6 +48,7 @@ export default function Index() {
   const [showVJBookingModal, setShowVJBookingModal] = useState(false);
   const [showVNABookingModal, setShowVNABookingModal] = useState(false);
   const [selectedFlight, setSelectedFlight] = useState<Flight | null>(null);
+  const [ticketPNR, setTicketPNR] = useState<string | undefined>(undefined);
   const [filters, setFilters] = useState<FilterOptions>({
     airlines: ['VJ', 'VNA'],
     showCheapestOnly: true,
@@ -506,11 +507,19 @@ export default function Index() {
           />
           <VJTicketModal 
             isOpen={showVJTicketModal} 
-            onClose={() => setShowVJTicketModal(false)} 
+            onClose={() => {
+              setShowVJTicketModal(false);
+              setTicketPNR(undefined);
+            }}
+            initialPNR={ticketPNR}
           />
           <VNATicketModal 
             isOpen={showVNATicketModal} 
-            onClose={() => setShowVNATicketModal(false)} 
+            onClose={() => {
+              setShowVNATicketModal(false);
+              setTicketPNR(undefined);
+            }}
+            initialPNR={ticketPNR}
           />
           {selectedFlight?.airline === 'VJ' && selectedFlight?.bookingKey && (
             <VJBookingModal
@@ -528,8 +537,13 @@ export default function Index() {
                 console.log('Booking success:', pnr);
                 toast({
                   title: "Giữ vé thành công!",
-                  description: `Mã giữ vé: ${pnr}`,
+                  description: `Mã giữ vé: ${pnr}. Đang lấy ảnh mặt vé...`,
                 });
+                // Auto open VJ ticket modal to get ticket image
+                setTicketPNR(pnr);
+                setTimeout(() => {
+                  setShowVJTicketModal(true);
+                }, 500);
               }}
             />
           )}
@@ -554,8 +568,13 @@ export default function Index() {
                 console.log('Booking success:', pnr);
                 toast({
                   title: "Giữ vé thành công!",
-                  description: `Mã giữ vé: ${pnr}`,
+                  description: `Mã giữ vé: ${pnr}. Đang lấy ảnh mặt vé...`,
                 });
+                // Auto open VNA ticket modal to get ticket image
+                setTicketPNR(pnr);
+                setTimeout(() => {
+                  setShowVNATicketModal(true);
+                }, 500);
               }}
             />
           )}
