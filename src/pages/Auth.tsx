@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Mail, Lock, User, Plane, Phone, Facebook } from 'lucide-react';
+import { Loader2, Mail, Lock, User, Plane, Phone, Facebook, Building2, MapPin, FileText } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { InkSplashEffect } from '@/components/InkSplashEffect';
 import { supabase } from '@/integrations/supabase/client';
@@ -39,6 +39,9 @@ export default function Auth() {
     fullName: '',
     phone: '',
     linkfacebook: '',
+    agentName: '',
+    address: '',
+    businessNumber: '',
   });
 
   // Handle auth callback from URL (magic link, recovery, etc.)
@@ -275,7 +278,10 @@ export default function Auth() {
         signUpForm.password,
         signUpForm.fullName,
         signUpForm.phone,
-        signUpForm.linkfacebook
+        signUpForm.linkfacebook,
+        signUpForm.agentName,
+        signUpForm.address,
+        signUpForm.businessNumber
       );
 
       if (error) {
@@ -295,7 +301,7 @@ export default function Auth() {
       } else {
         toast({
           title: "Đăng ký thành công",
-          description: "Tài khoản đã được tạo. Vui lòng liên hệ admin để kích hoạt tài khoản.",
+          description: "Bạn hãy vào email để xác nhận và liên hệ Admin để nâng cấp lên tài khoản đại lý.",
         });
         setActiveTab('signin');
       }
@@ -398,7 +404,7 @@ export default function Auth() {
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin">Đăng nhập</TabsTrigger>
-              <TabsTrigger value="signup">Đăng ký</TabsTrigger>
+              <TabsTrigger value="signup">Đăng ký đại lý</TabsTrigger>
             </TabsList>
 
             <TabsContent value="signin" className="space-y-4 mt-4">
@@ -515,7 +521,23 @@ export default function Auth() {
             <TabsContent value="signup" className="space-y-4 mt-4">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signup-name">Họ và tên</Label>
+                  <Label htmlFor="signup-agent-name">Tên đại lý</Label>
+                  <div className="relative">
+                    <Building2 className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="signup-agent-name"
+                      type="text"
+                      placeholder="Công ty TNHH Du lịch ABC"
+                      className="pl-10"
+                      value={signUpForm.agentName}
+                      onChange={(e) => setSignUpForm(prev => ({ ...prev, agentName: e.target.value }))}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="signup-name">Họ và tên người đại diện</Label>
                   <div className="relative">
                     <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                     <Input
@@ -526,6 +548,37 @@ export default function Auth() {
                       value={signUpForm.fullName}
                       onChange={(e) => setSignUpForm(prev => ({ ...prev, fullName: e.target.value }))}
                       required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="signup-address">Địa chỉ</Label>
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="signup-address"
+                      type="text"
+                      placeholder="123 Đường ABC, Quận 1, TP.HCM"
+                      className="pl-10"
+                      value={signUpForm.address}
+                      onChange={(e) => setSignUpForm(prev => ({ ...prev, address: e.target.value }))}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="signup-business-number">Mã số doanh nghiệp (tùy chọn)</Label>
+                  <div className="relative">
+                    <FileText className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="signup-business-number"
+                      type="text"
+                      placeholder="0123456789"
+                      className="pl-10"
+                      value={signUpForm.businessNumber}
+                      onChange={(e) => setSignUpForm(prev => ({ ...prev, businessNumber: e.target.value }))}
                     />
                   </div>
                 </div>
@@ -616,7 +669,7 @@ export default function Auth() {
                       Đang đăng ký...
                     </>
                   ) : (
-                    'Đăng ký'
+                    'Đăng ký đại lý'
                   )}
                 </Button>
               </form>
