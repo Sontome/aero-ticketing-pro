@@ -182,8 +182,21 @@ export default function Index() {
       console.log('BLOCKING SEARCH - No permissions:', errorMsg);
       setError(errorMsg);
       toast({
-        title: "Không có quyền truy cập",
-        description: errorMsg,
+        title: "Thông báo",
+        description: (
+        <span>
+          Vui lòng liên hệ{' '}
+          <a
+            href="https://zalo.me/821035463396"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 underline font-semibold"
+          >
+            Zalo Admin
+          </a>{' '}
+          để được cấp quyền
+        </span>
+      ),
         variant: "destructive",
       });
       return;
@@ -193,14 +206,40 @@ export default function Index() {
     if (!canCheckVJ) {
       toast({
         title: "Thông báo",
-        description: "Tính năng tìm vé VietJet đã bị khóa. Vui lòng liên hệ Zalo Admin để được cấp quyền https://zalo.me/821035463396 ",
+        description: (
+          <span>
+            Vui lòng liên hệ{' '}
+            <a
+              href="https://zalo.me/821035463396"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 underline font-semibold"
+            >
+              Zalo Admin
+            </a>{' '}
+            để được cấp quyền
+          </span>
+        ),
         variant: "destructive",
       });
     }
     if (!canCheckVNA) {
       toast({
         title: "Thông báo",
-        description: "Tính năng tìm vé Vietnam Airlines đã bị khóa. Vui lòng liên hệ Zalo Admin để được cấp quyền https://zalo.me/821035463396",
+        description: (
+          <span>
+            Vui lòng liên hệ{' '}
+            <a
+              href="https://zalo.me/821035463396"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 underline font-semibold"
+            >
+              Zalo Admin
+            </a>{' '}
+            để được cấp quyền
+          </span>
+        ),
         variant: "destructive",
       });
     }
