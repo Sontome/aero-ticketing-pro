@@ -197,7 +197,9 @@ export default function Index() {
           để được cấp quyền
         </span>
       ),
+        
         variant: "destructive",
+        duration: 10000,
       });
       return;
     }
@@ -224,6 +226,7 @@ export default function Index() {
           </span>
         ),
         variant: "destructive",
+        duration: 10000,
       });
     }
     if (!canCheckVNA) {
@@ -247,6 +250,7 @@ export default function Index() {
           </span>
         ),
         variant: "destructive",
+        duration: 10000,
       });
     }
 
