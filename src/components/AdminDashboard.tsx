@@ -565,11 +565,7 @@ export const AdminDashboard = () => {
                                     placeholder="Nhập nội dung banner, Enter để xuống dòng"
                                     rows={4}
                                   />
-                                  {editForm.banner && (
-                                    <div className="mt-2 rounded-md border p-3 text-sm whitespace-pre-line">
-                                      {editForm.banner}
-                                    </div>
-                                  )}
+                                  
                                 </div>
                               </div>
                               <div className="space-y-2">
