@@ -220,7 +220,7 @@ export default function Index() {
             >
               Zalo Admin
             </a>{' '}
-            để được cấp quyền
+            để được cấp quyền kiểm tra vé VJ
           </span>
         ),
         variant: "destructive",
@@ -243,7 +243,7 @@ export default function Index() {
             >
               Zalo Admin
             </a>{' '}
-            để được cấp quyền
+            để được cấp quyền kiểm tra vé VNA
           </span>
         ),
         variant: "destructive",
