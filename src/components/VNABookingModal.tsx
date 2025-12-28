@@ -58,7 +58,27 @@ export const VNABookingModal = ({
   const [successData, setSuccessData] = useState<{ pnr: string } | null>(null);
   const [ticketEmail, setTicketEmail] = useState("");
   const [ticketPhone, setTicketPhone] = useState("");
-  
+  // Load user profile data on mount
+  useEffect(() => {
+    const loadProfile = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("ticket_email, ticket_phone")
+          .eq("id", user.id)
+          .single();
+
+        if (profile) {
+          setTicketEmail(profile.ticket_email || "");
+          setTicketPhone(profile.ticket_phone || "");
+        }
+      }
+    };
+    loadProfile();
+  }, []);
   // Remove Vietnamese diacritics
   // Convert date from "24/04/2026" to "24APR"
   const formatDateForAPI = (dateStr: string) => {
