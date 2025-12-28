@@ -178,7 +178,7 @@ export default function Index() {
 
     // If no permissions at all, show error and return
     if (!canCheckVJ && !canCheckVNA) {
-      const errorMsg = 'Tính năng tìm kiếm chuyến bay đã bị khóa. Vui lòng liên hệ Zalo Admin để được cấp quyền https://zalo.me/821035463396 ';
+      const errorMsg = 'Tính năng tìm kiếm chuyến bay đã bị khóa.';
       console.log('BLOCKING SEARCH - No permissions:', errorMsg);
       setError(errorMsg);
       toast({
@@ -204,6 +204,9 @@ export default function Index() {
 
     // Show toast for locked features
     if (!canCheckVJ) {
+      const errorMsg = 'Tính năng tìm kiếm chuyến bay VJ đã bị khóa.';
+      console.log('BLOCKING SEARCH - No permissions:', errorMsg);
+      setError(errorMsg);
       toast({
         title: "Thông báo",
         description: (
@@ -224,6 +227,9 @@ export default function Index() {
       });
     }
     if (!canCheckVNA) {
+      const errorMsg = 'Tính năng tìm kiếm chuyến bay VNA đã bị khóa.';
+      console.log('BLOCKING SEARCH - No permissions:', errorMsg);
+      setError(errorMsg);
       toast({
         title: "Thông báo",
         description: (
