@@ -179,12 +179,20 @@ export default function Index() {
     setLowFareReturn([]);
     console.log(data);
     try {
+      const tripType =
+        data.tripType === 'round_trip' ? 'RT' : 'OW';
+      const departure_date_parsed = data.departureDate
+        ? data.departureDate.split('T')[0]
+        : '';
+      const return_date_parsed = data.returnDate
+        ? data.returnDate.split('T')[0]
+        : '';
       const result = await searchLowFare(
         data.from,
         data.to,
-        data.tripType,
-        data.departureDate,
-        data.returnDate
+        tripType,
+        departure_date_parsed,
+        return_date_parsed
       );
       
       if (result.status_code === '200' && result.body) {
