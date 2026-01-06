@@ -181,18 +181,19 @@ export default function Index() {
     try {
       const tripType =
         data.tripType === 'round_trip' ? 'RT' : 'OW';
-      const departure_date_parsed = data.departureDate
-        ? data.departureDate.split('T')[0]
-        : '';
-      const return_date_parsed = data.returnDate
-        ? data.returnDate.split('T')[0]
-        : '';
+      const formatDate = (date: Date | string | undefined) => {
+        if (!date) return '';
+        if (date instanceof Date) {
+          return date.toISOString().slice(0, 10);
+        }
+        return date.split('T')[0];
+      };
       const result = await searchLowFare(
         data.from,
         data.to,
         tripType,
-        departure_date_parsed,
-        return_date_parsed
+        formatDate(data.departureDate),
+        tripType === 'RT' ? formatDate(data.returnDate) : ''
       );
       
       if (result.status_code === '200' && result.body) {
