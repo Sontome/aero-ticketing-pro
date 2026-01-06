@@ -54,6 +54,7 @@ export default function Index() {
   const [ticketPNR, setTicketPNR] = useState<string | undefined>(undefined);
   // Low fare chart state
   const [lowFareDeparture, setLowFareDeparture] = useState<LowFareDay[]>([]);
+  const [hasSearched, setHasSearched] = useState(false);
   const [lowFareReturn, setLowFareReturn] = useState<LowFareDay[]>([]);
   const [isLoadingLowFare, setIsLoadingLowFare] = useState(false);
   const [lastSearchData, setLastSearchData] = useState<FlightSearchData | null>(null);  
@@ -320,6 +321,9 @@ export default function Index() {
     setError(null);
     setSearchPerformed(true);
     setFlights([]); // Clear previous results
+    setHasSearched(true);
+    setSearchData(searchData);
+    setLastSearchData(searchData);
     
     // Determine which airlines to fetch based on permissions
     const availableAirlines = [];
