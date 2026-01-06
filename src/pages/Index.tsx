@@ -55,6 +55,7 @@ export default function Index() {
   // Low fare chart state
   const [lowFareDeparture, setLowFareDeparture] = useState<LowFareDay[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
+  const [searchData, setSearchData] = useState<FlightSearchData | null>(null);
   const [lowFareReturn, setLowFareReturn] = useState<LowFareDay[]>([]);
   const [isLoadingLowFare, setIsLoadingLowFare] = useState(false);
   const [lastSearchData, setLastSearchData] = useState<FlightSearchData | null>(null);  
