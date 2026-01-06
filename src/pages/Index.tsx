@@ -177,7 +177,7 @@ export default function Index() {
     setIsLoadingLowFare(true);
     setLowFareDeparture([]);
     setLowFareReturn([]);
-    
+    console.log(data);
     try {
       const result = await searchLowFare(
         data.departure,
