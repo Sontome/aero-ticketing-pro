@@ -180,8 +180,8 @@ export default function Index() {
     console.log(data);
     try {
       const result = await searchLowFare(
-        data.departure,
-        data.arrival,
+        data.from,
+        data.to,
         data.tripType,
         data.departureDate,
         data.returnDate
