@@ -554,7 +554,7 @@ export default function Index() {
             returnData={lowFareReturn}
             tripType={searchData?.tripType || 'OW'}
             onSearchWithDates={handleSearchWithDates}
-            isLoading={isLoading}
+            isLoading={loading}
           />
         )}
         {filteredFlights.length > 0 && <div className="space-y-4 animate-fade-in">
