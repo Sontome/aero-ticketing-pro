@@ -552,7 +552,7 @@ export default function Index() {
           <LowFareChart
             departureData={lowFareDeparture}
             returnData={lowFareReturn}
-            tripType={data.tripType === 'round_trip' ? 'RT' : 'OW'}
+            tripType={searchData.tripType === 'round_trip' ? 'RT' : 'OW'}
             onSearchWithDates={handleSearchWithDates}
             isLoading={loading}
           />
