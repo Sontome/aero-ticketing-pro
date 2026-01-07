@@ -557,6 +557,8 @@ export default function Index() {
             tripType={searchData.tripType === 'round_trip' ? 'RT' : 'OW'}
             onSearchWithDates={handleSearchWithDates}
             isLoading={loading}
+            initialDepartureDate={formatDate(searchData?.departureDate)}
+            initialReturnDate={formatDate(searchData?.returnDate)}
           />
         )}
         {filteredFlights.length > 0 && <div className="space-y-4 animate-fade-in">
