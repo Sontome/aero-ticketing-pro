@@ -210,12 +210,14 @@ export default function Index() {
   // Handle search with selected dates from low fare chart
   const handleSearchWithDates = (departureDate: string, returnDate: string) => {
     if (!lastSearchData) return;
-    
+    const parseVNDate = (dateStr: string) => {
+      return new Date(`${dateStr}T00:00:00+07:00`);
+    };
     const newSearchData: FlightSearchData = {
       ...lastSearchData,
-      departureDate,
-      returnDate,
-      tripType: returnDate ? 'RT' : 'OW',
+      departureDate: departureDate ? parseVNDate(departureDate) : undefined,
+      returnDate: returnDate ? parseVNDate(returnDate) : undefined,
+      tripType: returnDate ? 'round_trip' : 'one_way',
     };
     
     handleSearch(newSearchData);
