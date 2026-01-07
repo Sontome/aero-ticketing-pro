@@ -506,7 +506,13 @@ export default function Index() {
 
   // Check if show more button should be visible
   const shouldShowMoreButton = filters.showCheapestOnly || filters.directFlightsOnly;
-
+  const formatDate = (date: Date | string | undefined) => {
+        if (!date) return '';
+        if (date instanceof Date) {
+          return date.toISOString().slice(0, 10);
+        }
+        return date.split('T')[0];
+      };
   return (
     <div className={`min-h-screen transition-all duration-100 ${
       showContent 
