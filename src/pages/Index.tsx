@@ -345,9 +345,9 @@ export default function Index() {
     // Reset filters to default state with available airlines
     setFilters({
       airlines: availableAirlines as ('VJ' | 'VNA')[],
-      showCheapestOnly: true,
-      directFlightsOnly: true,
-      show2pc: true,
+      showCheapestOnly: false,
+      directFlightsOnly: false,
+      show2pc: false,
       sortBy: 'price'
     });
 
