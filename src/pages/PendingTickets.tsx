@@ -296,9 +296,11 @@ const PendingTickets = () => {
     return (
       <Popover>
         <PopoverTrigger asChild>
-          <Badge className={`${bgColor} text-white cursor-pointer hover:opacity-80`}>
-            {tag}
-          </Badge>
+          <button type="button">
+            <Badge className={`${bgColor} text-white cursor-pointer hover:opacity-80`}>
+              {tag}
+            </Badge>
+          </button>
         </PopoverTrigger>
       
         <PopoverContent
@@ -311,11 +313,10 @@ const PendingTickets = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => copyToClipboard(email)}
               className="w-full"
+              onClick={() => copyToClipboard(email)}
             >
-              <Copy className="w-3 h-3 mr-2" />
-              Sao chép
+              Copy
             </Button>
           </div>
         </PopoverContent>
