@@ -300,7 +300,12 @@ const PendingTickets = () => {
             {tag}
           </Badge>
         </PopoverTrigger>
-        <PopoverContent className="w-auto max-w-xs p-3" side="top">
+      
+        <PopoverContent
+          side="top"
+          sideOffset={6}
+          className="z-[9999] w-auto max-w-xs p-3"
+        >
           <div className="space-y-2">
             <p className="text-sm font-medium break-all">{email}</p>
             <Button
