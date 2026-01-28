@@ -36,10 +36,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface RepriceRecord {
   id: string;
@@ -294,13 +294,13 @@ const PendingTickets = () => {
     const bgColor = tag === "HVA" ? "bg-orange-500" : "bg-teal-500";
 
     return (
-      <HoverCard>
-        <HoverCardTrigger asChild>
-          <Badge className={`${bgColor} text-white cursor-pointer`}>
+      <Popover>
+        <PopoverTrigger asChild>
+          <Badge className={`${bgColor} text-white cursor-pointer hover:opacity-80`}>
             {tag}
           </Badge>
-        </HoverCardTrigger>
-        <HoverCardContent className="w-auto max-w-xs">
+        </PopoverTrigger>
+        <PopoverContent className="w-auto max-w-xs p-3" side="top">
           <div className="space-y-2">
             <p className="text-sm font-medium break-all">{email}</p>
             <Button
@@ -313,8 +313,8 @@ const PendingTickets = () => {
               Sao chép
             </Button>
           </div>
-        </HoverCardContent>
-      </HoverCard>
+        </PopoverContent>
+      </Popover>
     );
   };
 
