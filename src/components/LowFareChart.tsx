@@ -349,7 +349,7 @@ const LowFareChart: React.FC<LowFareChartProps> = ({
       </div>
 
       {/* Other Airlines Cheapest Box */}
-      /* {cheapestOtherFlight && onShowOtherAirlines && (
+      {/* cheapestOtherFlight && onShowOtherAirlines && (
         <div 
           className="mt-4 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-lg p-3 cursor-pointer hover:shadow-md transition-all duration-300"
           onClick={onShowOtherAirlines}
@@ -371,7 +371,7 @@ const LowFareChart: React.FC<LowFareChartProps> = ({
             </div>
           </div>
         </div>
-      )} */
+      ) */}
 
       {/* Search button */}
       {canSearch && (
