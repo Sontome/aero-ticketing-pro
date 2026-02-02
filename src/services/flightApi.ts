@@ -326,7 +326,7 @@ export const fetchVietnamAirlinesFlights = async (searchData: SearchFormData): P
   console.log('Calling Vietnam Airlines API with:', requestBody);
 
   try {
-    const response = await fetch('https://thuhongtour.com/vna/check-ve-v2', {
+    const response = await fetch('https://thuhongtour.com/vna/check-ve-v3', {
       method: 'POST',
       headers: {
         'accept': 'application/json',
