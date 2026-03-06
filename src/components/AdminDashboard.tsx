@@ -110,8 +110,8 @@ export const AdminDashboard = () => {
 
   const handleUpdateRateLimit = async () => {
     const minutes = parseInt(rateLimitInput);
-    if (isNaN(minutes) || minutes < 1) {
-      toast({ variant: "destructive", title: "Lỗi", description: "Số phút phải >= 1" });
+    if (isNaN(minutes) || minutes < 0) {
+      toast({ variant: "destructive", title: "Lỗi", description: "Số phút phải >= 0" });
       return;
     }
     setRateLimitLoading(true);
