@@ -502,6 +502,14 @@ const PendingTickets = () => {
                             <Button
                               variant="ghost"
                               size="icon"
+                              onClick={() => setVnaTicketPNR(record.pnr)}
+                              title="Xem vé VNA"
+                            >
+                              <FileSearch className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
                               onClick={() => handleOpenEditModal(record)}
                             >
                               <Edit2 className="w-4 h-4" />
