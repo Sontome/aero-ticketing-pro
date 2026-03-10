@@ -93,6 +93,9 @@ const PendingTickets = () => {
     auto_reprice: true,
   });
 
+  // VNA Ticket Modal
+  const [vnaTicketPNR, setVnaTicketPNR] = useState<string | null>(null);
+
   useEffect(() => {
     if (profile?.role !== "admin") {
       navigate("/");
