@@ -659,6 +659,11 @@ const PendingTickets = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <VNATicketModal
+        isOpen={!!vnaTicketPNR}
+        onClose={() => setVnaTicketPNR(null)}
+        initialPNR={vnaTicketPNR || undefined}
+      />
     </div>
   );
 };
