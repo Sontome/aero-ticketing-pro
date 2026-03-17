@@ -80,6 +80,7 @@ const PendingTickets = () => {
     HVA: true,
     F2: true,
   });
+  const [hasNewPriceFilter, setHasNewPriceFilter] = useState(false);
 
   // Add/Edit modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
