@@ -435,6 +435,19 @@ const PendingTickets = () => {
                       <Badge className="bg-teal-500 text-white">F2</Badge>
                     </label>
                   </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="filter-has-new-price"
+                      checked={hasNewPriceFilter}
+                      onCheckedChange={(checked) => setHasNewPriceFilter(!!checked)}
+                    />
+                    <label
+                      htmlFor="filter-has-new-price"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      Có giá mới
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>
