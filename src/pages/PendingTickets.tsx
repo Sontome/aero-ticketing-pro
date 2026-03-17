@@ -136,6 +136,9 @@ const PendingTickets = () => {
     // If no email tag (null), show if either filter is enabled
     if (emailTag === null && !emailTagFilters.HVA && !emailTagFilters.F2) return false;
 
+    // Has new price filter
+    if (hasNewPriceFilter && !(record.new_price && record.new_price > 0)) return false;
+
     return true;
   });
 
