@@ -419,8 +419,19 @@ const PendingTickets = () => {
               Bộ lọc
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-6">
+           <CardContent>
+            <div className="flex flex-wrap gap-6 items-end">
+              {/* PNR Search */}
+              <div className="space-y-2">
+                <Label>Tìm PNR</Label>
+                <Input
+                  placeholder="Nhập mã PNR..."
+                  value={pnrSearch}
+                  onChange={(e) => setPnrSearch(e.target.value)}
+                  className="w-[180px] uppercase"
+                />
+              </div>
+
               {/* Status Filter */}
               <div className="space-y-2">
                 <Label>Trạng thái</Label>
