@@ -81,6 +81,10 @@ const PendingTickets = () => {
     F2: true,
   });
   const [hasNewPriceFilter, setHasNewPriceFilter] = useState(false);
+  const [pnrSearch, setPnrSearch] = useState("");
+
+  // Refresh confirm
+  const [refreshRecord, setRefreshRecord] = useState<RepriceRecord | null>(null);
 
   // Add/Edit modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
