@@ -133,6 +133,11 @@ const PendingTickets = () => {
       return false;
     }
 
+    // PNR search filter
+    if (pnrSearch.trim() && !record.pnr.toUpperCase().includes(pnrSearch.trim().toUpperCase())) {
+      return false;
+    }
+
     // Email tag filter
     const emailTag = getEmailTag(record.email);
     if (emailTag === "HVA" && !emailTagFilters.HVA) return false;
