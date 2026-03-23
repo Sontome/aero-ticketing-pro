@@ -171,6 +171,34 @@ const PendingTickets = () => {
     }
   };
 
+  const handleRefreshConfirm = async () => {
+    if (!refreshRecord) return;
+    try {
+      if (refreshRecord.status === "HOLD" && !refreshRecord.auto_reprice) {
+        // Resume reprice: update created_at to now and enable auto_reprice
+        const { error } = await supabase
+          .from("reprice")
+          .update({ created_at: new Date().toISOString(), auto_reprice: true })
+          .eq("id", refreshRecord.id);
+        if (error) throw error;
+        toast.success("Đã tiếp tục reprice");
+      } else if (refreshRecord.status === "HOLD" && refreshRecord.auto_reprice) {
+        // Stop reprice: disable auto_reprice
+        const { error } = await supabase
+          .from("reprice")
+          .update({ auto_reprice: false })
+          .eq("id", refreshRecord.id);
+        if (error) throw error;
+        toast.success("Đã ngừng reprice");
+      }
+      setRefreshRecord(null);
+      fetchRepriceRecords();
+    } catch (error) {
+      console.error("Error updating reprice:", error);
+      toast.error("Không thể cập nhật");
+    }
+  };
+
   const handleOpenAddModal = () => {
     setEditingRecord(null);
     setFormData({
