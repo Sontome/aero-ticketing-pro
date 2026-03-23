@@ -734,6 +734,28 @@ const PendingTickets = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      {/* Refresh Confirmation Dialog */}
+      <AlertDialog
+        open={!!refreshRecord}
+        onOpenChange={() => setRefreshRecord(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Xác nhận</AlertDialogTitle>
+            <AlertDialogDescription>
+              {refreshRecord?.auto_reprice
+                ? `Ngừng reprice cho PNR ${refreshRecord?.pnr}?`
+                : `Tiếp tục reprice cho PNR ${refreshRecord?.pnr}? Ngày tạo sẽ được cập nhật thành hiện tại.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Hủy</AlertDialogCancel>
+            <AlertDialogAction onClick={handleRefreshConfirm}>
+              Đồng ý
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <VNATicketModal
         isOpen={!!vnaTicketPNR}
         onClose={() => setVnaTicketPNR(null)}
