@@ -575,9 +575,19 @@ const PendingTickets = () => {
                             <Button
                               variant="ghost"
                               size="icon"
-                              onClick={() => handleOpenEditModal(record)}
+                              disabled={record.status !== "HOLD"}
+                              onClick={() => {
+                                if (record.status === "HOLD") setRefreshRecord(record);
+                              }}
+                              title={
+                                record.status !== "HOLD"
+                                  ? "Chỉ áp dụng cho vé đang giữ"
+                                  : record.auto_reprice
+                                  ? "Ngừng reprice"
+                                  : "Tiếp tục reprice"
+                              }
                             >
-                              <Edit2 className="w-4 h-4" />
+                              <RefreshCw className={`w-4 h-4 ${record.status === "HOLD" && record.auto_reprice ? "text-green-500" : ""}`} />
                             </Button>
                             <Button
                               variant="ghost"
