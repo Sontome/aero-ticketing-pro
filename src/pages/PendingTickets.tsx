@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Trash2, Plus, Edit2, RefreshCw, Copy, Filter, FileSearch } from "lucide-react";
+import { ArrowLeft, Trash2, Plus, RefreshCw, Copy, Filter, FileSearch, Search } from "lucide-react";
 import { VNATicketModal } from "@/components/VNATicketModal";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
