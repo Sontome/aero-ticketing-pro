@@ -386,14 +386,23 @@ export default function KakaoNoti() {
                 />
               </div>
               <div>
-                <Label>PNR *</Label>
-                <Input
-                  value={formData.pnr}
-                  onChange={e => setFormData(f => ({ ...f, pnr: e.target.value.toUpperCase() }))}
-                  placeholder="ABC123 ABC124"
-                  
-                  className="font-mono"
-                />
+                <Label>PNR * {!editingRecord && <span className="text-xs text-muted-foreground">(nhiều PNR cách nhau bằng dấu cách, dấu phẩy hoặc xuống dòng)</span>}</Label>
+                {editingRecord ? (
+                  <Input
+                    value={formData.pnr}
+                    onChange={e => setFormData(f => ({ ...f, pnr: e.target.value.toUpperCase() }))}
+                    placeholder="ABC123"
+                    maxLength={6}
+                    className="font-mono"
+                  />
+                ) : (
+                  <Textarea
+                    value={formData.pnr}
+                    onChange={e => setFormData(f => ({ ...f, pnr: e.target.value.toUpperCase() }))}
+                    placeholder="ABC123 DEF456 GHI789"
+                    className="font-mono min-h-[80px]"
+                  />
+                )}
               </div>
               <div>
                 <Label>Số điện thoại</Label>
