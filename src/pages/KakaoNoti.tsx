@@ -403,6 +403,18 @@ export default function KakaoNoti() {
                 />
                 <p className="text-xs text-muted-foreground mt-1">Tự động thêm số 0 nếu thiếu</p>
               </div>
+              <div>
+                <Label>Trạng thái gửi</Label>
+                <Select value={formData.rowSent ? 'true' : 'false'} onValueChange={v => setFormData(f => ({ ...f, rowSent: v === 'true' }))}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="true">Đã gửi</SelectItem>
+                    <SelectItem value="false">Chưa gửi</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowAddEdit(false)}>Hủy</Button>
                 <Button onClick={handleSave} disabled={saving}>
