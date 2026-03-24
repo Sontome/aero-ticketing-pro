@@ -39,7 +39,7 @@ export default function KakaoNoti() {
   // Modal states
   const [showAddEdit, setShowAddEdit] = useState(false);
   const [editingRecord, setEditingRecord] = useState<KakaNotiRecord | null>(null);
-  const [formData, setFormData] = useState({ name: '', pnr: '', phone: '' });
+  const [formData, setFormData] = useState({ name: '', pnr: '', phone: '', rowSent: true });
   const [deleteRecord, setDeleteRecord] = useState<KakaNotiRecord | null>(null);
   const [saving, setSaving] = useState(false);
 
