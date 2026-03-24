@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Textarea } from '@/components/ui/textarea';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Plus, Search, Pencil, Trash2, RefreshCw, MessageSquare } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
