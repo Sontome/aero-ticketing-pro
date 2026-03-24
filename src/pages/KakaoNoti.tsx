@@ -104,13 +104,13 @@ export default function KakaoNoti() {
 
   const handleOpenAdd = () => {
     setEditingRecord(null);
-    setFormData({ name: '', pnr: '', phone: '' });
+    setFormData({ name: '', pnr: '', phone: '', rowSent: true });
     setShowAddEdit(true);
   };
 
   const handleOpenEdit = (record: KakaNotiRecord) => {
     setEditingRecord(record);
-    setFormData({ name: record.name, pnr: record.pnr, phone: record.phone || '' });
+    setFormData({ name: record.name, pnr: record.pnr, phone: record.phone || '', rowSent: record.isSent });
     setShowAddEdit(true);
   };
 
