@@ -115,16 +115,7 @@ export default function KakaoNoti() {
   };
 
   const handleSave = async () => {
-    const pnr = formData.pnr.trim().toUpperCase();
-    // validate: nhiều PNR, mỗi cái 6 ký tự, cách nhau bằng dấu cách
-    if (!/^([A-Z0-9]{6})(\s+[A-Z0-9]{6})*$/.test(pnr)) {
-      toast({
-        title: 'Lỗi',
-        description: 'Mỗi PNR phải 6 ký tự chữ/số, ngăn cách bằng dấu cách',
-        variant: 'destructive'
-      });
-      return;
-    }
+    const pnrRaw = formData.pnr.trim().toUpperCase();
     if (!formData.name.trim()) {
       toast({ title: 'Lỗi', description: 'Tên không được để trống', variant: 'destructive' });
       return;
@@ -135,21 +126,44 @@ export default function KakaoNoti() {
     setSaving(true);
     try {
       if (editingRecord) {
+        // Edit mode: single PNR
+        const pnr = pnrRaw;
+        if (!/^[A-Z0-9]{6}$/.test(pnr)) {
+          toast({ title: 'Lỗi', description: 'PNR phải 6 ký tự chữ/số', variant: 'destructive' });
+          setSaving(false);
+          return;
+        }
         const { error } = await supabase.from('kakanoti').update({
           name: formData.name.trim(),
           pnr,
           phone,
+          row_sent: formData.rowSent,
         }).eq('id', editingRecord.id);
         if (error) throw error;
         toast({ title: 'Đã cập nhật thành công' });
       } else {
-        const { error } = await supabase.from('kakanoti').insert({
+        // Add mode: multiple PNRs separated by spaces/commas/newlines
+        const pnrList = pnrRaw.split(/[\s,;]+/).filter(Boolean);
+        if (pnrList.length === 0) {
+          toast({ title: 'Lỗi', description: 'Vui lòng nhập ít nhất 1 PNR', variant: 'destructive' });
+          setSaving(false);
+          return;
+        }
+        const invalid = pnrList.filter(p => !/^[A-Z0-9]{6}$/.test(p));
+        if (invalid.length > 0) {
+          toast({ title: 'Lỗi', description: `PNR không hợp lệ: ${invalid.join(', ')}`, variant: 'destructive' });
+          setSaving(false);
+          return;
+        }
+        const rows = pnrList.map(pnr => ({
           name: formData.name.trim(),
           pnr,
           phone,
-        });
+          row_sent: formData.rowSent,
+        }));
+        const { error } = await supabase.from('kakanoti').upsert(rows, { onConflict: 'phone,pnr' });
         if (error) throw error;
-        toast({ title: 'Đã thêm thành công' });
+        toast({ title: `Đã thêm ${pnrList.length} PNR thành công` });
       }
       setShowAddEdit(false);
       fetchRecords();
