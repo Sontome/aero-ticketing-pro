@@ -518,6 +518,7 @@ const PendingTickets = () => {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b">
+                      <th className="text-center p-3 font-medium w-12">STT</th>
                       <th className="text-left p-3 font-medium">PNR</th>
                       <th className="text-left p-3 font-medium">Loại</th>
                       <th className="text-left p-3 font-medium">Email</th>
