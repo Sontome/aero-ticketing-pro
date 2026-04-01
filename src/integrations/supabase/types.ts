@@ -173,6 +173,27 @@ export type Database = {
         }
         Relationships: []
       }
+      pnr_email: {
+        Row: {
+          email: string | null
+          id: string
+          pnr: string | null
+          timecreat: string | null
+        }
+        Insert: {
+          email?: string | null
+          id?: string
+          pnr?: string | null
+          timecreat?: string | null
+        }
+        Update: {
+          email?: string | null
+          id?: string
+          pnr?: string | null
+          timecreat?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address: string | null
@@ -413,6 +434,14 @@ export type Database = {
     }
     Functions: {
       delete_old_reprice: { Args: never; Returns: undefined }
+      get_phone_email_to_pnr: {
+        Args: { pnr_input: string }
+        Returns: {
+          email: string
+          name: string
+          phone: string
+        }[]
+      }
       get_unsent_latest_kakao: {
         Args: never
         Returns: {
