@@ -317,6 +317,7 @@ export type Database = {
           created_at: string
           email: string | null
           id: string
+          id_f2: string | null
           last_checked_at: string | null
           new_price: number | null
           old_price: number | null
@@ -330,6 +331,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          id_f2?: string | null
           last_checked_at?: string | null
           new_price?: number | null
           old_price?: number | null
@@ -343,6 +345,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          id_f2?: string | null
           last_checked_at?: string | null
           new_price?: number | null
           old_price?: number | null
