@@ -3,6 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Plane, Clock, Users, Copy, ShoppingCart } from 'lucide-react';
+import { VNAFlightActions } from '@/components/VNAFlightActions';
 import { Flight } from '@/services/flightApi';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -181,18 +182,28 @@ ${getBaggageInfo()}, giá vé = ${formatPrice(adjustedPrice)}w`;
       onMouseEnter={playClickSound}
     >
       <CardContent className="p-6">
-        {/* Hold Ticket Icon Button */}
-        {onHoldTicket && (
-          <Button 
-            onClick={() => onHoldTicket(flight)}
-            size="icon"
-            variant="ghost"
-            className="absolute top-4 right-4 z-10 bg-white/80 hover:bg-white/90 dark:bg-gray-800/80 dark:hover:bg-gray-800/90"
-            title="Giữ vé"
-          >
-            <ShoppingCart className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-          </Button>
-        )}
+        {/* Top-right action buttons */}
+        <div className="absolute top-4 right-4 z-10 flex items-center gap-1">
+          {flight.airline === 'VNA' && (
+            <VNAFlightActions
+              flight={flight}
+              currentPrice={adjustedPrice}
+              passengerCount={1}
+              onApplyStuPrice={(p) => setAdjustedPrice(Math.round(p / 100) * 100)}
+            />
+          )}
+          {onHoldTicket && (
+            <Button
+              onClick={() => onHoldTicket(flight)}
+              size="icon"
+              variant="ghost"
+              className="bg-white/80 hover:bg-white/90 dark:bg-gray-800/80 dark:hover:bg-gray-800/90"
+              title="Giữ vé"
+            >
+              <ShoppingCart className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            </Button>
+          )}
+        </div>
 
         <div className="flex flex-col space-y-4">
           {/* Price and Main Info */}
