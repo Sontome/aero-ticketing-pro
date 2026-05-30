@@ -142,9 +142,11 @@ export const CheckSTUVNAModal: React.FC<Props> = ({
     };
   }, [isOpen, flight, passengerCount]);
 
+  const finalPrice = newPrice != null ? computeFinalPrice(newPrice) : null;
+
   const handleApply = () => {
-    if (newPrice == null) return;
-    onApply(newPrice);
+    if (finalPrice == null) return;
+    onApply(finalPrice);
     toast.success('Đã cập nhật giá vé học sinh');
     onClose();
   };
