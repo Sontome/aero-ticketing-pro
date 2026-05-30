@@ -9,6 +9,7 @@ import {
   type CheckStudentRequest,
 } from '@/services/checkStudentApi';
 import { formatDateToApi, formatTimeToApi } from './change-ticket/utils';
+import { useAuth } from '@/hooks/useAuth';
 
 interface VNALeg {
   nơi_đi?: string;
