@@ -198,10 +198,14 @@ export const CheckSTUVNAModal: React.FC<Props> = ({
                     {formatKRW(currentPrice)}
                   </span>
                 </div>
+                <div className="flex items-center justify-between text-xs text-gray-500">
+                  <span>Giá API gốc:</span>
+                  <span className="font-mono">{formatKRW(newPrice)}</span>
+                </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-700 font-medium">Giá học sinh:</span>
+                  <span className="text-gray-700 font-medium">Giá học sinh (đã cộng phí):</span>
                   <span className="font-mono text-indigo-700 font-bold text-base">
-                    {formatKRW(newPrice)}
+                    {finalPrice != null ? formatKRW(finalPrice) : '-'}
                   </span>
                 </div>
               </div>
