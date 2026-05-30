@@ -30,6 +30,7 @@ interface Props {
   flight: CheckSTUFlightLike | null;
   passengerCount: number;
   currentPrice: number;
+  isRoundTrip?: boolean;
   onApply: (newPrice: number) => void;
 }
 
