@@ -9,6 +9,7 @@ import {
   type CheckStudentRequest,
 } from '@/services/checkStudentApi';
 import { formatDateToApi, formatTimeToApi } from './change-ticket/utils';
+import { useAuth } from '@/hooks/useAuth';
 
 interface VNALeg {
   nơi_đi?: string;
@@ -29,6 +30,7 @@ interface Props {
   flight: CheckSTUFlightLike | null;
   passengerCount: number;
   currentPrice: number;
+  isRoundTrip?: boolean;
   onApply: (newPrice: number) => void;
 }
 
@@ -78,12 +80,23 @@ export const CheckSTUVNAModal: React.FC<Props> = ({
   flight,
   passengerCount,
   currentPrice,
+  isRoundTrip,
   onApply,
 }) => {
+  const { profile } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [newPrice, setNewPrice] = useState<number | null>(null);
   const [mess, setMess] = useState<string>('');
+
+  const computeFinalPrice = (basePrice: number) => {
+    const vnaMarkup = profile?.price_vna || 0;
+    const tripFee = isRoundTrip
+      ? profile?.price_rt_vna || 0
+      : profile?.price_ow_vna || 0;
+    const total = basePrice + vnaMarkup + tripFee;
+    return Math.round(total / 100) * 100;
+  };
 
   useEffect(() => {
     if (!isOpen) {
@@ -129,9 +142,11 @@ export const CheckSTUVNAModal: React.FC<Props> = ({
     };
   }, [isOpen, flight, passengerCount]);
 
+  const finalPrice = newPrice != null ? computeFinalPrice(newPrice) : null;
+
   const handleApply = () => {
-    if (newPrice == null) return;
-    onApply(newPrice);
+    if (finalPrice == null) return;
+    onApply(finalPrice);
     toast.success('Đã cập nhật giá vé học sinh');
     onClose();
   };
@@ -183,10 +198,14 @@ export const CheckSTUVNAModal: React.FC<Props> = ({
                     {formatKRW(currentPrice)}
                   </span>
                 </div>
+                <div className="flex items-center justify-between text-xs text-gray-500">
+                  <span>Giá API gốc:</span>
+                  <span className="font-mono">{formatKRW(newPrice)}</span>
+                </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-700 font-medium">Giá học sinh:</span>
+                  <span className="text-gray-700 font-medium">Giá học sinh (đã cộng phí):</span>
                   <span className="font-mono text-indigo-700 font-bold text-base">
-                    {formatKRW(newPrice)}
+                    {finalPrice != null ? formatKRW(finalPrice) : '-'}
                   </span>
                 </div>
               </div>
