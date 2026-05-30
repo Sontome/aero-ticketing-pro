@@ -96,6 +96,7 @@ export const VNAFlightActions: React.FC<Props> = React.memo(
             flight={modalFlight}
             passengerCount={passengerCount}
             currentPrice={currentPrice}
+            isRoundTrip={!!flight.return}
             onApply={(p) => onApplyStuPrice?.(p)}
           />
         )}
