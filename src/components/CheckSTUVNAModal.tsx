@@ -80,12 +80,23 @@ export const CheckSTUVNAModal: React.FC<Props> = ({
   flight,
   passengerCount,
   currentPrice,
+  isRoundTrip,
   onApply,
 }) => {
+  const { profile } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [newPrice, setNewPrice] = useState<number | null>(null);
   const [mess, setMess] = useState<string>('');
+
+  const computeFinalPrice = (basePrice: number) => {
+    const vnaMarkup = profile?.price_vna || 0;
+    const tripFee = isRoundTrip
+      ? profile?.price_rt_vna || 0
+      : profile?.price_ow_vna || 0;
+    const total = basePrice + vnaMarkup + tripFee;
+    return Math.round(total / 100) * 100;
+  };
 
   useEffect(() => {
     if (!isOpen) {
