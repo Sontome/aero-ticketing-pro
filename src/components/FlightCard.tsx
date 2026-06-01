@@ -190,7 +190,10 @@ ${getBaggageInfo()}, giá vé = ${formatPrice(adjustedPrice)}w`;
               flight={flight}
               currentPrice={adjustedPrice}
               passengerCount={1}
-              onApplyStuPrice={(p) => setAdjustedPrice(Math.round(p / 100) * 100)}
+              onApplyStuPrice={(p) => {
+                setAdjustedPrice(Math.round(p / 100) * 100);
+                setStuApplied(true);
+              }}
             />
           )}
           {onHoldTicket && (
