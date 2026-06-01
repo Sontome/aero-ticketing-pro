@@ -92,11 +92,11 @@ export const FlightCard: React.FC<FlightCardProps> = ({ flight, priceMode, onHol
     if (flight.airline === 'VJ') {
       return 'Vietjet 7kg xách tay, 20kg ký gửi';
     } else {
-      // VNA baggage based on hành_lý_vna field
+      const prefix = stuApplied ? 'VNairlines DHS' : 'VNairlines';
       if (flight.baggageType === 'ADT') {
-        return 'VNairlines 10kg xách tay, 23kg ký gửi';
+        return `${prefix} 10kg xách tay, 23kg ký gửi`;
       } else {
-        return 'VNairlines 10kg xách tay, 46kg ký gửi';
+        return `${prefix} 10kg xách tay, 46kg ký gửi`;
       }
     }
   };
