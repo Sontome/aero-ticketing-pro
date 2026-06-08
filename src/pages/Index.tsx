@@ -38,6 +38,8 @@ export default function Index() {
   const navigate = useNavigate();
   const [flights, setFlights] = useState<Flight[]>([]);
   const [otherFlights, setOtherFlights] = useState<OtherFlight[]>([]);
+  const [rawOtherFlights, setRawOtherFlights] = useState<OtherAirlineFlight[]>([]);
+  const [lastSearchIsRoundTrip, setLastSearchIsRoundTrip] = useState(false);
   const [showOtherAirlinesModal, setShowOtherAirlinesModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
