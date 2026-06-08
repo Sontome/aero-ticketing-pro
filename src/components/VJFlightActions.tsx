@@ -24,7 +24,7 @@ function buildModalFlight(flight: Flight) {
     giờ_cất_cánh: flight.departure.time,
     giờ_hạ_cánh: flight.landingTime || flight.arrival.time,
     id: stripPrefix(flight.flightNumber),
-    số_hiệu_máy_bay: flight.flightNumber,
+    số_hiệu_máy_bay: flight.new_flight_no,
   };
 
   const chiều_về = flight.return
@@ -35,7 +35,7 @@ function buildModalFlight(flight: Flight) {
         giờ_cất_cánh: flight.return.departure.time,
         giờ_hạ_cánh: flight.return.landingTime || flight.return.arrival.time,
         id: stripPrefix(flight.flightNumber),
-        số_hiệu_máy_bay: flight.flightNumber,
+        số_hiệu_máy_bay: flight.new_flight_arr_no,
       }
     : undefined;
 
