@@ -392,28 +392,11 @@ export default function Index() {
             setTimeout(() => playNotificationSound(), 200);
           }
           
-          // Process Other Airlines flights if user has permission
-          if (profile?.perm_check_other && result.otherFlights.length > 0) {
-            const listOther = profile.list_other || [];
-            const isRoundTrip = !!searchData.returnDate;
-            const owMarkup = profile.price_ow_other || 0;
-            const rtMarkup = profile.price_rt_other || 0;
-            
-            // Filter and transform other flights
-            const processedOtherFlights: OtherFlight[] = result.otherFlights
-              .filter(f => listOther.includes(f.airline))
-              .map(f => {
-                const priceWithMarkup = f.price + (isRoundTrip ? rtMarkup : owMarkup);
-                const roundedPrice = Math.round(priceWithMarkup / 100) * 100;
-                
-                return {
-                  ...f,
-                  adjustedPrice: roundedPrice,
-                  baggageInfo: AIRLINE_BAGGAGE[f.airline] || { carryOn: '10kg' },
-                };
-              });
-            
-            setOtherFlights(processedOtherFlights);
+          // Always store raw other airlines flights; processing happens in useMemo
+          // so it correctly re-runs when profile loads/changes.
+          if (result.otherFlights.length > 0) {
+            console.log('[OtherAirlines] Raw flights from API:', result.otherFlights.length, result.otherFlights.map(f => f.airline));
+            setRawOtherFlights(result.otherFlights);
           }
         }).catch(error => {
           console.error('Vietnam Airlines API error:', error);
