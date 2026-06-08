@@ -78,6 +78,7 @@ interface VJFlightResponse {
       điểm_dừng_2: string;
       loại_vé: string;
       BookingKey: string;
+      số_hiệu_máy_bay:string;
     };
     'chiều_về'?: {
       hãng: string;
@@ -95,6 +96,7 @@ interface VJFlightResponse {
       điểm_dừng_2: string;
       loại_vé: string;
       BookingKey: string;
+      số_hiệu_máy_bay:string;
     };
     thông_tin_chung: {
       giá_vé: string;
@@ -367,6 +369,8 @@ export const fetchVietJetFlights = async (searchData: SearchFormData): Promise<F
       availableSeats: parseInt(flight.thông_tin_chung.số_ghế_còn),
       bookingKey: flight['chiều_đi'].BookingKey,
       bookingKeyReturn: flight['chiều_về']?.BookingKey,
+      new_flight_arr_no: flight['chiều_về']?.số_hiệu_máy_bay,
+      new_flight_no: flight['chiều_đi'].số_hiệu_máy_bay,
       ticketClass: flight['chiều_đi'].loại_vé,
       baggageType: flight.thông_tin_chung.hành_lý_vna,
       stopInfo: flight['chiều_đi'].điểm_dừng_1 ? {
