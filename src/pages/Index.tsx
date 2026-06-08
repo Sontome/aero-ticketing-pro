@@ -521,7 +521,32 @@ export default function Index() {
 
   // Get allowed airlines for other flights
   const allowedOtherAirlines = profile?.list_other || [];
-  
+
+  // Process raw other-airlines flights whenever profile or raw data changes.
+  // This avoids the stale-closure bug where profile wasn't loaded when API resolved.
+  useEffect(() => {
+    if (!profile?.perm_check_other || rawOtherFlights.length === 0) {
+      setOtherFlights([]);
+      return;
+    }
+    const listOther = profile.list_other || [];
+    const owMarkup = profile.price_ow_other || 0;
+    const rtMarkup = profile.price_rt_other || 0;
+    const processed: OtherFlight[] = rawOtherFlights
+      .filter(f => listOther.includes(f.airline))
+      .map(f => {
+        const priceWithMarkup = f.price + (lastSearchIsRoundTrip ? rtMarkup : owMarkup);
+        const roundedPrice = Math.round(priceWithMarkup / 100) * 100;
+        return {
+          ...f,
+          adjustedPrice: roundedPrice,
+          baggageInfo: AIRLINE_BAGGAGE[f.airline] || { carryOn: '10kg' },
+        };
+      });
+    console.log('[OtherAirlines] Processed flights:', processed.length, 'allowed:', listOther);
+    setOtherFlights(processed);
+  }, [rawOtherFlights, profile, lastSearchIsRoundTrip]);
+
   // Filter other flights by allowed airlines and find cheapest
   const filteredOtherFlights = otherFlights.filter(f => allowedOtherAirlines.includes(f.airline));
   const cheapestOtherFlight = filteredOtherFlights.length > 0 
