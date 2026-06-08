@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Plane, Clock, Users, Copy, ShoppingCart } from 'lucide-react';
 import { VNAFlightActions } from '@/components/VNAFlightActions';
+import { VJFlightActions } from '@/components/VJFlightActions';
 import { Flight } from '@/services/flightApi';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
