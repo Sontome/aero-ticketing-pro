@@ -339,6 +339,8 @@ export default function Index() {
     setSearchPerformed(true);
     setFlights([]); // Clear previous results
     setOtherFlights([]); // Clear other airlines results
+    setRawOtherFlights([]);
+    setLastSearchIsRoundTrip(!!searchData.returnDate);
     setHasSearched(true);
     setSearchData(searchData);
     setLastSearchData(searchData);
