@@ -156,6 +156,8 @@ export interface Flight {
   availableSeats: number;
   bookingKey?: string;
   bookingKeyReturn?: string;
+  new_flight_no?: string;
+  new_flight_arr_no?: string;
   ticketClass: string;
   baggageType: string;
   stopInfo?: {
