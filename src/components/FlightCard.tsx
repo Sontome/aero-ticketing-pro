@@ -197,6 +197,9 @@ ${getBaggageInfo()}, giá vé = ${formatPrice(adjustedPrice)}w`;
               }}
             />
           )}
+          {flight.airline === 'VJ' && (
+            <VJFlightActions flight={flight} />
+          )}
           {onHoldTicket && (
             <Button
               onClick={() => onHoldTicket(flight)}
