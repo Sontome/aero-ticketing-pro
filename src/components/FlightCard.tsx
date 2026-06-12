@@ -249,7 +249,7 @@ ${getBaggageInfo()}, giá vé = ${formatPrice(adjustedPrice)}w`;
                   size="sm"
                 >
                   <ShoppingCart className="w-4 h-4 mr-2" />
-                  Giữ vé
+                  
                 </Button>
               )}
               
