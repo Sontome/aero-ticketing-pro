@@ -185,7 +185,7 @@ ${getBaggageInfo()}, giá vé = ${formatPrice(adjustedPrice)}w`;
     >
       <CardContent className="p-6">
         {/* Top-right action buttons */}
-        <div className="absolute top-4 right-4 z-10 flex items-center gap-1">
+        {/* <div className="absolute top-4 right-4 z-10 flex items-center gap-1">
           {flight.airline === 'VNA' && (
             <VNAFlightActions
               flight={flight}
@@ -211,7 +211,7 @@ ${getBaggageInfo()}, giá vé = ${formatPrice(adjustedPrice)}w`;
               <ShoppingCart className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             </Button>
           )}
-        </div>
+        </div> */}
 
         <div className="flex flex-col space-y-4">
           {/* Price and Main Info */}
