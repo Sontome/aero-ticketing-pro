@@ -185,67 +185,42 @@ ${getBaggageInfo()}, giá vé = ${formatPrice(adjustedPrice)}w`;
     >
       <CardContent className="p-6">
         {/* Top-right action buttons */}
-        {/* <div className="absolute top-4 right-4 z-10 flex items-center gap-1">
-          {flight.airline === 'VNA' && (
-            <VNAFlightActions
-              flight={flight}
-              currentPrice={adjustedPrice}
-              passengerCount={1}
-              onApplyStuPrice={(p) => {
-                setAdjustedPrice(Math.round(p / 100) * 100);
-                setStuApplied(true);
-              }}
-            />
-          )}
-          {flight.airline === 'VJ' && (
-            <VJFlightActions flight={flight} />
-          )}
-          {onHoldTicket && (
-            <Button
-              onClick={() => onHoldTicket(flight)}
-              size="icon"
-              variant="ghost"
-              className="bg-white/80 hover:bg-white/90 dark:bg-gray-800/80 dark:hover:bg-gray-800/90"
-              title="Giữ vé"
-            >
-              <ShoppingCart className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-            </Button>
-          )}
-        </div> */}
-        <div className="flex flex-wrap gap-2">
-            {flight.airline === 'VNA' && (
-              <VNAFlightActions
-                flight={flight}
-                currentPrice={adjustedPrice}
-                passengerCount={1}
-                onApplyStuPrice={(p) => {
-                  setAdjustedPrice(Math.round(p / 100) * 100);
-                  setStuApplied(true);
-                }}
-              />
-            )}
-          
-            {flight.airline === 'VJ' && (
-              <VJFlightActions flight={flight} />
-            )}
-          
-            {onHoldTicket && (
-              <Button
-                onClick={() => onHoldTicket(flight)}
-                variant="outline"
-                size="sm"
-              >
-                <ShoppingCart className="w-4 h-4 mr-2" />
-                Giữ vé
-              </Button>
-            )}
-          </div>
+        
+        
         <div className="flex flex-col space-y-4">
           {/* Price and Main Info */}
           <div className="flex justify-between items-start">
             <div>
               <div className="text-2xl font-bold text-blue-600 mb-1 transition-colors duration-200">
                 {formatPrice(adjustedPrice)} KRW
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {flight.airline === 'VNA' && (
+                  <VNAFlightActions
+                    flight={flight}
+                    currentPrice={adjustedPrice}
+                    passengerCount={1}
+                    onApplyStuPrice={(p) => {
+                      setAdjustedPrice(Math.round(p / 100) * 100);
+                      setStuApplied(true);
+                    }}
+                  />
+                )}
+              
+                {flight.airline === 'VJ' && (
+                  <VJFlightActions flight={flight} />
+                )}
+              
+                {onHoldTicket && (
+                  <Button
+                    onClick={() => onHoldTicket(flight)}
+                    variant="outline"
+                    size="sm"
+                  >
+                    <ShoppingCart className="w-4 h-4 mr-2" />
+                    Giữ vé
+                  </Button>
+                )}
               </div>
               <div className={`text-sm transition-colors duration-200 ${isADT ? 'text-red-600 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}>
                 {getTripTypeLabel()}: {getTicketClass()} - {getFlightType()}
