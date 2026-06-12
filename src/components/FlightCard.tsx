@@ -194,34 +194,7 @@ ${getBaggageInfo()}, giá vé = ${formatPrice(adjustedPrice)}w`;
               <div className="text-2xl font-bold text-blue-600 mb-1 transition-colors duration-200">
                 {formatPrice(adjustedPrice)} KRW
               </div>
-              <div className="flex flex-wrap gap-2">
-                {flight.airline === 'VNA' && (
-                  <VNAFlightActions
-                    flight={flight}
-                    currentPrice={adjustedPrice}
-                    passengerCount={1}
-                    onApplyStuPrice={(p) => {
-                      setAdjustedPrice(Math.round(p / 100) * 100);
-                      setStuApplied(true);
-                    }}
-                  />
-                )}
               
-                {flight.airline === 'VJ' && (
-                  <VJFlightActions flight={flight} />
-                )}
-              
-                {onHoldTicket && (
-                  <Button
-                    onClick={() => onHoldTicket(flight)}
-                    variant="outline"
-                    size="sm"
-                  >
-                    <ShoppingCart className="w-4 h-4 mr-2" />
-                    Giữ vé
-                  </Button>
-                )}
-              </div>
               <div className={`text-sm transition-colors duration-200 ${isADT ? 'text-red-600 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}>
                 {getTripTypeLabel()}: {getTicketClass()} - {getFlightType()}
               </div>
@@ -230,7 +203,7 @@ ${getBaggageInfo()}, giá vé = ${formatPrice(adjustedPrice)}w`;
                 Còn {flight.availableSeats} ghế
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-4">
               <Badge
                 variant={flight.airline === 'VJ' ? 'default' : 'secondary'}
                 className={
@@ -252,6 +225,34 @@ ${getBaggageInfo()}, giá vé = ${formatPrice(adjustedPrice)}w`;
               >
                 <Copy className="w-4 h-4" />
               </Button>
+              
+              {flight.airline === 'VNA' && (
+                <VNAFlightActions
+                  flight={flight}
+                  currentPrice={adjustedPrice}
+                  passengerCount={1}
+                  onApplyStuPrice={(p) => {
+                    setAdjustedPrice(Math.round(p / 100) * 100);
+                    setStuApplied(true);
+                  }}
+                />
+              )}
+            
+              {flight.airline === 'VJ' && (
+                <VJFlightActions flight={flight} />
+              )}
+            
+              {onHoldTicket && (
+                <Button
+                  onClick={() => onHoldTicket(flight)}
+                  variant="outline"
+                  size="sm"
+                >
+                  <ShoppingCart className="w-4 h-4 mr-2" />
+                  Giữ vé
+                </Button>
+              )}
+              
             </div>
           </div>
           
