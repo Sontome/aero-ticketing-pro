@@ -15,6 +15,7 @@ import HeldTickets from "./pages/HeldTickets";
 import PriceMonitor from "./pages/PriceMonitor";
 import KakaoNoti from "./pages/KakaoNoti";
 import PnrDelay from "./pages/PnrDelay";
+import DomainConfig from "./pages/DomainConfig";
 
 const queryClient = new QueryClient();
 
