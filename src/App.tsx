@@ -48,6 +48,11 @@ const App = () => (
                 <PnrDelay />
               </ProtectedRoute>
             } />
+            <Route path="/admin/domain-config" element={
+              <ProtectedRoute>
+                <DomainConfig />
+              </ProtectedRoute>
+            } />
             <Route path="/cart" element={
               <ProtectedRoute>
                 <HeldTickets />
