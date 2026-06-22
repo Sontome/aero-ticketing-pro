@@ -49,6 +49,18 @@ const DomainConfigPage = () => {
   const [saving, setSaving] = useState(false);
 
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const UPDATE_CMD = '~/update_api.sh';
+  const handleCopyCmd = async () => {
+    try {
+      await navigator.clipboard.writeText(UPDATE_CMD);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast({ title: 'Không thể copy', variant: 'destructive' });
+    }
+  };
 
   const fetchRows = async () => {
     setLoading(true);
