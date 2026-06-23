@@ -16,6 +16,7 @@ import PriceMonitor from "./pages/PriceMonitor";
 import KakaoNoti from "./pages/KakaoNoti";
 import PnrDelay from "./pages/PnrDelay";
 import DomainConfig from "./pages/DomainConfig";
+import InboundEmail from "./pages/InboundEmail";
 
 const queryClient = new QueryClient();
 
