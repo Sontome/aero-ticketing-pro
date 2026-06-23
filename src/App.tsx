@@ -54,6 +54,11 @@ const App = () => (
                 <DomainConfig />
               </ProtectedRoute>
             } />
+            <Route path="/admin/inbound-email" element={
+              <ProtectedRoute>
+                <InboundEmail />
+              </ProtectedRoute>
+            } />
             <Route path="/cart" element={
               <ProtectedRoute>
                 <HeldTickets />
