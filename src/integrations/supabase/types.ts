@@ -90,6 +90,7 @@ export type Database = {
           hang: string | null
           id: string
           note: string | null
+          noti: boolean | null
           pnr: string | null
           sender_email: string | null
           sender_name: string | null
@@ -105,6 +106,7 @@ export type Database = {
           hang?: string | null
           id?: string
           note?: string | null
+          noti?: boolean | null
           pnr?: string | null
           sender_email?: string | null
           sender_name?: string | null
@@ -120,6 +122,7 @@ export type Database = {
           hang?: string | null
           id?: string
           note?: string | null
+          noti?: boolean | null
           pnr?: string | null
           sender_email?: string | null
           sender_name?: string | null
