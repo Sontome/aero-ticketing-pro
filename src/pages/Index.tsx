@@ -348,6 +348,7 @@ export default function Index() {
     setFlights([]); // Clear previous results
     setOtherFlights([]); // Clear other airlines results
     setRawOtherFlights([]);
+    setSunpqFlights([]);
     setLastSearchIsRoundTrip(!!searchData.returnDate);
     setHasSearched(true);
     setSearchData(searchData);
@@ -366,6 +367,43 @@ export default function Index() {
       show2pc: false,
       sortBy: 'price'
     });
+
+    // Fire SunPQ search in parallel (no permission gating on display, gated below by perm)
+    if (profile?.perm_check_sunpq) {
+      const tripType: 'OW' | 'RT' = searchData.tripType === 'round_trip' ? 'RT' : 'OW';
+      const fmt = (d?: Date | string) => {
+        if (!d) return '';
+        if (d instanceof Date) return d.toISOString().slice(0, 10);
+        return String(d).split('T')[0];
+      };
+      const payload = {
+        tripType,
+        departure: searchData.from,
+        arrival: searchData.to,
+        departureDate: fmt(searchData.departureDate),
+        returnDate: fmt(searchData.returnDate),
+        adults: searchData.passengers || 1,
+        children: 0,
+        infants: 0,
+        sunpqOneWayFee: profile?.price_ow_sunpq ?? 0,
+        sunpqRoundTripFee: profile?.price_rt_sunpq ?? 0,
+      };
+      setSunpqSearchPayload(payload);
+      setSunpqLoading(true);
+      searchSunPQFlights({
+        departure: payload.departure,
+        arrival: payload.arrival,
+        departureDate: payload.departureDate,
+        returnDate: payload.returnDate,
+        tripType,
+        adults: payload.adults,
+        children: 0,
+        infants: 0,
+      })
+        .then((res) => setSunpqFlights(res.body || []))
+        .catch((e) => console.error('SunPQ search error', e))
+        .finally(() => setSunpqLoading(false));
+    }
 
     try {
       const promises = [];
