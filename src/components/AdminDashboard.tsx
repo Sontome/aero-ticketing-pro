@@ -41,6 +41,9 @@ interface Profile {
   perm_check_discount: boolean;
   perm_check_vna_issued: boolean;
   perm_reprice: boolean;
+  perm_check_sunpq?: boolean;
+  price_ow_sunpq?: number;
+  price_rt_sunpq?: number;
   hold_ticket_quantity: number;
   apikey_telegram: string | null;
   idchat_telegram: string | null;
@@ -85,6 +88,9 @@ export const AdminDashboard = () => {
     perm_check_discount: false,
     perm_check_vna_issued: false,
     perm_reprice: false,
+    perm_check_sunpq: false,
+    price_ow_sunpq: 0,
+    price_rt_sunpq: 0,
     hold_ticket_quantity: 0,
     apikey_telegram: '',
     idchat_telegram: '',
