@@ -892,6 +892,15 @@ export default function Index() {
             flights={otherFlights}
             allowedAirlines={allowedOtherAirlines}
           />
+
+          {/* SunPQ Modal */}
+          <SunPQModal
+            isOpen={sunpqOpen}
+            onClose={() => setSunpqOpen(false)}
+            flights={sunpqFlights}
+            searchData={sunpqSearchPayload}
+          />
+
         </>
       )}
 
