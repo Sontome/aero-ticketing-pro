@@ -655,6 +655,7 @@ export default function Index() {
             onShowEmailModal={() => setIsEmailModalOpen(true)}
             onShowVJTicketModal={() => setShowVJTicketModal(true)}
             onShowVNATicketModal={() => setShowVNATicketModal(true)}
+            onShowSunPQTicketModal={profile?.perm_check_sunpq ? () => setShowSunPQTicketModal(true) : undefined}
             onShowRepriceModal={() => setShowRepriceModal(true)}
           />
 
