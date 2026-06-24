@@ -601,6 +601,21 @@ export default function Index() {
       )
     : null;
 
+  // Compute cheapest SunPQ trip (with markup)
+  const sunpqOneWayFee = profile?.price_ow_sunpq ?? 0;
+  const sunpqRoundTripFee = profile?.price_rt_sunpq ?? 0;
+  const sunpqTripType: 'OW' | 'RT' = lastSearchIsRoundTrip ? 'RT' : 'OW';
+  const sunpqFee = sunpqTripType === 'RT' ? sunpqRoundTripFee : sunpqOneWayFee;
+  const sunpqWithPrice = (sunpqFlights || []).map((t) => {
+    const base =
+      Number(t.thông_tin_chung?.giá_vé ?? t.thông_tin_chung?.giá_vé_gốc ?? 0) ||
+      (t.chiều_đi?.giá_vé_gốc || 0) + (t.chiều_về?.giá_vé_gốc || 0);
+    return { trip: t, finalPrice: Math.round((base + sunpqFee) / 100) * 100 };
+  });
+  const cheapestSunPQ = sunpqWithPrice.length > 0
+    ? sunpqWithPrice.reduce((p, c) => (p.finalPrice < c.finalPrice ? p : c))
+    : null;
+
   // Check if we have direct flights (both departure and return for round-trip)
   const hasDirectFlights = flights.some(f => {
     if (!f.return) {
