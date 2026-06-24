@@ -24,6 +24,7 @@ import { TopNavbar } from '@/components/TopNavbar';
 import { supabase } from '@/integrations/supabase/client';
 import { OtherAirlinesModal, OtherFlight, AIRLINE_NAMES, AIRLINE_BAGGAGE } from '@/components/OtherAirlinesModal';
 import SunPQModal from '@/components/SunPQModal';
+import SunPQTicketModal from '@/components/SunPQTicketModal';
 import { searchSunPQFlights } from '@/services/sunpqService';
 import type { SunPQTrip } from '@/types/sunpq';
 import {
