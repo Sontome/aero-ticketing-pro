@@ -942,6 +942,12 @@ export default function Index() {
             searchData={sunpqSearchPayload}
           />
 
+          {/* SunPQ PNR check from Tiện ích menu */}
+          <SunPQTicketModal
+            isOpen={showSunPQTicketModal}
+            onClose={() => setShowSunPQTicketModal(false)}
+          />
+
         </>
       )}
 
