@@ -159,9 +159,12 @@ const SunPQTicketModal: React.FC<Props> = ({ isOpen, onClose, initialPNR }) => {
     }
   };
 
-  const totalPrice = Math.round((Number(data?.total_price || data?.tongtien || 0) || 0) / 100) * 100;
+  const totalPrice =
+    Math.round(
+      (Number(data?.tongbillgiagoc || data?.total_price || data?.tongtien || 0) || 0) / 100
+    ) * 100;
   const paid = !!(data?.paymentstatus ?? data?.paid);
-  const deadline = data?.payment_deadline || data?.han_tt || '';
+  const deadline = data?.hanthanhtoan || data?.payment_deadline || data?.han_tt || '';
   const passengers: any[] = data?.passengers || data?.hanhkhach || [];
   const chieudi: any[] = data?.chieudi || data?.outbound || [];
   const chieuve: any[] = data?.chieuve || data?.inbound || [];
