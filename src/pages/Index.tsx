@@ -71,6 +71,7 @@ export default function Index() {
   const [sunpqFlights, setSunpqFlights] = useState<SunPQTrip[]>([]);
   const [sunpqLoading, setSunpqLoading] = useState(false);
   const [sunpqSearchPayload, setSunpqSearchPayload] = useState<any>(null);
+  const [showSunPQTicketModal, setShowSunPQTicketModal] = useState(false);
   const [filters, setFilters] = useState<FilterOptions>({
     airlines: ['VJ', 'VNA'],
     showCheapestOnly: false,
