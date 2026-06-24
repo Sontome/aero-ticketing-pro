@@ -52,10 +52,17 @@ const fmtFlightTime = (raw?: string) => {
 };
 
 const SegmentCard: React.FC<{ seg: any }> = ({ seg }) => {
-  const dep = parseDateTime(seg.departure_datetime || seg.departure_time || seg.departure);
-  const arr = parseDateTime(seg.arrival_datetime || seg.arrival_time || seg.arrival);
-  const depCode = seg.departure_airport || seg.departure || seg.from || '';
-  const arrCode = seg.arrival_airport || seg.arrival || seg.to || '';
+  const dep = parseDateTime(
+    seg?.departure_info?.datetime || seg.departure_datetime || seg.departure_time
+  );
+  const arr = parseDateTime(
+    seg?.arrival_info?.datetime || seg.arrival_datetime || seg.arrival_time
+  );
+  const depCode = seg?.departure_info?.code || seg.departure || seg.from || '';
+  const arrCode = seg?.arrival_info?.code || seg.arrival || seg.to || '';
+  const aircraft = seg?.aircraft_info?.type || seg.aircraft || '';
+  const depTerminal = seg?.departure_info?.terminal;
+  const arrTerminal = seg?.arrival_info?.terminal;
 
   return (
     <div className="border border-orange-200 rounded-lg overflow-hidden mb-2">
@@ -68,19 +75,24 @@ const SegmentCard: React.FC<{ seg: any }> = ({ seg }) => {
       </div>
       <div className="p-3 grid grid-cols-3 gap-3 text-sm">
         <div>
-          <div className="text-xs text-gray-500">{AIRPORT_NAMES[depCode] || depCode} ({depCode})</div>
+          <div className="text-xs text-gray-500">
+            {AIRPORT_NAMES[depCode] || depCode} ({depCode}){depTerminal ? ` · T${depTerminal}` : ''}
+          </div>
           <div className="text-2xl font-bold text-gray-800">{dep.time}</div>
           <div className="text-xs text-gray-600">{dep.weekday} {dep.date}</div>
         </div>
         <div>
-          <div className="text-xs text-gray-500">{AIRPORT_NAMES[arrCode] || arrCode} ({arrCode})</div>
+          <div className="text-xs text-gray-500">
+            {AIRPORT_NAMES[arrCode] || arrCode} ({arrCode}){arrTerminal ? ` · T${arrTerminal}` : ''}
+          </div>
           <div className="text-2xl font-bold text-gray-800">{arr.time}</div>
           <div className="text-xs text-gray-600">{arr.weekday} {arr.date}</div>
         </div>
         <div className="text-xs space-y-1">
           <div>Chuyến: <span className="font-semibold">{seg.carrier || ''}{seg.flight_number || ''}</span></div>
-          <div>Thời gian: <span className="font-semibold">{fmtFlightTime(seg.elapse_flying_time || seg.duration)}</span></div>
-          {seg.aircraft && <div>Máy bay: {seg.aircraft}</div>}
+          <div>Thời gian: <span className="font-semibold">{fmtFlightTime(seg.duration || seg.elapse_flying_time)}</span></div>
+          {aircraft && <div>Máy bay: {aircraft}</div>}
+          {seg.booking_class && <div>Hạng: {seg.booking_class}</div>}
         </div>
       </div>
     </div>
