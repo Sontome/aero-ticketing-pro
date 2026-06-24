@@ -23,6 +23,9 @@ import { toast } from '@/components/ui/use-toast';
 import { TopNavbar } from '@/components/TopNavbar';
 import { supabase } from '@/integrations/supabase/client';
 import { OtherAirlinesModal, OtherFlight, AIRLINE_NAMES, AIRLINE_BAGGAGE } from '@/components/OtherAirlinesModal';
+import SunPQModal from '@/components/SunPQModal';
+import { searchSunPQFlights } from '@/services/sunpqService';
+import type { SunPQTrip } from '@/types/sunpq';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -64,6 +67,10 @@ export default function Index() {
   const [lowFareReturn, setLowFareReturn] = useState<LowFareDay[]>([]);
   const [isLoadingLowFare, setIsLoadingLowFare] = useState(false);
   const [lastSearchData, setLastSearchData] = useState<SearchFormData | null>(null);
+  const [sunpqOpen, setSunpqOpen] = useState(false);
+  const [sunpqFlights, setSunpqFlights] = useState<SunPQTrip[]>([]);
+  const [sunpqLoading, setSunpqLoading] = useState(false);
+  const [sunpqSearchPayload, setSunpqSearchPayload] = useState<any>(null);
   const [filters, setFilters] = useState<FilterOptions>({
     airlines: ['VJ', 'VNA'],
     showCheapestOnly: false,
