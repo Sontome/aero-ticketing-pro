@@ -668,59 +668,6 @@ export default function Index() {
             <div className="container mx-auto px-4 h-full flex items-start sm:items-center justify-center relative z-10 pt-24 sm:pt-0 pb-6">
               <div className="w-full max-w-5xl">
                 <FlightSearchForm onSearch={handleSearch} loading={loading} />
-                {profile?.perm_check_sunpq && (
-                  <div className="mt-3 flex justify-end">
-                    <Button
-                      onClick={async () => {
-                        const data = lastSearchData;
-                        if (!data?.departureDate || !data.from || !data.to) {
-                          toast({ title: 'Vui lòng tìm chuyến bay trước khi tra SunPQ' });
-                          return;
-                        }
-                        const tripType: 'OW' | 'RT' = data.tripType === 'round_trip' ? 'RT' : 'OW';
-                        const fmt = (d?: Date) => (d ? d.toISOString().slice(0, 10) : '');
-                        setSunpqLoading(true);
-                        try {
-                          const res = await searchSunPQFlights({
-                            departure: data.from,
-                            arrival: data.to,
-                            departureDate: fmt(data.departureDate),
-                            returnDate: fmt(data.returnDate),
-                            tripType,
-                            adults: data.passengers || 1,
-                            children: 0,
-                            infants: 0,
-                          });
-                          setSunpqFlights(res.body);
-                          setSunpqSearchPayload({
-                            tripType,
-                            departure: data.from,
-                            arrival: data.to,
-                            departureDate: fmt(data.departureDate),
-                            returnDate: fmt(data.returnDate),
-                            adults: data.passengers || 1,
-                            children: 0,
-                            infants: 0,
-                            sunpqOneWayFee: profile?.price_ow_sunpq ?? 0,
-                            sunpqRoundTripFee: profile?.price_rt_sunpq ?? 0,
-                          });
-                          setSunpqOpen(true);
-                          if (!res.body?.length) {
-                            toast({ title: 'Không có vé SunPQ cho hành trình này' });
-                          }
-                        } catch (e: any) {
-                          toast({ title: 'Lỗi tìm kiếm SunPQ', description: e?.message });
-                        } finally {
-                          setSunpqLoading(false);
-                        }
-                      }}
-                      disabled={sunpqLoading}
-                      className="bg-orange-500 hover:bg-orange-600 text-white"
-                    >
-                      {sunpqLoading ? 'Đang tìm vé SunPQ...' : 'Tìm vé SunPQ'}
-                    </Button>
-                  </div>
-                )}
               </div>
             </div>
           </div>
