@@ -1463,25 +1463,34 @@ export default function PriceMonitor() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error("Không tìm thấy thông tin người dùng");
 
-    const { error: insertError } = await supabase.from("held_tickets").insert({
-      pnr: data.pnr,
-      user_id: user.id,
-      flight_details: {
+    {
+      const segs = [
+        {
+          segment_order: 1,
+          departure_airport: segment1.departure_airport,
+          arrival_airport: segment1.arrival_airport,
+          departure_date: segment1.departure_date,
+          departure_time: depTime ? `${depTime.slice(0, 2)}:${depTime.slice(2, 4)}` : '00:00',
+        },
+      ];
+      if (segment2) {
+        const retTimeRaw = matchingFlightData["chiều_về"]?.giờ_cất_cánh || '';
+        segs.push({
+          segment_order: 2,
+          departure_airport: segment2.departure_airport,
+          arrival_airport: segment2.arrival_airport,
+          departure_date: segment2.departure_date,
+          departure_time: retTimeRaw || '00:00',
+        });
+      }
+      await saveHeldTicket({
+        user_id: user.id,
+        pnr: data.pnr,
         airline: 'VNA',
-        tripType: segment2 ? 'RT' : 'OW',
-        departureAirport: segment1.departure_airport,
-        arrivalAirport: segment1.arrival_airport,
-        departureDate: segment1.departure_date,
-        departureTime: depTime,
-        arrivalDate: segment2?.departure_date,
-        arrivalTime: segment2 ? matchingFlightData["chiều_về"]?.giờ_cất_cánh : undefined,
-        passengers: flight.passengers,
-        doiTuong: segment1.ticket_class
-      } as any,
-      status: 'holding'
-    });
-
-    if (insertError) throw insertError;
+        namelist: flight.passengers.map(buildPassengerName),
+        segments: segs,
+      });
+    }
 
     // Delete monitored flight
     const { error: deleteError } = await supabase.from("monitored_flights").delete().eq("id", flight.id);
