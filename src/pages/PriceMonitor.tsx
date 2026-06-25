@@ -1675,22 +1675,34 @@ export default function PriceMonitor() {
       }
     }
 
-    const { error: insertError } = await supabase.from("held_tickets").insert({
-      pnr: data.mã_giữ_vé,
-      user_id: user.id,
-      flight_details: {
-        airline: flight.airline,
-        departure_airport: flight.departure_airport,
-        arrival_airport: flight.arrival_airport,
-        departure_date: flight.departure_date,
-        return_date: flight.return_date,
-        price: flight.current_price,
-        passengers: flight.passengers,
-      } as any,
-      expire_date: expireDate,
-    });
-
-    if (insertError) throw insertError;
+    {
+      const segs = [
+        {
+          segment_order: 1,
+          departure_airport: flight.departure_airport,
+          arrival_airport: flight.arrival_airport,
+          departure_date: flight.departure_date,
+          departure_time: flight.departure_time || '00:00',
+        },
+      ];
+      if (flight.return_date) {
+        segs.push({
+          segment_order: 2,
+          departure_airport: flight.arrival_airport,
+          arrival_airport: flight.departure_airport,
+          departure_date: flight.return_date,
+          departure_time: (flight as any).return_time || '00:00',
+        });
+      }
+      await saveHeldTicket({
+        user_id: user.id,
+        pnr: data.mã_giữ_vé,
+        airline: (flight.airline === 'VJ' || flight.airline === 'VNA' || flight.airline === 'SUN') ? flight.airline : 'OTHER',
+        namelist: (flight.passengers || []).map(buildPassengerName),
+        segments: segs,
+        expire_date: expireDate,
+      });
+    }
 
     // Check if original PNR exists in held tickets and delete it
     if (flight.pnr) {
