@@ -864,8 +864,12 @@ export default function HeldTickets() {
                 </Table>
               </CardContent>
             </Card>
-          )}
+                )}
+              </>
+            );
+          })()}
         </div>
+
 
 
         <Dialog open={isPnrModalOpen} onOpenChange={setIsPnrModalOpen}>
