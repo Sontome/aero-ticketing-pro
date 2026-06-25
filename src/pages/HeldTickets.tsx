@@ -255,11 +255,13 @@ export default function HeldTickets() {
     });
   };
 
-  const handleOpenTicketModal = async (pnr: string, isVNA: boolean) => {
+  const handleOpenTicketModal = async (pnr: string, airline: string) => {
     setTicketPnr(pnr);
+    const isVNA = airline === "VNA";
+    const isSun = airline === "SUN";
 
     // Check payment status for VJ tickets
-    if (!isVNA) {
+    if (!isVNA && !isSun) {
       try {
         const response = await fetch(`https://apilive.hanvietair.com/vj/checkpnr?pnr=${pnr}`, {
           method: "POST",
@@ -267,22 +269,16 @@ export default function HeldTickets() {
 
         if (response.ok) {
           const data = await response.json();
-
-          // If payment status is true, update ticket status to "issued"
           if (data.paymentstatus === true) {
-            const {
-              data: { user },
-            } = await supabase.auth.getUser();
+            const { data: { user } } = await supabase.auth.getUser();
             if (user) {
               const { error } = await supabase
                 .from("held_tickets")
                 .update({ ticket_status: "issued", payment_status: true })
                 .eq("pnr", pnr)
                 .eq("user_id", user.id);
-
               if (!error) {
-                // Update local state
-                setTickets((prevTickets) => prevTickets.map((t) => (t.pnr === pnr ? { ...t, ticket_status: "issued", payment_status: true } : t)));
+                setTickets((prev) => prev.map((t) => (t.pnr === pnr ? { ...t, ticket_status: "issued", payment_status: true } : t)));
               }
             }
           }
@@ -292,11 +288,9 @@ export default function HeldTickets() {
       }
     }
 
-    if (isVNA) {
-      setIsVNATicketModalOpen(true);
-    } else {
-      setIsVJTicketModalOpen(true);
-    }
+    if (isVNA) setIsVNATicketModalOpen(true);
+    else if (isSun) setIsSunTicketModalOpen(true);
+    else setIsVJTicketModalOpen(true);
   };
 
   const handleImportFromPnr = async () => {
