@@ -227,7 +227,7 @@ export default function HeldTickets() {
   };
 
   const isVNA = (ticket: HeldTicket) => {
-    return ticket.flight_details?.airline === "VNA";
+    return ticket.airline === "VNA";
   };
 
   const parseDate = (dateStr: string): string => {
