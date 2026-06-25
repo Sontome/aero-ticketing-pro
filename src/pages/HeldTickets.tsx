@@ -64,6 +64,20 @@ export default function HeldTickets() {
   const [showVJTicketModal, setShowVJTicketModal] = useState(false);
   const [showVNATicketModal, setShowVNATicketModal] = useState(false);
 
+  // Filters
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const monthAgoIso = (() => {
+    const d = new Date();
+    d.setMonth(d.getMonth() - 1);
+    return d.toISOString().slice(0, 10);
+  })();
+  const [flightFrom, setFlightFrom] = useState<string>("");
+  const [flightTo, setFlightTo] = useState<string>("");
+  const [holdFrom, setHoldFrom] = useState<string>(monthAgoIso);
+  const [holdTo, setHoldTo] = useState<string>(todayIso);
+  const [filterAirline, setFilterAirline] = useState<string>("ALL");
+  const [filterRoute, setFilterRoute] = useState<string>("ALL");
+
   useEffect(() => {
     if (!profile?.perm_hold_ticket) {
       navigate("/");
