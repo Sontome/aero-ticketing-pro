@@ -19,13 +19,26 @@ import { EmailTicketModal } from "@/components/EmailTicketModal";
 import { TopNavbar } from "@/components/TopNavbar";
 import { useHoverSound } from "@/hooks/useHoverSound";
 
+interface HeldSegment {
+  segment_order: number;
+  departure_airport: string;
+  arrival_airport: string;
+  departure_date: string;
+  departure_time: string;
+  trip: string;
+}
+
 interface HeldTicket {
   id: string;
   pnr: string;
-  flight_details: any;
+  airline: string;
+  number_person: number;
+  namelist: string[];
+  payment_status: boolean;
+  ticket_status: string;
   hold_date: string;
-  expire_date: string;
-  status: string;
+  expire_date: string | null;
+  segments: HeldSegment[];
 }
 
 export default function HeldTickets() {
@@ -76,7 +89,7 @@ export default function HeldTickets() {
           // If body is null or paymentstatus is not true, mark as cancelled
           const newStatus = data && data.paymentstatus === true ? "issued" : "cancelled";
 
-          await supabase.from("held_tickets").update({ status: newStatus }).eq("id", ticket.id).eq("user_id", user.id);
+          await supabase.from("held_tickets").update({ ticket_status: newStatus, payment_status: newStatus === "issued" }).eq("id", ticket.id).eq("user_id", user.id);
         }
       } catch (error) {
         console.error(`Error checking status for PNR ${ticket.pnr}:`, error);
@@ -93,19 +106,33 @@ export default function HeldTickets() {
 
       const { data, error } = await supabase
         .from("held_tickets")
-        .select("*")
+        .select("*, held_ticket_segments(*)")
         .eq("user_id", user.id)
         .order("hold_date", { ascending: false });
 
       if (error) throw error;
 
+      // Map to HeldTicket with sorted segments
+      const mapped: HeldTicket[] = (data || []).map((row: any) => ({
+        id: row.id,
+        pnr: row.pnr,
+        airline: row.airline,
+        number_person: row.number_person,
+        namelist: row.namelist || [],
+        payment_status: row.payment_status,
+        ticket_status: row.ticket_status,
+        hold_date: row.hold_date,
+        expire_date: row.expire_date,
+        segments: (row.held_ticket_segments || [])
+          .slice()
+          .sort((a: HeldSegment, b: HeldSegment) => a.segment_order - b.segment_order),
+      }));
+
       // Separate expired holding tickets and others
       const expiredHoldingTickets: HeldTicket[] = [];
-      const filteredTickets = (data || []).filter((ticket) => {
-        // Don't show cancelled tickets
-        if (ticket.status === "cancelled") return false;
-
-        if (ticket.status === "holding" && ticket.expire_date) {
+      const filteredTickets = mapped.filter((ticket) => {
+        if (ticket.ticket_status === "cancelled") return false;
+        if (ticket.ticket_status === "holding" && ticket.expire_date) {
           const expired = isExpired(ticket.expire_date);
           if (expired) {
             expiredHoldingTickets.push(ticket);
@@ -200,7 +227,7 @@ export default function HeldTickets() {
   };
 
   const isVNA = (ticket: HeldTicket) => {
-    return ticket.flight_details?.airline === "VNA";
+    return ticket.airline === "VNA";
   };
 
   const parseDate = (dateStr: string): string => {
@@ -246,13 +273,13 @@ export default function HeldTickets() {
             if (user) {
               const { error } = await supabase
                 .from("held_tickets")
-                .update({ status: "issued" })
+                .update({ ticket_status: "issued", payment_status: true })
                 .eq("pnr", pnr)
                 .eq("user_id", user.id);
 
               if (!error) {
                 // Update local state
-                setTickets((prevTickets) => prevTickets.map((t) => (t.pnr === pnr ? { ...t, status: "issued" } : t)));
+                setTickets((prevTickets) => prevTickets.map((t) => (t.pnr === pnr ? { ...t, ticket_status: "issued", payment_status: true } : t)));
               }
             }
           }
@@ -626,27 +653,53 @@ export default function HeldTickets() {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Badge variant="outline">{ticket.airline}</Badge>
                           <Badge variant={isVJExpired ? "destructive" : "default"}>
-                            {ticket.status === "holding"
+                            {ticket.ticket_status === "holding"
                               ? "Đang giữ"
-                              : ticket.status === "issued"
+                              : ticket.ticket_status === "issued" || ticket.ticket_status === "ticketed"
                                 ? "Đã xuất vé"
-                                : ticket.status}
+                                : ticket.ticket_status === "paid"
+                                  ? "Đã thanh toán"
+                                  : ticket.ticket_status === "expired"
+                                    ? "Hết hạn"
+                                    : ticket.ticket_status}
                           </Badge>
-                          {isVJExpired && ticket.status !== "issued" && <Badge variant="destructive">Hết hạn</Badge>}
+                          {ticket.payment_status && <Badge className="bg-green-600">Đã thanh toán</Badge>}
+                          {isVJExpired && ticket.ticket_status !== "issued" && <Badge variant="destructive">Hết hạn</Badge>}
                         </div>
 
                         <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
                           <div className="text-sm space-y-1">
-                            {!vnaTicket && (
+                            <p>
+                              <strong>Số hành khách:</strong> {ticket.number_person}
+                            </p>
+                            {ticket.namelist.length > 0 && (
                               <p>
-                                <strong>Hạn thanh toán:</strong>{" "}
-                                {ticket.flight_details?.deadline || formatDate(ticket.expire_date)}
+                                <strong>Hành khách:</strong> {ticket.namelist.join(", ")}
+                              </p>
+                            )}
+                            {ticket.segments.length > 0 && (
+                              <div>
+                                <strong>Hành trình:</strong>
+                                <ul className="list-disc list-inside ml-2">
+                                  {ticket.segments.map((s) => (
+                                    <li key={s.segment_order}>
+                                      {s.trip} — {s.departure_date} {s.departure_time}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                            {!vnaTicket && ticket.expire_date && (
+                              <p>
+                                <strong>Hạn thanh toán:</strong> {formatDate(ticket.expire_date)}
                               </p>
                             )}
                           </div>
                         </div>
+
 
                         {!vnaTicket && !expired && (
                           <Button
