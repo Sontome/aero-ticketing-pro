@@ -77,6 +77,7 @@ export default function HeldTickets() {
   const [holdTo, setHoldTo] = useState<string>(todayIso);
   const [filterAirline, setFilterAirline] = useState<string>("ALL");
   const [filterRoute, setFilterRoute] = useState<string>("ALL");
+  const [filterStatus, setFilterStatus] = useState<string>("ALL");
 
   useEffect(() => {
     if (!profile?.perm_hold_ticket) {
