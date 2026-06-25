@@ -715,6 +715,19 @@ export default function HeldTickets() {
                         </SelectContent>
                       </Select>
                     </div>
+                    <div>
+                      <Label className="text-xs">Trạng Thái</Label>
+                      <Select value={filterStatus} onValueChange={setFilterStatus}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="ALL">Tất cả</SelectItem>
+                          <SelectItem value="holding">Đang giữ</SelectItem>
+                          <SelectItem value="issued">Đã xuất vé</SelectItem>
+                          <SelectItem value="paid">Đã thanh toán</SelectItem>
+                          <SelectItem value="expired">Hết hạn</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                     <div className="md:col-span-2 lg:col-span-6 flex justify-end">
                       <Button
                         variant="outline"
@@ -726,6 +739,7 @@ export default function HeldTickets() {
                           setHoldTo(todayIso);
                           setFilterAirline("ALL");
                           setFilterRoute("ALL");
+                          setFilterStatus("ALL");
                         }}
                       >
                         Đặt lại bộ lọc
