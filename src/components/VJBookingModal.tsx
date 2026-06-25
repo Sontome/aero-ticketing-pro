@@ -56,6 +56,7 @@ export const BookingModal = ({
   initialPassengers,
   onBookingSuccess,
   onSavePassengers,
+  segments,
 }: BookingModalProps) => {
   const [passengers, setPassengers] = useState<PassengerWithType[]>(
     initialPassengers || [
