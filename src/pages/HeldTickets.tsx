@@ -606,17 +606,133 @@ export default function HeldTickets() {
             Yêu cầu đặt chỗ / Đặt vé
           </h1>
 
-          {tickets.length === 0 ? (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <p className="text-gray-500">Chưa có vé nào trong giỏ hàng</p>
-              </CardContent>
-            </Card>
-          ) : (
+          {(() => {
+            const airlineOptions = Array.from(new Set(tickets.map((t) => t.airline).filter(Boolean)));
+            const routeOptions = Array.from(
+              new Set(
+                tickets.flatMap((t) =>
+                  t.segments.map((s) => `${s.departure_airport}-${s.arrival_airport}`)
+                )
+              )
+            ).sort();
+
+            const inDateRange = (iso: string, from: string, to: string) => {
+              if (!iso) return true;
+              const d = iso.slice(0, 10);
+              if (from && d < from) return false;
+              if (to && d > to) return false;
+              return true;
+            };
+
+            const filtered = tickets.filter((t) => {
+              if (filterAirline !== "ALL" && t.airline !== filterAirline) return false;
+              if (filterRoute !== "ALL") {
+                const hit = t.segments.some(
+                  (s) => `${s.departure_airport}-${s.arrival_airport}` === filterRoute
+                );
+                if (!hit) return false;
+              }
+              if (holdFrom || holdTo) {
+                if (!inDateRange(t.hold_date, holdFrom, holdTo)) return false;
+              }
+              if (flightFrom || flightTo) {
+                const anyMatch = t.segments.some((s) =>
+                  inDateRange(
+                    /^\d{4}-\d{2}-\d{2}/.test(s.departure_date)
+                      ? s.departure_date
+                      : (() => {
+                          const p = s.departure_date.split("/");
+                          return p.length === 3
+                            ? `${p[2]}-${p[1].padStart(2, "0")}-${p[0].padStart(2, "0")}`
+                            : s.departure_date;
+                        })(),
+                    flightFrom,
+                    flightTo
+                  )
+                );
+                if (!anyMatch) return false;
+              }
+              return true;
+            });
+
+            return (
+              <>
+                <Card className="mb-4">
+                  <CardContent className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3">
+                    <div className="lg:col-span-2 grid grid-cols-2 gap-2">
+                      <div>
+                        <Label className="text-xs">Ngày bay từ</Label>
+                        <Input type="date" value={flightFrom} onChange={(e) => setFlightFrom(e.target.value)} />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Đến</Label>
+                        <Input type="date" value={flightTo} onChange={(e) => setFlightTo(e.target.value)} />
+                      </div>
+                    </div>
+                    <div className="lg:col-span-2 grid grid-cols-2 gap-2">
+                      <div>
+                        <Label className="text-xs">Ngày đặt từ</Label>
+                        <Input type="date" value={holdFrom} onChange={(e) => setHoldFrom(e.target.value)} />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Đến</Label>
+                        <Input type="date" value={holdTo} onChange={(e) => setHoldTo(e.target.value)} />
+                      </div>
+                    </div>
+                    <div>
+                      <Label className="text-xs">Hãng bay</Label>
+                      <Select value={filterAirline} onValueChange={setFilterAirline}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="ALL">Tất cả</SelectItem>
+                          {airlineOptions.map((a) => (
+                            <SelectItem key={a} value={a}>{a}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label className="text-xs">Chặng bay</Label>
+                      <Select value={filterRoute} onValueChange={setFilterRoute}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="ALL">Tất cả</SelectItem>
+                          {routeOptions.map((r) => (
+                            <SelectItem key={r} value={r}>{r}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="md:col-span-2 lg:col-span-6 flex justify-end">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setFlightFrom("");
+                          setFlightTo("");
+                          setHoldFrom(monthAgoIso);
+                          setHoldTo(todayIso);
+                          setFilterAirline("ALL");
+                          setFilterRoute("ALL");
+                        }}
+                      >
+                        Đặt lại bộ lọc
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {filtered.length === 0 ? (
+                  <Card>
+                    <CardContent className="py-12 text-center">
+                      <p className="text-gray-500">Không có vé phù hợp với bộ lọc</p>
+                    </CardContent>
+                  </Card>
+                ) : (
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-base font-medium">
-                  Tổng cộng {tickets.length} trường hợp
+                  Tổng cộng {filtered.length} trường hợp
                 </CardTitle>
               </CardHeader>
               <CardContent className="overflow-x-auto p-0">
@@ -625,7 +741,7 @@ export default function HeldTickets() {
                     <TableRow>
                       <TableHead className="w-12">STT</TableHead>
                       <TableHead>PNR</TableHead>
-                      <TableHead>Tình huống</TableHead>
+                      <TableHead>Trạng Thái</TableHead>
                       <TableHead>Hành trình lựa chọn</TableHead>
                       <TableHead>Ngày đặt chỗ</TableHead>
                       <TableHead className="text-center">Khách</TableHead>
@@ -636,7 +752,7 @@ export default function HeldTickets() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {tickets.map((ticket, idx) => {
+                    {filtered.map((ticket, idx) => {
                       const expired = isExpired(ticket.expire_date);
                       const vnaTicket = isVNA(ticket);
                       const isVJExpired = !vnaTicket && ticket.airline === "VJ" && expired;
@@ -672,12 +788,17 @@ export default function HeldTickets() {
                             </button>
                           </TableCell>
                           <TableCell>
-                            <Badge variant={isVJExpired ? "destructive" : "default"}>
-                              {statusLabel}
-                            </Badge>
-                            {ticket.payment_status && (
-                              <Badge className="bg-green-600 ml-1">TT</Badge>
-                            )}
+                            <div className="flex flex-wrap items-center gap-1">
+                              <Badge
+                                variant={isVJExpired ? "destructive" : "default"}
+                                className="whitespace-nowrap px-2 py-0.5"
+                              >
+                                {statusLabel}
+                              </Badge>
+                              {ticket.payment_status && (
+                                <Badge className="bg-green-600 whitespace-nowrap">TT</Badge>
+                              )}
+                            </div>
                           </TableCell>
                           <TableCell className="text-xs">
                             {ticket.segments.length === 0 ? (
