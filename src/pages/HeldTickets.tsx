@@ -273,13 +273,13 @@ export default function HeldTickets() {
             if (user) {
               const { error } = await supabase
                 .from("held_tickets")
-                .update({ status: "issued" })
+                .update({ ticket_status: "issued", payment_status: true })
                 .eq("pnr", pnr)
                 .eq("user_id", user.id);
 
               if (!error) {
                 // Update local state
-                setTickets((prevTickets) => prevTickets.map((t) => (t.pnr === pnr ? { ...t, status: "issued" } : t)));
+                setTickets((prevTickets) => prevTickets.map((t) => (t.pnr === pnr ? { ...t, ticket_status: "issued", payment_status: true } : t)));
               }
             }
           }
