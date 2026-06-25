@@ -21,6 +21,13 @@ export interface PassengerWithType extends PassengerInfo {
   infant?: PassengerInfo;
 }
 
+export interface VJFlightSegmentInfo {
+  departure_airport: string;
+  arrival_airport: string;
+  departure_date: string; // YYYY-MM-DD or DD/MM/YYYY
+  departure_time: string; // HH:MM
+}
+
 interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -33,6 +40,8 @@ interface BookingModalProps {
   initialPassengers?: PassengerWithType[]; // Dữ liệu hành khách ban đầu
   onBookingSuccess?: (pnr: string) => void;
   onSavePassengers?: (passengers: PassengerWithType[]) => void; // Callback khi lưu thông tin
+  /** Outbound + (optional) return segment info, used to persist held_ticket_segments. */
+  segments?: VJFlightSegmentInfo[];
 }
 
 export const BookingModal = ({
