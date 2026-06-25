@@ -9,6 +9,8 @@ import { toast } from 'sonner';
 import type { SunPQTrip, SunPQPassenger, SunPQPaxType } from '@/types/sunpq';
 import { bookingSunPQ } from '@/services/sunpqService';
 import SunPQTicketModal from './SunPQTicketModal';
+import { supabase } from '@/integrations/supabase/client';
+import { saveHeldTicket } from '@/utils/heldTickets';
 
 interface Props {
   isOpen: boolean;
