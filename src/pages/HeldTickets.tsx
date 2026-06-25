@@ -653,27 +653,53 @@ export default function HeldTickets() {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Badge variant="outline">{ticket.airline}</Badge>
                           <Badge variant={isVJExpired ? "destructive" : "default"}>
-                            {ticket.status === "holding"
+                            {ticket.ticket_status === "holding"
                               ? "Đang giữ"
-                              : ticket.status === "issued"
+                              : ticket.ticket_status === "issued" || ticket.ticket_status === "ticketed"
                                 ? "Đã xuất vé"
-                                : ticket.status}
+                                : ticket.ticket_status === "paid"
+                                  ? "Đã thanh toán"
+                                  : ticket.ticket_status === "expired"
+                                    ? "Hết hạn"
+                                    : ticket.ticket_status}
                           </Badge>
-                          {isVJExpired && ticket.status !== "issued" && <Badge variant="destructive">Hết hạn</Badge>}
+                          {ticket.payment_status && <Badge className="bg-green-600">Đã thanh toán</Badge>}
+                          {isVJExpired && ticket.ticket_status !== "issued" && <Badge variant="destructive">Hết hạn</Badge>}
                         </div>
 
                         <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
                           <div className="text-sm space-y-1">
-                            {!vnaTicket && (
+                            <p>
+                              <strong>Số hành khách:</strong> {ticket.number_person}
+                            </p>
+                            {ticket.namelist.length > 0 && (
                               <p>
-                                <strong>Hạn thanh toán:</strong>{" "}
-                                {ticket.flight_details?.deadline || formatDate(ticket.expire_date)}
+                                <strong>Hành khách:</strong> {ticket.namelist.join(", ")}
+                              </p>
+                            )}
+                            {ticket.segments.length > 0 && (
+                              <div>
+                                <strong>Hành trình:</strong>
+                                <ul className="list-disc list-inside ml-2">
+                                  {ticket.segments.map((s) => (
+                                    <li key={s.segment_order}>
+                                      {s.trip} — {s.departure_date} {s.departure_time}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                            {!vnaTicket && ticket.expire_date && (
+                              <p>
+                                <strong>Hạn thanh toán:</strong> {formatDate(ticket.expire_date)}
                               </p>
                             )}
                           </div>
                         </div>
+
 
                         {!vnaTicket && !expired && (
                           <Button
