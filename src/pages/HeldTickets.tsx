@@ -19,13 +19,26 @@ import { EmailTicketModal } from "@/components/EmailTicketModal";
 import { TopNavbar } from "@/components/TopNavbar";
 import { useHoverSound } from "@/hooks/useHoverSound";
 
+interface HeldSegment {
+  segment_order: number;
+  departure_airport: string;
+  arrival_airport: string;
+  departure_date: string;
+  departure_time: string;
+  trip: string;
+}
+
 interface HeldTicket {
   id: string;
   pnr: string;
-  flight_details: any;
+  airline: string;
+  number_person: number;
+  namelist: string[];
+  payment_status: boolean;
+  ticket_status: string;
   hold_date: string;
-  expire_date: string;
-  status: string;
+  expire_date: string | null;
+  segments: HeldSegment[];
 }
 
 export default function HeldTickets() {
