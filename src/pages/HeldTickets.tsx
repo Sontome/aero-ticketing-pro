@@ -57,6 +57,7 @@ export default function HeldTickets() {
   const [isLoadingPnr, setIsLoadingPnr] = useState(false);
   const [isVJTicketModalOpen, setIsVJTicketModalOpen] = useState(false);
   const [isVNATicketModalOpen, setIsVNATicketModalOpen] = useState(false);
+  const [isSunTicketModalOpen, setIsSunTicketModalOpen] = useState(false);
   const [ticketPnr, setTicketPnr] = useState("");
   const [showPNRModal, setShowPNRModal] = useState(false);
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
