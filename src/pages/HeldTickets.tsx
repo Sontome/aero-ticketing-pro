@@ -587,8 +587,10 @@ export default function HeldTickets() {
           </Button>
         </div>
 
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-6">Giỏ hàng - Vé đang giữ</h1>
+        <div className="max-w-6xl mx-auto">
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-6">
+            Yêu cầu đặt chỗ / Đặt vé
+          </h1>
 
           {tickets.length === 0 ? (
             <Card>
@@ -597,139 +599,139 @@ export default function HeldTickets() {
               </CardContent>
             </Card>
           ) : (
-            <div className="space-y-4">
-              {tickets.map((ticket) => {
-                const expired = isExpired(ticket.expire_date);
-                const vnaTicket = isVNA(ticket);
-                const isVJExpired = !vnaTicket && expired;
-
-                return (
-                  <Card
-                    key={ticket.id}
-                    className={`chase-border-card hover:scale-[1.02] transition-all duration-300 ${isVJExpired ? "opacity-50 grayscale" : ""} ${
-                      vnaTicket
-                        ? "border-blue-500 bg-blue-50 dark:bg-blue-950/20"
-                        : "border-red-500 bg-red-50 dark:bg-red-950/20"
-                    }`}
-                    onMouseEnter={playClickSound}
-                  >
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div className="space-y-1">
-                          <CardTitle
-                            className={`flex items-center gap-2 ${
-                              vnaTicket ? "text-blue-700 dark:text-blue-400" : "text-red-700 dark:text-red-400"
-                            }`}
-                          >
-                            Mã PNR: {ticket.pnr}
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => handleOpenTicketModal(ticket.pnr, vnaTicket)}
-                              className="h-6 w-6 p-0"
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base font-medium">
+                  Tổng cộng {tickets.length} trường hợp
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="overflow-x-auto p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-12">STT</TableHead>
+                      <TableHead>PNR</TableHead>
+                      <TableHead>Tình huống</TableHead>
+                      <TableHead>Hành trình lựa chọn</TableHead>
+                      <TableHead>Ngày đặt chỗ</TableHead>
+                      <TableHead className="text-center">Khách</TableHead>
+                      <TableHead>Hành khách</TableHead>
+                      <TableHead>TL (Hạn thanh toán)</TableHead>
+                      <TableHead>Hãng</TableHead>
+                      <TableHead className="text-right">Hành động</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {tickets.map((ticket, idx) => {
+                      const expired = isExpired(ticket.expire_date);
+                      const vnaTicket = isVNA(ticket);
+                      const isVJExpired = !vnaTicket && ticket.airline === "VJ" && expired;
+                      const statusLabel =
+                        ticket.ticket_status === "holding"
+                          ? "Đang giữ"
+                          : ticket.ticket_status === "issued" || ticket.ticket_status === "ticketed"
+                          ? "Đã xuất vé"
+                          : ticket.ticket_status === "paid"
+                          ? "Đã thanh toán"
+                          : ticket.ticket_status === "expired" || isVJExpired
+                          ? "Hết hạn"
+                          : ticket.ticket_status;
+                      const rowTone = vnaTicket
+                        ? "bg-blue-50/40 dark:bg-blue-950/10"
+                        : ticket.airline === "SUN"
+                        ? "bg-orange-50/40 dark:bg-orange-950/10"
+                        : "bg-red-50/40 dark:bg-red-950/10";
+                      return (
+                        <TableRow
+                          key={ticket.id}
+                          className={`${rowTone} ${isVJExpired ? "opacity-60" : ""}`}
+                          onMouseEnter={playClickSound}
+                        >
+                          <TableCell>{idx + 1}</TableCell>
+                          <TableCell>
+                            <button
+                              onClick={() => handleOpenTicketModal(ticket.pnr, ticket.airline)}
+                              className="font-semibold underline decoration-dotted text-foreground"
                               title="Xem mặt vé"
                             >
-                              <Info className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => copyPNR(ticket.pnr)}
-                              className="h-6 w-6 p-0"
-                              title="Copy PNR"
-                            >
-                              <Copy className="h-4 w-4" />
-                            </Button>
-                          </CardTitle>
-                          <div className="text-sm text-gray-500">Giữ lúc: {formatDate(ticket.hold_date)}</div>
-                        </div>
-                        <Button size="sm" variant="destructive" onClick={() => handleDelete(ticket.id)}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <Badge variant="outline">{ticket.airline}</Badge>
-                          <Badge variant={isVJExpired ? "destructive" : "default"}>
-                            {ticket.ticket_status === "holding"
-                              ? "Đang giữ"
-                              : ticket.ticket_status === "issued" || ticket.ticket_status === "ticketed"
-                                ? "Đã xuất vé"
-                                : ticket.ticket_status === "paid"
-                                  ? "Đã thanh toán"
-                                  : ticket.ticket_status === "expired"
-                                    ? "Hết hạn"
-                                    : ticket.ticket_status}
-                          </Badge>
-                          {ticket.payment_status && <Badge className="bg-green-600">Đã thanh toán</Badge>}
-                          {isVJExpired && ticket.ticket_status !== "issued" && <Badge variant="destructive">Hết hạn</Badge>}
-                        </div>
-
-                        <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
-                          <div className="text-sm space-y-1">
-                            <p>
-                              <strong>Số hành khách:</strong> {ticket.number_person}
-                            </p>
-                            {ticket.namelist.length > 0 && (
-                              <p>
-                                <strong>Hành khách:</strong> {ticket.namelist.join(", ")}
-                              </p>
+                              {ticket.pnr}
+                            </button>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={isVJExpired ? "destructive" : "default"}>
+                              {statusLabel}
+                            </Badge>
+                            {ticket.payment_status && (
+                              <Badge className="bg-green-600 ml-1">TT</Badge>
                             )}
-                            {ticket.segments.length > 0 && (
-                              <div>
-                                <strong>Hành trình:</strong>
-                                <ul className="list-disc list-inside ml-2">
-                                  {ticket.segments.map((s) => (
-                                    <li key={s.segment_order}>
-                                      {s.trip} — {s.departure_date} {s.departure_time}
-                                    </li>
-                                  ))}
-                                </ul>
+                          </TableCell>
+                          <TableCell className="text-xs">
+                            {ticket.segments.length === 0 ? (
+                              <span className="text-muted-foreground">—</span>
+                            ) : (
+                              <div className="space-y-0.5">
+                                {ticket.segments.map((s) => (
+                                  <div key={s.segment_order}>
+                                    {s.trip} / {s.departure_date} {s.departure_time}
+                                  </div>
+                                ))}
                               </div>
                             )}
-                            {!vnaTicket && ticket.expire_date && (
-                              <p>
-                                <strong>Hạn thanh toán:</strong> {formatDate(ticket.expire_date)}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-
-
-                        {!vnaTicket && !expired && (
-                          <Button
-                            onClick={() => handleOpenPnrModal(ticket.pnr)}
-                            disabled={monitoredPNRs.has(ticket.pnr)}
-                            size="sm"
-                            variant={monitoredPNRs.has(ticket.pnr) ? "ghost" : "outline"}
-                            className="mt-2"
-                            title={monitoredPNRs.has(ticket.pnr) ? "Đang theo dõi giá" : "Theo dõi giá giảm"}
-                          >
-                            <TrendingDown className="h-4 w-4" />
-                          </Button>
-                        )}
-                        {vnaTicket && !expired && (
-                          <Button
-                            onClick={() => handleOpenPnrModalVNA(ticket.pnr)}
-                            disabled={monitoredPNRs.has(ticket.pnr)}
-                            size="sm"
-                            variant={monitoredPNRs.has(ticket.pnr) ? "ghost" : "outline"}
-                            className="mt-2"
-                            title={monitoredPNRs.has(ticket.pnr) ? "Đang theo dõi giá" : "Theo dõi giá giảm"}
-                          >
-                            <TrendingDown className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
+                          </TableCell>
+                          <TableCell className="text-xs whitespace-nowrap">
+                            {formatDate(ticket.hold_date)}
+                          </TableCell>
+                          <TableCell className="text-center">{ticket.number_person}</TableCell>
+                          <TableCell className="text-xs">
+                            {ticket.namelist.join(", ") || "—"}
+                          </TableCell>
+                          <TableCell className="text-xs whitespace-nowrap">
+                            {ticket.expire_date ? formatDate(ticket.expire_date) : "—"}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline">{ticket.airline}</Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-1">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleOpenTicketModal(ticket.pnr, ticket.airline)}
+                                className="h-7 w-7 p-0"
+                                title="Xem mặt vé"
+                              >
+                                <Info className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => copyPNR(ticket.pnr)}
+                                className="h-7 w-7 p-0"
+                                title="Copy PNR"
+                              >
+                                <Copy className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleDelete(ticket.id)}
+                                className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+                                title="Xóa"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
           )}
         </div>
+
 
         <Dialog open={isPnrModalOpen} onOpenChange={setIsPnrModalOpen}>
           <DialogContent>
