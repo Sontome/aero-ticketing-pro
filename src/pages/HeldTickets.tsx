@@ -783,6 +783,12 @@ export default function HeldTickets() {
           initialPNR={ticketPnr}
         />
 
+        <SunPQTicketModal
+          isOpen={isSunTicketModalOpen}
+          onClose={() => setIsSunTicketModalOpen(false)}
+          initialPNR={ticketPnr}
+        />
+
         <PNRCheckModal
           isOpen={showPNRModal}
           onClose={() => setShowPNRModal(false)}
