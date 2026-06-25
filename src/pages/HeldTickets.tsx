@@ -89,7 +89,7 @@ export default function HeldTickets() {
           // If body is null or paymentstatus is not true, mark as cancelled
           const newStatus = data && data.paymentstatus === true ? "issued" : "cancelled";
 
-          await supabase.from("held_tickets").update({ status: newStatus }).eq("id", ticket.id).eq("user_id", user.id);
+          await supabase.from("held_tickets").update({ ticket_status: newStatus, payment_status: newStatus === "issued" }).eq("id", ticket.id).eq("user_id", user.id);
         }
       } catch (error) {
         console.error(`Error checking status for PNR ${ticket.pnr}:`, error);
