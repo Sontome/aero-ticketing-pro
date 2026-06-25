@@ -22,6 +22,7 @@ import { EmailTicketModal } from "@/components/EmailTicketModal";
 import { VJTicketModal } from "@/components/VJTicketModal";
 import { VNATicketModal } from "@/components/VNATicketModal";
 import { useHoverSound } from "@/hooks/useHoverSound";
+import { saveHeldTicket, buildPassengerName } from "@/utils/heldTickets";
 
 interface FlightSegment {
   departure_airport: string;
