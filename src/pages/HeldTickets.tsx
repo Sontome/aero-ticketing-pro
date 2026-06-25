@@ -106,19 +106,33 @@ export default function HeldTickets() {
 
       const { data, error } = await supabase
         .from("held_tickets")
-        .select("*")
+        .select("*, held_ticket_segments(*)")
         .eq("user_id", user.id)
         .order("hold_date", { ascending: false });
 
       if (error) throw error;
 
+      // Map to HeldTicket with sorted segments
+      const mapped: HeldTicket[] = (data || []).map((row: any) => ({
+        id: row.id,
+        pnr: row.pnr,
+        airline: row.airline,
+        number_person: row.number_person,
+        namelist: row.namelist || [],
+        payment_status: row.payment_status,
+        ticket_status: row.ticket_status,
+        hold_date: row.hold_date,
+        expire_date: row.expire_date,
+        segments: (row.held_ticket_segments || [])
+          .slice()
+          .sort((a: HeldSegment, b: HeldSegment) => a.segment_order - b.segment_order),
+      }));
+
       // Separate expired holding tickets and others
       const expiredHoldingTickets: HeldTicket[] = [];
-      const filteredTickets = (data || []).filter((ticket) => {
-        // Don't show cancelled tickets
-        if (ticket.status === "cancelled") return false;
-
-        if (ticket.status === "holding" && ticket.expire_date) {
+      const filteredTickets = mapped.filter((ticket) => {
+        if (ticket.ticket_status === "cancelled") return false;
+        if (ticket.ticket_status === "holding" && ticket.expire_date) {
           const expired = isExpired(ticket.expire_date);
           if (expired) {
             expiredHoldingTickets.push(ticket);
