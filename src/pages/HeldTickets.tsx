@@ -625,8 +625,19 @@ export default function HeldTickets() {
               return true;
             };
 
+            const getStatusKey = (t: HeldTicket) => {
+              const expired = isExpired(t.expire_date);
+              const isVJExpired = t.airline !== "VNA" && t.airline === "VJ" && expired;
+              if (t.ticket_status === "holding") return "holding";
+              if (t.ticket_status === "issued" || t.ticket_status === "ticketed") return "issued";
+              if (t.ticket_status === "paid") return "paid";
+              if (t.ticket_status === "expired" || isVJExpired) return "expired";
+              return t.ticket_status || "other";
+            };
+
             const filtered = tickets.filter((t) => {
               if (filterAirline !== "ALL" && t.airline !== filterAirline) return false;
+              if (filterStatus !== "ALL" && getStatusKey(t) !== filterStatus) return false;
               if (filterRoute !== "ALL") {
                 const hit = t.segments.some(
                   (s) => `${s.departure_airport}-${s.arrival_airport}` === filterRoute
