@@ -151,7 +151,6 @@ export default function HeldTickets() {
       // Separate expired holding tickets and others
       const expiredHoldingTickets: HeldTicket[] = [];
       const filteredTickets = mapped.filter((ticket) => {
-        if (ticket.ticket_status === "cancelled") return false;
         if (ticket.ticket_status === "holding" && ticket.expire_date) {
           const expired = isExpired(ticket.expire_date);
           if (expired) {
