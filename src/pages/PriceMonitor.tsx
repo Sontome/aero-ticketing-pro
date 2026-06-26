@@ -118,6 +118,7 @@ export default function PriceMonitor() {
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
   const [showVJTicketModal, setShowVJTicketModal] = useState(false);
   const [showVNATicketModal, setShowVNATicketModal] = useState(false);
+  const [showSunPQTicketModal, setShowSunPQTicketModal] = useState(false);
 
   // Send Telegram notification
   const sendTelegramNotification = async (flight: MonitoredFlight, newPrice: number, oldPrice: number) => {
