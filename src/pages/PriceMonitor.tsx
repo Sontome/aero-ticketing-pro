@@ -21,6 +21,7 @@ import { PNRCheckModal } from "@/components/PNRCheckModal";
 import { EmailTicketModal } from "@/components/EmailTicketModal";
 import { VJTicketModal } from "@/components/VJTicketModal";
 import { VNATicketModal } from "@/components/VNATicketModal";
+import SunPQTicketModal from "@/components/SunPQTicketModal";
 import { useHoverSound } from "@/hooks/useHoverSound";
 import { saveHeldTicket, buildPassengerName } from "@/utils/heldTickets";
 
