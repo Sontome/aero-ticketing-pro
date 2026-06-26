@@ -2246,6 +2246,7 @@ export default function PriceMonitor() {
         onShowEmailModal={() => setIsEmailModalOpen(true)}
         onShowVJTicketModal={() => setShowVJTicketModal(true)}
         onShowVNATicketModal={() => setShowVNATicketModal(true)}
+        onShowSunPQTicketModal={profile?.perm_check_sunpq ? () => setShowSunPQTicketModal(true) : undefined}
       />
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
