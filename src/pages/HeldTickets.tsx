@@ -849,6 +849,11 @@ export default function HeldTickets() {
                           <TableCell className="text-xs">
                             {ticket.namelist.join(", ") || "—"}
                           </TableCell>
+                          <TableCell className="text-right text-xs whitespace-nowrap font-medium">
+                            {ticket.tongbillgiagoc && ticket.tongbillgiagoc > 0
+                              ? ticket.tongbillgiagoc.toLocaleString("en-US")
+                              : "—"}
+                          </TableCell>
                           <TableCell className="text-xs whitespace-nowrap">
                             {ticket.expire_date ? formatDate(ticket.expire_date) : "—"}
                           </TableCell>
