@@ -6,6 +6,7 @@ import { Loader2, Camera } from 'lucide-react';
 import { toast } from 'sonner';
 import { toPng } from 'html-to-image';
 import { checkSunPQPnr } from '@/services/sunpqService';
+import { syncHeldTicketFromCheck } from '@/utils/syncHeldTicketFromCheck';
 
 interface Props {
   isOpen: boolean;
