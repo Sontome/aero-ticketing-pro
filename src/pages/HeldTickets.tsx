@@ -774,6 +774,7 @@ export default function HeldTickets() {
                       <TableHead>Ngày đặt chỗ</TableHead>
                       <TableHead className="text-center">Khách</TableHead>
                       <TableHead>Hành khách</TableHead>
+                      <TableHead className="text-right whitespace-nowrap">Tổng bill giá gốc</TableHead>
                       <TableHead>TL (Hạn thanh toán)</TableHead>
                       <TableHead>Hãng</TableHead>
                       <TableHead className="text-right">Hành động</TableHead>
