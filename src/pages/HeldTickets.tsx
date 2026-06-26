@@ -631,7 +631,7 @@ export default function HeldTickets() {
               if (t.ticket_status === "holding") return "holding";
               if (t.ticket_status === "issued" || t.ticket_status === "ticketed") return "issued";
               if (t.ticket_status === "paid") return "paid";
-              if (t.ticket_status === "expired" || isVJExpired) return "expired";
+              if (t.ticket_status === "expired" || t.ticket_status === "cancelled" || isVJExpired) return "expired";
               return t.ticket_status || "other";
             };
 
