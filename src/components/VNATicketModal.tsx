@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { ChevronLeft, Camera, Copy, User } from "lucide-react";
 import html2canvas from "html2canvas";
+import { syncHeldTicketFromCheck } from "@/utils/syncHeldTicketFromCheck";
 
 interface VNATicketModalProps {
   isOpen: boolean;
