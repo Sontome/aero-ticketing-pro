@@ -789,7 +789,7 @@ export default function HeldTickets() {
                           ? "Đã xuất vé"
                           : ticket.ticket_status === "paid"
                           ? "Đã thanh toán"
-                          : ticket.ticket_status === "expired" || isVJExpired
+                          : ticket.ticket_status === "expired" || ticket.ticket_status === "cancelled" || isVJExpired
                           ? "Hết hạn"
                           : ticket.ticket_status;
                       const rowTone = vnaTicket
