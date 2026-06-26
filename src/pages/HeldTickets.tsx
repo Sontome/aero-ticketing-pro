@@ -40,6 +40,7 @@ interface HeldTicket {
   ticket_status: string;
   hold_date: string;
   expire_date: string | null;
+  tongbillgiagoc: number | null;
   segments: HeldSegment[];
 }
 
