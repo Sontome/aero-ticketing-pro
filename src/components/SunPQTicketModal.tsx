@@ -126,6 +126,7 @@ const SunPQTicketModal: React.FC<Props> = ({ isOpen, onClose, initialPNR }) => {
       const res = await checkSunPQPnr(code);
       const body = res?.data ?? res?.body ?? res;
       setData(body);
+      syncHeldTicketFromCheck(code, body);
     } catch (e: any) {
       setErrorMsg(e?.message || 'Không tra cứu được PNR');
     } finally {
