@@ -589,6 +589,7 @@ export default function HeldTickets() {
         onShowEmailModal={() => setIsEmailModalOpen(true)}
         onShowVJTicketModal={() => setShowVJTicketModal(true)}
         onShowVNATicketModal={() => setShowVNATicketModal(true)}
+        onShowSunPQTicketModal={profile?.perm_check_sunpq ? () => { setTicketPnr(""); setIsSunTicketModalOpen(true); } : undefined}
       />
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
@@ -631,7 +632,7 @@ export default function HeldTickets() {
               if (t.ticket_status === "holding") return "holding";
               if (t.ticket_status === "issued" || t.ticket_status === "ticketed") return "issued";
               if (t.ticket_status === "paid") return "paid";
-              if (t.ticket_status === "expired" || isVJExpired) return "expired";
+              if (t.ticket_status === "expired" || t.ticket_status === "cancelled" || isVJExpired) return "expired";
               return t.ticket_status || "other";
             };
 
@@ -789,7 +790,7 @@ export default function HeldTickets() {
                           ? "Đã xuất vé"
                           : ticket.ticket_status === "paid"
                           ? "Đã thanh toán"
-                          : ticket.ticket_status === "expired" || isVJExpired
+                          : ticket.ticket_status === "expired" || ticket.ticket_status === "cancelled" || isVJExpired
                           ? "Hết hạn"
                           : ticket.ticket_status;
                       const rowTone = vnaTicket
