@@ -40,6 +40,7 @@ interface HeldTicket {
   ticket_status: string;
   hold_date: string;
   expire_date: string | null;
+  tongbillgiagoc: number | null;
   segments: HeldSegment[];
 }
 
@@ -141,6 +142,7 @@ export default function HeldTickets() {
         ticket_status: row.ticket_status,
         hold_date: row.hold_date,
         expire_date: row.expire_date,
+        tongbillgiagoc: row.tongbillgiagoc ?? null,
         segments: (row.held_ticket_segments || [])
           .slice()
           .sort((a: HeldSegment, b: HeldSegment) => a.segment_order - b.segment_order),
@@ -149,7 +151,6 @@ export default function HeldTickets() {
       // Separate expired holding tickets and others
       const expiredHoldingTickets: HeldTicket[] = [];
       const filteredTickets = mapped.filter((ticket) => {
-        if (ticket.ticket_status === "cancelled") return false;
         if (ticket.ticket_status === "holding" && ticket.expire_date) {
           const expired = isExpired(ticket.expire_date);
           if (expired) {
@@ -773,6 +774,7 @@ export default function HeldTickets() {
                       <TableHead>Ngày đặt chỗ</TableHead>
                       <TableHead className="text-center">Khách</TableHead>
                       <TableHead>Hành khách</TableHead>
+                      <TableHead className="text-right whitespace-nowrap">Tổng bill giá gốc</TableHead>
                       <TableHead>TL (Hạn thanh toán)</TableHead>
                       <TableHead>Hãng</TableHead>
                       <TableHead className="text-right">Hành động</TableHead>
@@ -846,6 +848,11 @@ export default function HeldTickets() {
                           <TableCell className="text-center">{ticket.number_person}</TableCell>
                           <TableCell className="text-xs">
                             {ticket.namelist.join(", ") || "—"}
+                          </TableCell>
+                          <TableCell className="text-right text-xs whitespace-nowrap font-medium">
+                            {ticket.tongbillgiagoc && ticket.tongbillgiagoc > 0
+                              ? ticket.tongbillgiagoc.toLocaleString("en-US")
+                              : "—"}
                           </TableCell>
                           <TableCell className="text-xs whitespace-nowrap">
                             {ticket.expire_date ? formatDate(ticket.expire_date) : "—"}
