@@ -589,7 +589,7 @@ export default function HeldTickets() {
         onShowEmailModal={() => setIsEmailModalOpen(true)}
         onShowVJTicketModal={() => setShowVJTicketModal(true)}
         onShowVNATicketModal={() => setShowVNATicketModal(true)}
-        onShowSunPQTicketModal={profile?.perm_check_sunpq ? () => setIsSunTicketModalOpen(true) : undefined}
+        onShowSunPQTicketModal={profile?.perm_check_sunpq ? () => { setTicketPnr(""); setIsSunTicketModalOpen(true); } : undefined}
       />
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
