@@ -142,6 +142,7 @@ export default function HeldTickets() {
         ticket_status: row.ticket_status,
         hold_date: row.hold_date,
         expire_date: row.expire_date,
+        tongbillgiagoc: row.tongbillgiagoc ?? null,
         segments: (row.held_ticket_segments || [])
           .slice()
           .sort((a: HeldSegment, b: HeldSegment) => a.segment_order - b.segment_order),
