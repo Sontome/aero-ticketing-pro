@@ -2868,6 +2868,11 @@ export default function PriceMonitor() {
         onClose={() => setShowVNATicketModal(false)}
         initialPNR=""
       />
+
+      <SunPQTicketModal
+        isOpen={showSunPQTicketModal}
+        onClose={() => setShowSunPQTicketModal(false)}
+      />
     </div>
   );
 }
