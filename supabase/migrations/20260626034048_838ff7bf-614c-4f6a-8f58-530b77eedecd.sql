@@ -1,0 +1,1 @@
+ALTER TABLE public.held_tickets ADD COLUMN IF NOT EXISTS tongbillgiagoc bigint NULL DEFAULT 0;
