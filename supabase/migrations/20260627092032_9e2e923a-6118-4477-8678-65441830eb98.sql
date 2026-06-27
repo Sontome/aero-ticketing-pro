@@ -1,0 +1,1 @@
+CREATE POLICY "Admins can view all segments" ON public.held_ticket_segments FOR SELECT USING (has_role(auth.uid(), 'admin'::app_role));
