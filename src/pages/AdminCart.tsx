@@ -437,13 +437,13 @@ export default function AdminCart() {
       </div>
 
       {isVJTicketModalOpen && (
-        <VJTicketModal isOpen={isVJTicketModalOpen} onClose={() => setIsVJTicketModalOpen(false)} initialPnr={ticketPnr} />
+        <VJTicketModal isOpen={isVJTicketModalOpen} onClose={() => setIsVJTicketModalOpen(false)} initialPNR={ticketPnr} />
       )}
       {isVNATicketModalOpen && (
-        <VNATicketModal isOpen={isVNATicketModalOpen} onClose={() => setIsVNATicketModalOpen(false)} initialPnr={ticketPnr} />
+        <VNATicketModal isOpen={isVNATicketModalOpen} onClose={() => setIsVNATicketModalOpen(false)} initialPNR={ticketPnr} />
       )}
       {isSunTicketModalOpen && (
-        <SunPQTicketModal isOpen={isSunTicketModalOpen} onClose={() => setIsSunTicketModalOpen(false)} initialPnr={ticketPnr} />
+        <SunPQTicketModal isOpen={isSunTicketModalOpen} onClose={() => setIsSunTicketModalOpen(false)} initialPNR={ticketPnr} />
       )}
     </div>
   );
