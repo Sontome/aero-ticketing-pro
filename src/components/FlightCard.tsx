@@ -396,8 +396,14 @@ ${getBaggageInfo()}, giá vé = ${formatPrice(adjustedPrice)}w`;
           {/* Baggage and Price Info */}
           <div className={`border-t pt-4 transition-all duration-200`}>
             <div className={`text-sm ${isADT ? 'text-red-600 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}>
-              {getBaggageInfo()}, giá vé = {formatPrice(adjustedPrice)}w
+              {ruleEffects.baggage ?? getBaggageInfo()}, giá vé = {formatPrice(ruleEffects.priceOverride ?? adjustedPrice)}w
             </div>
+            {notesLine && (
+              <div className="text-sm text-red-600 font-bold mt-1">{notesLine}</div>
+            )}
+            {ruleEffects.warnings.length > 0 && (
+              <div className="text-sm text-orange-600 font-semibold mt-1">⚠️ {ruleEffects.warnings.join(' | ')}</div>
+            )}
           </div>
         </div>
       </CardContent>
