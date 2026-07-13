@@ -9,6 +9,9 @@ import { Flight } from '@/services/flightApi';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useHoverSound } from '@/hooks/useHoverSound';
+import { useTicketRulesDataset } from '@/hooks/useTicketRulesDataset';
+import { applyTicketRules, formatNotesLine } from '@/utils/ticketRuleEngine';
+import type { RuleSegmentInput, RuleTicketInput } from '@/types/ticketRules';
 
 interface FlightCardProps {
   flight: Flight;
