@@ -230,7 +230,7 @@ export const FlightCard: React.FC<FlightCardProps> = ({ flight, priceMode, onHol
     
     const copyText = `${outboundLine}${returnLine ? `\n\n${returnLine}` : ''}
 
-${getBaggageInfo()}, giá vé = ${formatPrice(adjustedPrice)}w`;
+${ruleEffects.baggage ?? getBaggageInfo()}, giá vé = ${formatPrice(ruleEffects.priceOverride ?? adjustedPrice)}w${notesLine ? `\n${notesLine}` : ''}`;
 
     navigator.clipboard.writeText(copyText).then(() => {
       toast({
