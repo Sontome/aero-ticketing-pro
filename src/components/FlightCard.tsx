@@ -61,6 +61,73 @@ export const FlightCard: React.FC<FlightCardProps> = ({ flight, priceMode, onHol
     setAdjustedPrice(roundedPrice);
   }, [flight.price, flight.airline, profile?.price_vj, profile?.price_vna, profile?.price_ow_vj, profile?.price_rt_vj, profile?.price_ow_vna, profile?.price_rt_vna, flight.return]);
 
+  // ----- Ticket Rule Engine -----
+  const { data: rulesDataset } = useTicketRulesDataset();
+  const ruleEffects = React.useMemo(() => {
+    const segments: RuleSegmentInput[] = [];
+    const outLegSize = 1 + ((flight.departure.stops && flight.stopInfo?.stop1) ? 1 : 0);
+    segments.push({
+      airline: flight.airline,
+      from: flight.departure.airport,
+      to: flight.stopInfo?.stop1 || flight.arrival.airport,
+      departure_time: flight.departure.time,
+      arrival_time: outLegSize === 1 ? flight.arrival.time : undefined,
+      departure_date: flight.departure.date,
+      segment_order: 1,
+      leg_index: flight.return ? 0 : null,
+      leg_size: outLegSize,
+      booking_class: flight.ticketClass,
+    });
+    if (outLegSize === 2 && flight.stopInfo?.stop1) {
+      segments.push({
+        airline: flight.airline,
+        from: flight.stopInfo.stop1,
+        to: flight.arrival.airport,
+        departure_time: undefined,
+        arrival_time: flight.landingTime || flight.arrival.time,
+        departure_date: flight.landingDate || flight.arrival.date,
+        segment_order: 2,
+        leg_index: flight.return ? 0 : null,
+        leg_size: outLegSize,
+        booking_class: flight.ticketClass,
+      });
+    }
+    if (flight.return) {
+      const retLegSize = 1 + ((flight.return.stops && flight.return.stopInfo?.stop1) ? 1 : 0);
+      segments.push({
+        airline: flight.airline,
+        from: flight.return.departure.airport,
+        to: flight.return.stopInfo?.stop1 || flight.return.arrival.airport,
+        departure_time: flight.return.departure.time,
+        arrival_time: retLegSize === 1 ? flight.return.arrival.time : undefined,
+        departure_date: flight.return.departure.date,
+        segment_order: 1,
+        leg_index: 1,
+        leg_size: retLegSize,
+        booking_class: flight.return.ticketClass,
+      });
+      if (retLegSize === 2 && flight.return.stopInfo?.stop1) {
+        segments.push({
+          airline: flight.airline,
+          from: flight.return.stopInfo.stop1,
+          to: flight.return.arrival.airport,
+          departure_time: undefined,
+          arrival_time: flight.return.landingTime || flight.return.arrival.time,
+          departure_date: flight.return.landingDate || flight.return.arrival.date,
+          segment_order: 2,
+          leg_index: 1,
+          leg_size: retLegSize,
+          booking_class: flight.return.ticketClass,
+        });
+      }
+    }
+    const input: RuleTicketInput = { segments, raw: flight };
+    return applyTicketRules(input, rulesDataset);
+  }, [flight, rulesDataset]);
+
+  const notesLine = formatNotesLine(ruleEffects.notes);
+  if (ruleEffects.hidden) return null;
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('ko-KR').format(price);
   };
