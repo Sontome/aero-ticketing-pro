@@ -403,10 +403,9 @@ const SunPQModal: React.FC<Props> = ({ isOpen, onClose, flights, searchData }) =
                 const seats = trip.thông_tin_chung?.số_ghế_còn ?? '9';
 
                 // Ticket Rule Engine
-                const effects = applyTicketRules(
-                  { segments: buildSunPQSegments(trip, tripType), raw: trip },
-                  rulesDataset,
-                );
+                const _segs = buildSunPQSegments(trip, tripType);
+                const effects = applyTicketRules({ segments: _segs, raw: trip }, rulesDataset);
+                if (i === 0) console.log('[SunPQ RuleEngine]', { segments: _segs, dataset: rulesDataset, effects, trip });
                 if (effects.hidden) return null;
                 const finalPrice = effects.priceOverride ?? baseFinal;
                 const roundedPrice = Math.round(finalPrice / 100) * 100;
