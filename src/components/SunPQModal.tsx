@@ -405,7 +405,6 @@ const SunPQModal: React.FC<Props> = ({ isOpen, onClose, flights, searchData }) =
                 // Ticket Rule Engine
                 const _segs = buildSunPQSegments(trip, tripType);
                 const effects = applyTicketRules({ segments: _segs, raw: trip }, rulesDataset);
-                if (i === 0) console.log('[SunPQ RuleEngine]', { segments: _segs, dataset: rulesDataset, effects, trip });
                 if (effects.hidden) return null;
                 const finalPrice = effects.priceOverride ?? baseFinal;
                 const roundedPrice = Math.round(finalPrice / 100) * 100;
