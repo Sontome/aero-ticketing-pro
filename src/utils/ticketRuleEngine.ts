@@ -13,7 +13,7 @@ import type {
 const AIRLINE_ALIAS: Record<string, string> = {
   vn: 'vna', vna: 'vna',
   vj: 'vja', vja: 'vja', vietjet: 'vja',
-  sun: 'sunpq', sunpq: 'sunpq', vu: 'sunpq',
+  sun: 'sunpq', sunpq: 'sunpq', vu: 'sunpq', '9g': 'sunpq',
 };
 
 function normAirline(a?: string | null): string {
