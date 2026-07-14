@@ -6,11 +6,59 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Copy, Plus, Trash2, Loader2, Users } from 'lucide-react';
 import { toast } from 'sonner';
-import type { SunPQTrip, SunPQPassenger, SunPQPaxType } from '@/types/sunpq';
+import type { SunPQTrip, SunPQLeg, SunPQPassenger, SunPQPaxType } from '@/types/sunpq';
 import { bookingSunPQ } from '@/services/sunpqService';
 import SunPQTicketModal from './SunPQTicketModal';
 import { supabase } from '@/integrations/supabase/client';
 import { saveHeldTicket } from '@/utils/heldTickets';
+import { useTicketRulesDataset } from '@/hooks/useTicketRulesDataset';
+import { applyTicketRules, formatNotesLine } from '@/utils/ticketRuleEngine';
+import type { RuleSegmentInput } from '@/types/ticketRules';
+
+const buildSunPQSegments = (trip: SunPQTrip, tripType: 'OW' | 'RT'): RuleSegmentInput[] => {
+  const segs: RuleSegmentInput[] = [];
+  const pushLeg = (leg: SunPQLeg | undefined, legIndex: number | null) => {
+    if (!leg) return;
+    const itin = leg.list_itinerary || [];
+    const legSize = Math.max(itin.length, 1);
+    if (itin.length > 0) {
+      itin.forEach((it, i) => {
+        segs.push({
+          airline: it.carrier || leg.hãng || 'SUN',
+          from: it.departure,
+          to: it.arrival,
+          departure_time: undefined,
+          arrival_time: undefined,
+          departure_date: it.flight_date,
+          segment_order: i + 1,
+          leg_index: legIndex,
+          leg_size: legSize,
+          booking_class: it.booking_class || leg.loại_vé || null,
+        });
+      });
+    } else {
+      segs.push({
+        airline: leg.hãng || 'SUN',
+        from: leg.nơi_đi,
+        to: leg.nơi_đến,
+        departure_time: leg.giờ_cất_cánh,
+        arrival_time: leg.giờ_hạ_cánh,
+        departure_date: leg.ngày_cất_cánh,
+        segment_order: 1,
+        leg_index: legIndex,
+        leg_size: 1,
+        booking_class: leg.loại_vé || null,
+      });
+    }
+  };
+  if (tripType === 'RT') {
+    pushLeg(trip.chiều_đi, 0);
+    pushLeg(trip.chiều_về, 1);
+  } else {
+    pushLeg(trip.chiều_đi, null);
+  }
+  return segs;
+};
 
 interface Props {
   isOpen: boolean;
