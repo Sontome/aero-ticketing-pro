@@ -22,8 +22,10 @@ import { ArrowUp, Mail, Wrench, ShoppingBasket, TrendingDown, Plane } from 'luci
 import { toast } from '@/components/ui/use-toast';
 import { TopNavbar } from '@/components/TopNavbar';
 import { supabase } from '@/integrations/supabase/client';
-import { OtherAirlinesModal, OtherFlight, AIRLINE_NAMES, AIRLINE_BAGGAGE } from '@/components/OtherAirlinesModal';
+import { OtherAirlinesModal, OtherFlight, OtherFlightCard, AIRLINE_NAMES, AIRLINE_BAGGAGE } from '@/components/OtherAirlinesModal';
 import SunPQModal from '@/components/SunPQModal';
+import SunPQFlightCard, { sunpqTripTier, calcSunPQFinalPrice } from '@/components/SunPQFlightCard';
+import { useTicketRulesDataset } from '@/hooks/useTicketRulesDataset';
 import SunPQTicketModal from '@/components/SunPQTicketModal';
 import { searchSunPQFlights } from '@/services/sunpqService';
 import type { SunPQTrip } from '@/types/sunpq';
