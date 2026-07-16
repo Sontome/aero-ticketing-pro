@@ -720,8 +720,8 @@ export default function Index() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6 items-stretch">
             {/* Other Airlines preview */}
             {profile?.perm_check_other && cheapestOtherFlight && filteredOtherFlights.length > 0 ? (
-              <div className="flex flex-col h-full bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border border-purple-200 dark:border-purple-700 rounded-xl p-4 animate-fade-in">
-                <h3 className="text-lg font-semibold text-purple-700 dark:text-purple-300 mb-3 flex items-center gap-2">
+              <div className="flex flex-col h-full bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl p-4 animate-fade-in">
+                <h3 className="text-lg font-semibold text-blue-700 dark:text-blue-300 mb-3 flex items-center gap-2">
                   <Plane className="w-5 h-5" /> Hãng khác rẻ nhất — {cheapestOtherFlight.airlineName}
                 </h3>
                 <div className="flex-1">
