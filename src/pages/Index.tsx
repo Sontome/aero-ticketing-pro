@@ -740,8 +740,8 @@ export default function Index() {
 
             {/* SunPQ preview */}
             {profile?.perm_check_sunpq && (sunpqLoading || previewSunPQ) ? (
-              <div className="flex flex-col h-full bg-gradient-to-br from-orange-50 to-amber-50 border-2 border-orange-300 rounded-xl p-4 animate-fade-in">
-                <h3 className="text-lg font-semibold text-orange-700 mb-3 flex items-center gap-2">
+              <div className="flex flex-col h-full bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl p-4 animate-fade-in">
+                <h3 className="text-lg font-semibold text-blue-700 dark:text-blue-300 mb-3 flex items-center gap-2">
                   <img src="/icon/sunpq-logo.png" alt="SunPQ" className="w-6 h-6 rounded object-contain bg-white p-0.5 border border-orange-200" />
                   SunPQ {previewSunPQ ? '— Vé đề xuất' : 'đang tìm...'}
                 </h3>
