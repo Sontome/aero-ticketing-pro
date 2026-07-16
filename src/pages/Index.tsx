@@ -609,20 +609,20 @@ export default function Index() {
       )
     : null;
 
-  // Compute cheapest SunPQ trip (with markup)
+  // Compute preview SunPQ trip: tier priority (V,Y,W,B,H,K,L,M,N,Q,T,O,R,U > S,G,A,X > others),
+  // then cheapest within the same tier. Falls back to cheapest overall.
   const sunpqOneWayFee = profile?.price_ow_sunpq ?? 0;
   const sunpqRoundTripFee = profile?.price_rt_sunpq ?? 0;
   const sunpqTripType: 'OW' | 'RT' = lastSearchIsRoundTrip ? 'RT' : 'OW';
-  const sunpqFee = sunpqTripType === 'RT' ? sunpqRoundTripFee : sunpqOneWayFee;
-  const sunpqWithPrice = (sunpqFlights || []).map((t) => {
-    const base =
-      Number(t.thông_tin_chung?.giá_vé ?? t.thông_tin_chung?.giá_vé_gốc ?? 0) ||
-      (t.chiều_đi?.giá_vé_gốc || 0) + (t.chiều_về?.giá_vé_gốc || 0);
-    return { trip: t, finalPrice: Math.round((base + sunpqFee) / 100) * 100 };
-  });
-  const cheapestSunPQ = sunpqWithPrice.length > 0
-    ? sunpqWithPrice.reduce((p, c) => (p.finalPrice < c.finalPrice ? p : c))
+  const sunpqWithPrice = (sunpqFlights || []).map((t) => ({
+    trip: t,
+    finalPrice: Math.round(calcSunPQFinalPrice(t, sunpqTripType, sunpqOneWayFee, sunpqRoundTripFee) / 100) * 100,
+    tier: sunpqTripTier(t),
+  }));
+  const previewSunPQ = sunpqWithPrice.length > 0
+    ? [...sunpqWithPrice].sort((a, b) => (a.tier - b.tier) || (a.finalPrice - b.finalPrice))[0]
     : null;
+  const { data: rulesDataset } = useTicketRulesDataset();
 
   // Check if we have direct flights (both departure and return for round-trip)
   const hasDirectFlights = flights.some(f => {
