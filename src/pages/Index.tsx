@@ -720,8 +720,8 @@ export default function Index() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6 items-stretch">
             {/* Other Airlines preview */}
             {profile?.perm_check_other && cheapestOtherFlight && filteredOtherFlights.length > 0 ? (
-              <div className="flex flex-col h-full bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border border-purple-200 dark:border-purple-700 rounded-xl p-4 animate-fade-in">
-                <h3 className="text-lg font-semibold text-purple-700 dark:text-purple-300 mb-3 flex items-center gap-2">
+              <div className="flex flex-col h-full bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl p-4 animate-fade-in">
+                <h3 className="text-lg font-semibold text-blue-700 dark:text-blue-300 mb-3 flex items-center gap-2">
                   <Plane className="w-5 h-5" /> Hãng khác rẻ nhất — {cheapestOtherFlight.airlineName}
                 </h3>
                 <div className="flex-1">
@@ -740,8 +740,8 @@ export default function Index() {
 
             {/* SunPQ preview */}
             {profile?.perm_check_sunpq && (sunpqLoading || previewSunPQ) ? (
-              <div className="flex flex-col h-full bg-gradient-to-br from-orange-50 to-amber-50 border-2 border-orange-300 rounded-xl p-4 animate-fade-in">
-                <h3 className="text-lg font-semibold text-orange-700 mb-3 flex items-center gap-2">
+              <div className="flex flex-col h-full bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl p-4 animate-fade-in">
+                <h3 className="text-lg font-semibold text-blue-700 dark:text-blue-300 mb-3 flex items-center gap-2">
                   <img src="/icon/sunpq-logo.png" alt="SunPQ" className="w-6 h-6 rounded object-contain bg-white p-0.5 border border-orange-200" />
                   SunPQ {previewSunPQ ? '— Vé đề xuất' : 'đang tìm...'}
                 </h3>
