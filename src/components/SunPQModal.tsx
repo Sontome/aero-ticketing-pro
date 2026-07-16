@@ -14,51 +14,6 @@ import { saveHeldTicket } from '@/utils/heldTickets';
 import { useTicketRulesDataset } from '@/hooks/useTicketRulesDataset';
 import SunPQFlightCard from './SunPQFlightCard';
 
-const buildSunPQSegments = (trip: SunPQTrip, tripType: 'OW' | 'RT'): RuleSegmentInput[] => {
-  const segs: RuleSegmentInput[] = [];
-  const pushLeg = (leg: SunPQLeg | undefined, legIndex: number | null) => {
-    if (!leg) return;
-    const itin = leg.list_itinerary || [];
-    const legSize = Math.max(itin.length, 1);
-    if (itin.length > 0) {
-      itin.forEach((it, i) => {
-        segs.push({
-          airline: it.carrier || leg.hãng || 'SUN',
-          from: it.departure,
-          to: it.arrival,
-          departure_time: undefined,
-          arrival_time: undefined,
-          departure_date: it.flight_date,
-          segment_order: i + 1,
-          leg_index: legIndex,
-          leg_size: legSize,
-          booking_class: it.booking_class || leg.loại_vé || null,
-        });
-      });
-    } else {
-      segs.push({
-        airline: leg.hãng || 'SUN',
-        from: leg.nơi_đi,
-        to: leg.nơi_đến,
-        departure_time: leg.giờ_cất_cánh,
-        arrival_time: leg.giờ_hạ_cánh,
-        departure_date: leg.ngày_cất_cánh,
-        segment_order: 1,
-        leg_index: legIndex,
-        leg_size: 1,
-        booking_class: leg.loại_vé || null,
-      });
-    }
-  };
-  if (tripType === 'RT') {
-    pushLeg(trip.chiều_đi, 0);
-    pushLeg(trip.chiều_về, 1);
-  } else {
-    pushLeg(trip.chiều_đi, null);
-  }
-  return segs;
-};
-
 interface Props {
   isOpen: boolean;
   onClose: () => void;
@@ -77,37 +32,12 @@ interface Props {
   } | null;
 }
 
-const fmtKRW = new Intl.NumberFormat('de-DE');
-
 const removeDiacritics = (s: string) =>
   s
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/đ/g, 'd')
     .replace(/Đ/g, 'D');
-
-const calculateFinalPrice = (
-  trip: SunPQTrip,
-  tripType: 'OW' | 'RT',
-  searchData: Props['searchData']
-) => {
-  const base =
-    Number(
-      trip.thông_tin_chung?.giá_vé ??
-        trip.thông_tin_chung?.giá_vé_gốc ??
-        ((trip.chiều_đi?.giá_vé_gốc || 0) + (trip.chiều_về?.giá_vé_gốc || 0))
-    ) || 0;
-  const fee =
-    tripType === 'OW' ? searchData?.sunpqOneWayFee ?? 0 : searchData?.sunpqRoundTripFee ?? 0;
-  return base + fee;
-};
-
-const buildRouteText = (leg?: SunPQTrip['chiều_đi']) => {
-  if (!leg) return '';
-  const stop = leg.điểm_dừng_1 ? `-${leg.điểm_dừng_1}` : '';
-  const ddmm = (leg.ngày_cất_cánh || '').split('/').slice(0, 2).join('/');
-  return `${leg.nơi_đi}${stop}-${leg.nơi_đến} ${leg.giờ_cất_cánh} ngày ${ddmm}`;
-};
 
 interface BookingFormProps {
   trip: SunPQTrip;
