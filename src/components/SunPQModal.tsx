@@ -301,11 +301,6 @@ const SunPQModal: React.FC<Props> = ({ isOpen, onClose, flights, searchData }) =
     });
   }, [flights]);
 
-  const handleCopy = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast.success('Đã copy thông tin chuyến bay');
-  };
-
   const { data: rulesDataset } = useTicketRulesDataset();
 
   return (
@@ -327,81 +322,22 @@ const SunPQModal: React.FC<Props> = ({ isOpen, onClose, flights, searchData }) =
             </div>
           ) : (
             <div className="space-y-4">
-              {sorted.map((trip, i) => {
-                const baseFinal = calculateFinalPrice(trip, tripType, searchData);
-                const seats = trip.thông_tin_chung?.số_ghế_còn ?? '9';
-
-                // Ticket Rule Engine
-                const _segs = buildSunPQSegments(trip, tripType);
-                const effects = applyTicketRules({ segments: _segs, raw: trip }, rulesDataset);
-                if (effects.hidden) return null;
-                const finalPrice = effects.priceOverride ?? baseFinal;
-                const roundedPrice = Math.round(finalPrice / 100) * 100;
-                const notesLine = formatNotesLine(effects.notes);
-                const baggageLine = effects.baggage || 'SunPQ 7kg xách tay, 23kg ký gửi';
-
-                const ticketClasses =
-                  tripType === 'OW'
-                    ? `Một chiều: ${trip.chiều_đi?.loại_vé || ''}`
-                    : `Khứ hồi: ${trip.chiều_đi?.loại_vé || ''}-${trip.chiều_về?.loại_vé || ''}`;
-
-                const copyText = [
-                  buildRouteText(trip.chiều_đi),
-                  trip.chiều_về ? buildRouteText(trip.chiều_về) : '',
-                  `${baggageLine}, giá vé = ${fmtKRW.format(roundedPrice)}w`,
-                  notesLine,
-                ]
-                  .filter(Boolean)
-                  .join('\n');
-
-                return (
-                  <div key={i} className={`border-2 rounded-lg p-4 bg-white ${effects.highlight ? 'border-red-500' : 'border-orange-400'}`}>
-                    <div className="flex items-start justify-between gap-3 mb-3">
-                      <div className="flex items-center gap-2">
-                        <span className="bg-orange-500 text-white px-2 py-0.5 rounded text-xs font-bold">
-                          SUNPQ
-                        </span>
-                        <span className="text-2xl font-bold text-gray-800">
-                          {fmtKRW.format(finalPrice)} KRW
-                        </span>
-                      </div>
-                      <div className="text-sm text-gray-600 flex items-center gap-1">
-                        <Users className="h-4 w-4" /> Còn {seats} ghế
-                      </div>
-                    </div>
-
-                    <div className="text-sm text-gray-700 mb-2">
-                      <div>{buildRouteText(trip.chiều_đi)}</div>
-                      {trip.chiều_về && <div>{buildRouteText(trip.chiều_về)}</div>}
-                      <div className="text-xs text-gray-500 mt-1">{ticketClasses}</div>
-                    </div>
-
-                    <pre className="bg-orange-50 border border-orange-200 rounded p-3 font-sans font-medium text-xl text-black whitespace-pre-line mb-3">
-                      {copyText}
-                    </pre>
-                    {notesLine && (
-                      <div className="text-red-600 font-semibold text-sm mb-2">{notesLine}</div>
-                    )}
-
-                    <div className="flex gap-2 justify-end">
-                      <Button size="sm" variant="outline" onClick={() => handleCopy(copyText)}>
-                        <Copy className="h-4 w-4 mr-1" /> Copy
-                      </Button>
-                      <Button
-                        size="sm"
-                        className="bg-green-600 hover:bg-green-700 text-white"
-                        onClick={() => setBookingTrip(trip)}
-                      >
-                        Giữ vé
-                      </Button>
-                    </div>
-                  </div>
-                );
-              })}
+              {sorted.map((trip, i) => (
+                <SunPQFlightCard
+                  key={i}
+                  trip={trip}
+                  tripType={tripType}
+                  oneWayFee={searchData?.sunpqOneWayFee ?? 0}
+                  roundTripFee={searchData?.sunpqRoundTripFee ?? 0}
+                  rulesDataset={rulesDataset}
+                  onBook={(t) => setBookingTrip(t)}
+                />
+              ))}
             </div>
           )}
         </DialogContent>
       </Dialog>
+
 
 
       <Dialog open={!!bookingTrip} onOpenChange={(o) => !o && setBookingTrip(null)}>
