@@ -4,16 +4,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Copy, Plus, Trash2, Loader2, Users } from 'lucide-react';
+import { Plus, Trash2, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import type { SunPQTrip, SunPQLeg, SunPQPassenger, SunPQPaxType } from '@/types/sunpq';
+import type { SunPQTrip, SunPQPassenger, SunPQPaxType } from '@/types/sunpq';
 import { bookingSunPQ } from '@/services/sunpqService';
 import SunPQTicketModal from './SunPQTicketModal';
 import { supabase } from '@/integrations/supabase/client';
 import { saveHeldTicket } from '@/utils/heldTickets';
 import { useTicketRulesDataset } from '@/hooks/useTicketRulesDataset';
-import { applyTicketRules, formatNotesLine } from '@/utils/ticketRuleEngine';
-import type { RuleSegmentInput } from '@/types/ticketRules';
+import SunPQFlightCard from './SunPQFlightCard';
 
 const buildSunPQSegments = (trip: SunPQTrip, tripType: 'OW' | 'RT'): RuleSegmentInput[] => {
   const segs: RuleSegmentInput[] = [];
