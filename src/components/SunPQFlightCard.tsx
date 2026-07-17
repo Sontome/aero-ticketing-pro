@@ -175,7 +175,7 @@ export const SunPQFlightCard: React.FC<SunPQFlightCardProps> = ({
               onClick={() => onBook(trip)}
               title={bookLabel}
             >
-              <Ticket className="h-4 w-4" />
+              <ShoppingCart className="h-4 w-4" />
             </Button>
           )}
         </div>
