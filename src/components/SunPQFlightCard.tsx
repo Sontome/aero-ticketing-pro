@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Copy, Users, Ticket } from 'lucide-react';
+import { Copy, Users, ShoppingCart, Plane } from 'lucide-react';
 import { toast } from 'sonner';
 import type { SunPQTrip, SunPQLeg } from '@/types/sunpq';
 import { applyTicketRules, formatNotesLine } from '@/utils/ticketRuleEngine';
