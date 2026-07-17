@@ -152,7 +152,7 @@ export const SunPQFlightCard: React.FC<SunPQFlightCardProps> = ({
   };
 
   return (
-    <div className={`border-2 rounded-lg p-4 bg-white ${effects.highlight ? 'border-red-500' : 'border-orange-400'}`}>
+    <div className={`border rounded-lg p-4 bg-white ${effects.highlight ? 'border-red-500' : 'border-gray-200'}`}>
       <div className="flex items-start justify-between gap-3 mb-3">
         <div>
           <div className="text-2xl font-bold text-gray-800 mb-1">
@@ -171,7 +171,8 @@ export const SunPQFlightCard: React.FC<SunPQFlightCardProps> = ({
           {onBook && (
             <Button
               size="sm"
-              className="bg-green-600 hover:bg-green-700 text-white p-2"
+              variant="outline"
+              className="p-2"
               onClick={() => onBook(trip)}
               title={bookLabel}
             >
@@ -180,6 +181,7 @@ export const SunPQFlightCard: React.FC<SunPQFlightCardProps> = ({
           )}
         </div>
       </div>
+
 
       <div className="text-sm text-gray-700 space-y-1 mb-2">
         <div className="flex items-center">
