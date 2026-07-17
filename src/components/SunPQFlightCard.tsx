@@ -181,15 +181,23 @@ export const SunPQFlightCard: React.FC<SunPQFlightCardProps> = ({
         </div>
       </div>
 
-      <div className="text-sm text-gray-700 mb-2">
-        <div>{buildRouteText(trip.chiều_đi)}</div>
-        {trip.chiều_về && <div>{buildRouteText(trip.chiều_về)}</div>}
+      <div className="text-sm text-gray-700 space-y-1 mb-2">
+        <div className="flex items-center">
+          <Plane className="w-4 h-4 text-primary mr-2" />
+          <span>{buildRouteText(trip.chiều_đi)}</span>
+        </div>
+        {trip.chiều_về && (
+          <div className="flex items-center">
+            <Plane className="w-4 h-4 text-primary mr-2 rotate-180" />
+            <span>{buildRouteText(trip.chiều_về)}</span>
+          </div>
+        )}
       </div>
 
-      <pre className="bg-orange-50 border border-orange-200 rounded p-3 font-sans font-medium text-xl text-black whitespace-pre-line mb-2">
-        {copyText}
-      </pre>
-      {notesLine && <div className="text-red-600 font-semibold text-sm">{notesLine}</div>}
+      <div className="border-t pt-2 text-sm text-gray-600">
+        {baggageLine}, giá vé = {fmtKRW.format(roundedPrice)}w
+      </div>
+      {notesLine && <div className="text-red-600 font-semibold text-sm mt-1">{notesLine}</div>}
     </div>
   );
 };
