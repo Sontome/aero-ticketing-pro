@@ -339,6 +339,24 @@ ${getBaggageInfo()}, giá vé = ${formatPrice(flight.adjustedPrice)}w`;
           </div>
         </div>
       </CardContent>
+      {booking && bookingOpen && (
+        <OtherBookingModal
+          isOpen={bookingOpen}
+          onClose={() => setBookingOpen(false)}
+          hang={flight.airline}
+          fromCode={flight.departure.airport}
+          toCode={flight.arrival.airport}
+          depDate={booking.depDate}
+          arrDate={booking.arrDate}
+          indexId={String(flight.id)}
+          tripType={booking.tripType}
+          adults={booking.adults}
+          children={booking.children ?? 0}
+          infants={booking.infants ?? 0}
+          maxSeats={Number(flight.availableSeats) || 9}
+          onBookingSuccess={booking.onBookingSuccess}
+        />
+      )}
     </Card>
   );
 };
