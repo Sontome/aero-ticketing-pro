@@ -6,8 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Trash2, Copy } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { saveHeldTicket } from '@/services/heldTicketService';
-import { mapAirlineName } from '@/types/heldTicket';
+import { saveHeldTicket, resolveAirlineCode } from '@/utils/heldTickets';
+import { useAuth } from '@/hooks/useAuth';
 
 type PaxType = 'ADT' | 'CHD' | 'INF';
 
