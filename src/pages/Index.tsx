@@ -740,7 +740,7 @@ export default function Index() {
                   <Plane className="w-5 h-5" /> Hãng khác rẻ nhất — {cheapestOtherFlight.airlineName}
                 </h3>
                 <div className="flex-1">
-                  <OtherFlightCard flight={cheapestOtherFlight} />
+                  <OtherFlightCard flight={cheapestOtherFlight} booking={otherBookingContext} />
                 </div>
                 <Button
                   className="mt-3 w-full bg-purple-600 hover:bg-purple-700 text-white"
@@ -964,6 +964,7 @@ export default function Index() {
             onClose={() => setShowOtherAirlinesModal(false)}
             flights={otherFlights}
             allowedAirlines={allowedOtherAirlines}
+            booking={otherBookingContext}
           />
 
           {/* SunPQ Modal */}
