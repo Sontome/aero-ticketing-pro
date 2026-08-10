@@ -264,6 +264,17 @@ ${getBaggageInfo()}, giá vé = ${formatPrice(flight.adjustedPrice)}w`;
               >
                 <Copy className="w-4 h-4" />
               </Button>
+              {booking && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setBookingOpen(true)}
+                  className="p-2 transition-all duration-200 hover:scale-105"
+                  title="Giữ vé"
+                >
+                  <ShoppingCart className="w-4 h-4" />
+                </Button>
+              )}
             </div>
           </div>
 
