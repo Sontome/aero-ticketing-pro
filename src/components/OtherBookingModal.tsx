@@ -6,8 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Trash2, Copy } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { saveHeldTicket } from '@/services/heldTicketService';
-import { mapAirlineName } from '@/types/heldTicket';
+import { saveHeldTicket, resolveAirlineCode } from '@/utils/heldTickets';
+import { useAuth } from '@/hooks/useAuth';
 
 type PaxType = 'ADT' | 'CHD' | 'INF';
 
@@ -105,6 +105,7 @@ export const OtherBookingModal = ({
   maxSeats,
   onBookingSuccess,
 }: OtherBookingModalProps) => {
+  const { user } = useAuth();
   const [passengers, setPassengers] = useState<PaxRow[]>(buildInitial(adults, children, infants));
   const [phoneKakao, setPhoneKakao] = useState('');
   const [emailKakao, setEmailKakao] = useState('');
@@ -235,6 +236,7 @@ export const OtherBookingModal = ({
             return s;
           };
           const segs = [{
+            segment_order: 1,
             departure_airport: fromCode,
             arrival_airport: toCode,
             departure_date: toIso(depDate),
@@ -243,6 +245,7 @@ export const OtherBookingModal = ({
           }];
           if (tripType === 'RT' && arrDate) {
             segs.push({
+              segment_order: 2,
               departure_airport: toCode,
               arrival_airport: fromCode,
               departure_date: toIso(arrDate),
@@ -250,13 +253,16 @@ export const OtherBookingModal = ({
               trip: `${toCode}-${fromCode}`,
             });
           }
-          await saveHeldTicket({
-            pnr: code,
-            airline: mapAirlineName(hang),
-            namelist,
-            segments: segs,
-            expire_date: typeof deadline === 'string' ? deadline : null,
-          });
+          if (user?.id) {
+            await saveHeldTicket({
+              user_id: user.id,
+              pnr: code,
+              airline: resolveAirlineCode(hang),
+              namelist,
+              segments: segs,
+              expire_date: typeof deadline === 'string' ? deadline : null,
+            });
+          }
         } catch (e) {
           console.error('[saveHeldTicket OTHER]', e);
         }
