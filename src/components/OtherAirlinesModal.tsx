@@ -429,7 +429,7 @@ export const OtherAirlinesModal: React.FC<OtherAirlinesModalProps> = ({
                 </h3>
                 <div className="space-y-2">
                   {groupedFlights[airlineCode]?.map(flight => (
-                    <OtherFlightCard key={flight.id} flight={flight} />
+                    <OtherFlightCard key={flight.id} flight={flight} booking={booking} />
                   ))}
                 </div>
               </div>
@@ -455,7 +455,7 @@ export const OtherAirlinesModal: React.FC<OtherAirlinesModalProps> = ({
                 </h3>
                 <div className="space-y-2">
                   {groupedFlights[airlineCode]?.map(flight => (
-                    <OtherFlightCard key={flight.id} flight={flight} />
+                    <OtherFlightCard key={flight.id} flight={flight} booking={booking} />
                   ))}
                 </div>
               </div>
