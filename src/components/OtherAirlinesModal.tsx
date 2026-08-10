@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Plane, Users, Copy, ShoppingCart } from 'lucide-react';
+import { OtherBookingModal } from '@/components/OtherBookingModal';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useHoverSound } from '@/hooks/useHoverSound';
