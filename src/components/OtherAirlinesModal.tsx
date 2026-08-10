@@ -96,12 +96,24 @@ export interface OtherFlight {
   };
 }
 
-interface OtherFlightCardProps {
-  flight: OtherFlight;
+export interface OtherBookingContext {
+  depDate: string;   // yyyy-MM-dd
+  arrDate?: string;  // yyyy-MM-dd
+  tripType: 'OW' | 'RT';
+  adults: number;
+  children?: number;
+  infants?: number;
+  onBookingSuccess?: (pnr: string) => void;
 }
 
-export const OtherFlightCard: React.FC<OtherFlightCardProps> = ({ flight }) => {
+interface OtherFlightCardProps {
+  flight: OtherFlight;
+  booking?: OtherBookingContext;
+}
+
+export const OtherFlightCard: React.FC<OtherFlightCardProps> = ({ flight, booking }) => {
   const { toast } = useToast();
+  const [bookingOpen, setBookingOpen] = useState(false);
   const { playClickSound } = useHoverSound();
 
   const formatPrice = (price: number) => {
