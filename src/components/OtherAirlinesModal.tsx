@@ -367,6 +367,7 @@ interface OtherAirlinesModalProps {
   onClose: () => void;
   flights: OtherFlight[];
   allowedAirlines: string[];
+  booking?: OtherBookingContext;
 }
 
 export const OtherAirlinesModal: React.FC<OtherAirlinesModalProps> = ({
@@ -374,6 +375,7 @@ export const OtherAirlinesModal: React.FC<OtherAirlinesModalProps> = ({
   onClose,
   flights,
   allowedAirlines,
+  booking,
 }) => {
   // Filter flights by allowed airlines and group by airline
   const groupedFlights = React.useMemo(() => {
