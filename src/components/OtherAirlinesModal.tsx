@@ -7,7 +7,7 @@ import { Plane, Users, Copy } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useHoverSound } from '@/hooks/useHoverSound';
-
+import { OtherBookingModal } from './OtherBookingModal';
 // Airline code to name mapping
 export const AIRLINE_NAMES: Record<string, string> = {
   'OZ': 'Asiana',
