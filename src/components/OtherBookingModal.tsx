@@ -235,6 +235,7 @@ export const OtherBookingModal = ({
             return s;
           };
           const segs = [{
+            segment_order: 1,
             departure_airport: fromCode,
             arrival_airport: toCode,
             departure_date: toIso(depDate),
@@ -243,6 +244,7 @@ export const OtherBookingModal = ({
           }];
           if (tripType === 'RT' && arrDate) {
             segs.push({
+              segment_order: 2,
               departure_airport: toCode,
               arrival_airport: fromCode,
               departure_date: toIso(arrDate),
@@ -250,13 +252,16 @@ export const OtherBookingModal = ({
               trip: `${toCode}-${fromCode}`,
             });
           }
-          await saveHeldTicket({
-            pnr: code,
-            airline: mapAirlineName(hang),
-            namelist,
-            segments: segs,
-            expire_date: typeof deadline === 'string' ? deadline : null,
-          });
+          if (user?.id) {
+            await saveHeldTicket({
+              user_id: user.id,
+              pnr: code,
+              airline: resolveAirlineCode(hang),
+              namelist,
+              segments: segs,
+              expire_date: typeof deadline === 'string' ? deadline : null,
+            });
+          }
         } catch (e) {
           console.error('[saveHeldTicket OTHER]', e);
         }
