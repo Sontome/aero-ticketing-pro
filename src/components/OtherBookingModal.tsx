@@ -105,6 +105,7 @@ export const OtherBookingModal = ({
   maxSeats,
   onBookingSuccess,
 }: OtherBookingModalProps) => {
+  const { user } = useAuth();
   const [passengers, setPassengers] = useState<PaxRow[]>(buildInitial(adults, children, infants));
   const [phoneKakao, setPhoneKakao] = useState('');
   const [emailKakao, setEmailKakao] = useState('');
