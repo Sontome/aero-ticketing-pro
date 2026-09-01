@@ -101,10 +101,52 @@ export const AdminDashboard = () => {
     list_other: '',
   });
 
+  const [apiappConfig, setApiappConfig] = useState<{ id: string; domain: string; price_addon: number; updated_at: string | null } | null>(null);
+  const [apiappDialogOpen, setApiappDialogOpen] = useState(false);
+  const [apiappInput, setApiappInput] = useState<string>('0');
+  const [apiappLoading, setApiappLoading] = useState(false);
+
   useEffect(() => {
     fetchProfiles();
     fetchRateLimit();
+    fetchApiappConfig();
   }, []);
+
+  const fetchApiappConfig = async () => {
+    const { data } = await supabase
+      .from('kakao_apiapp_config' as any)
+      .select('*')
+      .eq('domain', 'apiapp.hanvietair.com')
+      .maybeSingle();
+    if (data) {
+      const row = data as any;
+      setApiappConfig(row);
+      setApiappInput(String(row.price_addon ?? 0));
+    }
+  };
+
+  const handleUpdateApiappConfig = async () => {
+    const price = parseInt(apiappInput);
+    if (isNaN(price) || price < 0) {
+      toast({ variant: "destructive", title: "Lỗi", description: "Giá cộng thêm phải >= 0" });
+      return;
+    }
+    if (!apiappConfig) return;
+    setApiappLoading(true);
+    const { error } = await supabase
+      .from('kakao_apiapp_config' as any)
+      .update({ price_addon: price, updated_at: new Date().toISOString() })
+      .eq('id', apiappConfig.id);
+    setApiappLoading(false);
+    if (error) {
+      toast({ variant: "destructive", title: "Lỗi", description: error.message });
+      return;
+    }
+    toast({ title: "Thành công", description: `Đã cập nhật giá cộng thêm: ${price.toLocaleString('vi-VN')}đ` });
+    setApiappDialogOpen(false);
+    fetchApiappConfig();
+  };
+
 
   const fetchRateLimit = async () => {
     const { data } = await supabase.from('set_rate_limit').select('minutes').limit(1).single();
