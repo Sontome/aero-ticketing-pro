@@ -80,6 +80,14 @@ const getAge = (birthday: string, refDateStr: string): number => {
   return age;
 };
 
+// Sinh PNR ảo tạm thời dạng TMP_XXXXXX (6 ký tự A-Z, 0-9)
+const generateVirtualPnr = (): string => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let s = '';
+  for (let i = 0; i < 6; i++) s += chars[Math.floor(Math.random() * chars.length)];
+  return `TMP_${s}`;
+};
+
 const buildInitial = (adults: number, children: number, infants: number): PaxRow[] => {
   const rows: PaxRow[] = [];
   for (let i = 0; i < adults; i++) rows.push({ type: 'ADT', Họ: '', Tên: '', Giới_tính: 'NAM', birthday: '' });
