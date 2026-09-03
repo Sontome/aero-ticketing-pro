@@ -208,6 +208,8 @@ export const OtherBookingModal = ({
       let phone = phoneKakao.trim();
       if (phone && !phone.startsWith('0')) phone = '0' + phone;
 
+      const virtualPnr = generateVirtualPnr();
+
       const body: Record<string, any> = {
         hang,
         from_code: fromCode,
@@ -215,6 +217,7 @@ export const OtherBookingModal = ({
         dep_date: normalizeDate(depDate),
         arr_date: tripType === 'RT' ? normalizeDate(arrDate || '') : '',
         index: String(indexId),
+        virtual_pnr: virtualPnr,
         customer,
       };
       if (phone) body.phonekakao = phone;
@@ -228,9 +231,9 @@ export const OtherBookingModal = ({
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      const code = data.mã_giữ_vé || data.pnr || data.status_code;
+      const code = data.mã_giữ_vé || data.pnr || data.status_code || virtualPnr;
       const deadline = data.hạn_thanh_toán || data.message || '';
-      if (code) {
+      {
         setSuccessData({ code, deadline });
         try {
           const namelist = passengers.map((p) => `${p.Họ} ${p.Tên}`.trim().toUpperCase());
@@ -264,11 +267,11 @@ export const OtherBookingModal = ({
           if (user?.id) {
             await saveHeldTicket({
               user_id: user.id,
-              pnr: code,
-              airline: resolveAirlineCode(hang),
+              pnr: virtualPnr,
+              airline: (hang || '').toUpperCase() || resolveAirlineCode(hang),
               namelist,
               segments: segs,
-              expire_date: typeof deadline === 'string' ? deadline : null,
+              expire_date: null,
             });
           }
         } catch (e) {
@@ -281,13 +284,6 @@ export const OtherBookingModal = ({
             onBookingSuccess(code);
           }, 100);
         }
-      } else {
-        toast({
-          title: 'Lỗi giữ vé',
-          description: data.mess || data.message || 'Không thể giữ vé. Vui lòng thử lại.',
-          variant: 'destructive',
-          duration: 10000,
-        });
       }
     } catch (err: any) {
       toast({ title: 'Lỗi', description: err.message || 'Không thể giữ vé', variant: 'destructive' });
