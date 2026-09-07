@@ -773,9 +773,10 @@ export default function Index() {
           />
         )}
 
-        {/* Other Airlines + SunPQ Preview (single full ticket + "Xem thêm") */}
+        {/* Other Airlines + SunPQ + Premia Preview (single full ticket + "Xem thêm") */}
         {((profile?.perm_check_other && cheapestOtherFlight && filteredOtherFlights.length > 0) ||
-          (profile?.perm_check_sunpq && (sunpqLoading || previewSunPQ))) && (
+          (profile?.perm_check_sunpq && (sunpqLoading || previewSunPQ)) ||
+          (profile?.perm_check_premia && (premiaLoading || premiaSorted.length > 0))) && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6 items-stretch">
             {/* Other Airlines preview */}
             {profile?.perm_check_other && cheapestOtherFlight && filteredOtherFlights.length > 0 ? (
@@ -793,9 +794,7 @@ export default function Index() {
                   Xem thêm {filteredOtherFlights.length} vé hãng khác
                 </Button>
               </div>
-            ) : (
-              <div />
-            )}
+            ) : null}
 
             {/* SunPQ preview */}
             {profile?.perm_check_sunpq && (sunpqLoading || previewSunPQ) ? (
@@ -830,9 +829,55 @@ export default function Index() {
                   </Button>
                 )}
               </div>
-            ) : (
-              <div />
+            ) : null}
+
+            {/* Premia (YP) — 1 ô đầu tiên + các ô mở rộng nằm chung lưới */}
+            {profile?.perm_check_premia && premiaLoading && premiaSorted.length === 0 && (
+              <div className="flex flex-col h-full bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl p-4 animate-fade-in">
+                <h3 className="text-lg font-semibold text-purple-700 dark:text-purple-300 mb-3 flex items-center gap-2">
+                  <Plane className="w-5 h-5" /> Premia đang tìm...
+                </h3>
+                <div className="flex-1 text-center py-8 text-purple-600 text-sm">
+                  Đang tải kết quả từ Air Premia...
+                </div>
+              </div>
             )}
+            {profile?.perm_check_premia &&
+              premiaVisible.map((trip, idx) => (
+                <div
+                  key={`premia-${idx}`}
+                  className="flex flex-col h-full bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl p-4 animate-fade-in"
+                >
+                  <h3 className="text-lg font-semibold text-purple-700 dark:text-purple-300 mb-3 flex items-center gap-2">
+                    <Plane className="w-5 h-5" /> Premia
+                  </h3>
+                  <div className="flex-1">
+                    <PremiaFlightCard
+                      trip={trip}
+                      tripType={premiaTripType}
+                      oneWayFee={premiaOneWayFee}
+                      roundTripFee={premiaRoundTripFee}
+                    />
+                  </div>
+                  {idx === 0 && !premiaExpanded && premiaSorted.length > 1 && (
+                    <Button
+                      className="mt-3 w-full bg-purple-600 hover:bg-purple-700 text-white"
+                      onClick={() => setPremiaExpanded(true)}
+                    >
+                      Hiện thêm {premiaSorted.length - 1} vé Premia
+                    </Button>
+                  )}
+                  {idx === 0 && premiaExpanded && premiaSorted.length > 1 && (
+                    <Button
+                      variant="outline"
+                      className="mt-3 w-full border-purple-300 text-purple-700 hover:bg-purple-50"
+                      onClick={() => setPremiaExpanded(false)}
+                    >
+                      Thu gọn
+                    </Button>
+                  )}
+                </div>
+              ))}
           </div>
         )}
 
