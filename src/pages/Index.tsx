@@ -28,6 +28,8 @@ import SunPQFlightCard, { sunpqTripTier, calcSunPQFinalPrice } from '@/component
 import { useTicketRulesDataset } from '@/hooks/useTicketRulesDataset';
 import SunPQTicketModal from '@/components/SunPQTicketModal';
 import { searchSunPQFlights } from '@/services/sunpqService';
+import { searchPremiaFlights, type PremiaTrip } from '@/services/premiaService';
+import PremiaFlightCard, { calcPremiaFinalPrice } from '@/components/PremiaFlightCard';
 import type { SunPQTrip } from '@/types/sunpq';
 import {
   DropdownMenu,
@@ -75,6 +77,9 @@ export default function Index() {
   const [sunpqLoading, setSunpqLoading] = useState(false);
   const [sunpqSearchPayload, setSunpqSearchPayload] = useState<any>(null);
   const [showSunPQTicketModal, setShowSunPQTicketModal] = useState(false);
+  const [premiaFlights, setPremiaFlights] = useState<PremiaTrip[]>([]);
+  const [premiaLoading, setPremiaLoading] = useState(false);
+  const [premiaExpanded, setPremiaExpanded] = useState(false);
   const [filters, setFilters] = useState<FilterOptions>({
     airlines: ['VJ', 'VNA'],
     showCheapestOnly: false,
@@ -352,6 +357,8 @@ export default function Index() {
     setOtherFlights([]); // Clear other airlines results
     setRawOtherFlights([]);
     setSunpqFlights([]);
+    setPremiaFlights([]);
+    setPremiaExpanded(false);
     setLastSearchIsRoundTrip(!!searchData.returnDate);
     setHasSearched(true);
     setSearchData(searchData);
@@ -411,6 +418,32 @@ export default function Index() {
         .then((res) => setSunpqFlights(res.body || []))
         .catch((e) => console.error('SunPQ search error', e))
         .finally(() => setSunpqLoading(false));
+    }
+
+    // Premia (YP) search - luồng riêng
+    if (profile?.perm_check_premia) {
+      const tripTypeP: 'OW' | 'RT' = searchData.tripType === 'round_trip' ? 'RT' : 'OW';
+      const fmtP = (d?: Date | string) => {
+        if (!d) return '';
+        if (d instanceof Date) {
+          return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        }
+        return String(d).split('T')[0];
+      };
+      setPremiaLoading(true);
+      searchPremiaFlights({
+        departure: searchData.from,
+        arrival: searchData.to,
+        departureDate: fmtP(searchData.departureDate),
+        returnDate: fmtP(searchData.returnDate),
+        tripType: tripTypeP,
+        adults: searchData.passengers || 1,
+        children: 0,
+        infants: 0,
+      })
+        .then((res) => setPremiaFlights(res.body || []))
+        .catch((e) => console.error('Premia search error', e))
+        .finally(() => setPremiaLoading(false));
     }
 
     try {
@@ -637,6 +670,17 @@ export default function Index() {
   const previewSunPQ = sunpqWithPrice.length > 0
     ? [...sunpqWithPrice].sort((a, b) => (a.tier - b.tier) || (a.finalPrice - b.finalPrice))[0]
     : null;
+  // Premia (YP)
+  const premiaOneWayFee = profile?.price_ow_premia ?? 0;
+  const premiaRoundTripFee = profile?.price_rt_premia ?? 0;
+  const premiaTripType: 'OW' | 'RT' = lastSearchIsRoundTrip ? 'RT' : 'OW';
+  const premiaSorted = [...(premiaFlights || [])].sort(
+    (a, b) =>
+      calcPremiaFinalPrice(a, premiaTripType, premiaOneWayFee, premiaRoundTripFee) -
+      calcPremiaFinalPrice(b, premiaTripType, premiaOneWayFee, premiaRoundTripFee)
+  );
+  const premiaVisible = premiaExpanded ? premiaSorted : premiaSorted.slice(0, 1);
+
   const { data: rulesDataset } = useTicketRulesDataset();
 
   // Check if we have direct flights (both departure and return for round-trip)
