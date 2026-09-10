@@ -37,6 +37,7 @@ export interface PremiaFlightCardProps {
   tripType: 'OW' | 'RT';
   oneWayFee?: number;
   roundTripFee?: number;
+  isReference?: boolean;
 }
 
 export const PremiaFlightCard: React.FC<PremiaFlightCardProps> = ({
