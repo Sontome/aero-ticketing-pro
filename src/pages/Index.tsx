@@ -443,7 +443,10 @@ export default function Index() {
         children: 0,
         infants: 0,
       })
-        .then((res) => setPremiaFlights(res.body || []))
+        .then((res) => {
+          setPremiaFlights(res.body || []);
+          setPremiaStatus(res.trạng_thái);
+        })
         .catch((e) => console.error('Premia search error', e))
         .finally(() => setPremiaLoading(false));
     }
