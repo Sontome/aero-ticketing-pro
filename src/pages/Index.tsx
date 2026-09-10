@@ -360,6 +360,7 @@ export default function Index() {
     setSunpqFlights([]);
     setPremiaFlights([]);
     setPremiaExpanded(false);
+    setPremiaStatus(undefined);
     setLastSearchIsRoundTrip(!!searchData.returnDate);
     setHasSearched(true);
     setSearchData(searchData);
