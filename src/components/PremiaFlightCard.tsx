@@ -107,6 +107,30 @@ export const PremiaFlightCard: React.FC<PremiaFlightCardProps> = ({
       <div className="border-t pt-2 text-sm text-gray-600">
         {baggageLine}, giá vé = {fmtKRW.format(roundedPrice)}w
       </div>
+
+      {isReference && (
+        <div
+          className="absolute top-0 right-0 pointer-events-none z-10"
+          style={{
+            width: '130px',
+            height: '130px',
+            overflow: 'hidden',
+          }}
+        >
+          <div
+            className="absolute top-[22px] right-[-42px] w-[180px] bg-purple-600 text-white text-[11px] font-bold uppercase tracking-wide text-center py-1 shadow-md"
+            style={{
+              transform: 'rotate(45deg)',
+              transformOrigin: 'top right',
+              lineHeight: '1.2',
+            }}
+          >
+            Vé hãng Premia
+            <br />
+            tham khảo
+          </div>
+        </div>
+      )}
     </div>
   );
 };
