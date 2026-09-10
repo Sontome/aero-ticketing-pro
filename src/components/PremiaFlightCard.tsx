@@ -112,17 +112,17 @@ export const PremiaFlightCard: React.FC<PremiaFlightCardProps> = ({
         <div
           className="absolute top-0 right-0 pointer-events-none z-10"
           style={{
-            width: '130px',
-            height: '130px',
+            width: '170px',
+            height: '170px',
             overflow: 'hidden',
           }}
         >
           <div
-            className="absolute top-[22px] right-[-42px] w-[180px] bg-purple-600 text-white text-[11px] font-bold uppercase tracking-wide text-center py-1 shadow-md"
+            className="absolute top-[30px] right-[-58px] w-[240px] bg-purple-700 text-white text-[13px] font-bold uppercase tracking-wide text-center py-2 shadow-lg"
             style={{
               transform: 'rotate(45deg)',
               transformOrigin: 'top right',
-              lineHeight: '1.2',
+              lineHeight: '1.3',
             }}
           >
             Vé hãng Premia
