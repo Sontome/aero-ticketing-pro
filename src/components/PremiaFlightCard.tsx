@@ -37,6 +37,7 @@ export interface PremiaFlightCardProps {
   tripType: 'OW' | 'RT';
   oneWayFee?: number;
   roundTripFee?: number;
+  isReference?: boolean;
 }
 
 export const PremiaFlightCard: React.FC<PremiaFlightCardProps> = ({
@@ -44,6 +45,7 @@ export const PremiaFlightCard: React.FC<PremiaFlightCardProps> = ({
   tripType,
   oneWayFee = 0,
   roundTripFee = 0,
+  isReference = false,
 }) => {
   const finalPrice = calcPremiaFinalPrice(trip, tripType, oneWayFee, roundTripFee);
   const roundedPrice = Math.round(finalPrice / 100) * 100;
@@ -59,6 +61,7 @@ export const PremiaFlightCard: React.FC<PremiaFlightCardProps> = ({
     buildRouteText(trip.chiều_đi),
     trip.chiều_về ? buildRouteText(trip.chiều_về) : '',
     `${baggageLine}, giá vé = ${fmtKRW.format(roundedPrice)}w`,
+    isReference ? 'Vé hãng Premia tham khảo' : '',
   ]
     .filter(Boolean)
     .join('\n');
@@ -69,7 +72,7 @@ export const PremiaFlightCard: React.FC<PremiaFlightCardProps> = ({
   };
 
   return (
-    <div className="border border-gray-200 rounded-lg p-4 bg-white h-full">
+    <div className="relative border border-gray-200 rounded-lg p-4 bg-white h-full overflow-hidden">
       <div className="flex items-start justify-between gap-3 mb-3">
         <div>
           <div className="text-2xl font-bold text-gray-800 mb-1">
@@ -104,6 +107,30 @@ export const PremiaFlightCard: React.FC<PremiaFlightCardProps> = ({
       <div className="border-t pt-2 text-sm text-gray-600">
         {baggageLine}, giá vé = {fmtKRW.format(roundedPrice)}w
       </div>
+
+      {isReference && (
+        <div
+          className="absolute top-0 right-0 pointer-events-none z-10"
+          style={{
+            width: '130px',
+            height: '130px',
+            overflow: 'hidden',
+          }}
+        >
+          <div
+            className="absolute top-[22px] right-[-42px] w-[180px] bg-purple-600 text-white text-[11px] font-bold uppercase tracking-wide text-center py-1 shadow-md"
+            style={{
+              transform: 'rotate(45deg)',
+              transformOrigin: 'top right',
+              lineHeight: '1.2',
+            }}
+          >
+            Vé hãng Premia
+            <br />
+            tham khảo
+          </div>
+        </div>
+      )}
     </div>
   );
 };

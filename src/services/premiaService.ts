@@ -37,6 +37,7 @@ export interface PremiaSearchResult {
   body: PremiaTrip[];
   session_key?: string;
   error?: string;
+  trạng_thái?: string;
 }
 
 const PREMIA_BASE = 'https://apilive.hanvietair.com/premia';
