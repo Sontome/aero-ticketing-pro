@@ -80,6 +80,7 @@ export default function Index() {
   const [premiaFlights, setPremiaFlights] = useState<PremiaTrip[]>([]);
   const [premiaLoading, setPremiaLoading] = useState(false);
   const [premiaExpanded, setPremiaExpanded] = useState(false);
+  const [premiaStatus, setPremiaStatus] = useState<string | undefined>(undefined);
   const [filters, setFilters] = useState<FilterOptions>({
     airlines: ['VJ', 'VNA'],
     showCheapestOnly: false,
