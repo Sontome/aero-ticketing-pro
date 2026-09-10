@@ -109,23 +109,9 @@ export const PremiaFlightCard: React.FC<PremiaFlightCardProps> = ({
       </div>
 
       {isReference && (
-        <div
-          className="absolute top-0 right-0 pointer-events-none z-10"
-          style={{
-            width: '170px',
-            height: '170px',
-            overflow: 'hidden',
-          }}
-        >
-          <div
-            className="absolute top-[30px] right-[-58px] w-[240px] bg-purple-700 text-white text-[13px] font-bold uppercase tracking-wide text-center py-2 shadow-lg"
-            style={{
-              transform: 'rotate(45deg)',
-              transformOrigin: 'top right',
-              lineHeight: '1.3',
-            }}
-          >
-            Vé hãng Premia
+        <div className="pointer-events-none absolute top-0 right-0 z-20 h-24 w-24 overflow-hidden">
+          <div className="absolute top-[18px] right-[-42px] w-[150px] rotate-45 bg-gradient-to-r from-red-600 to-rose-500 text-white text-[9px] font-bold text-center leading-tight py-1 shadow-lg">
+            Vé Premia
             <br />
             tham khảo
           </div>
