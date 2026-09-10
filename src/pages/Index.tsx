@@ -862,6 +862,7 @@ export default function Index() {
                       tripType={premiaTripType}
                       oneWayFee={premiaOneWayFee}
                       roundTripFee={premiaRoundTripFee}
+                      isReference={premiaStatus === 'adjacent'}
                     />
                   </div>
                   {idx === 0 && !premiaExpanded && premiaSorted.length > 1 && (
