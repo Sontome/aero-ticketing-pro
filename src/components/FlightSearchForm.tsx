@@ -318,8 +318,8 @@ export const FlightSearchForm: React.FC<FlightSearchFormProps> = ({ onSearch, lo
                     mode="single"
                     selected={formData.returnDate}
                     onSelect={handleReturnDateSelect}
-                    disabled={(date) => date < (formData.departureDate || new Date())}
-                    defaultMonth={returnDateMonth || formData.returnDate || formData.departureDate || new Date()}
+                    disabled={(date) => date < (formData.departureDate ? startOfDay(formData.departureDate) : today)}
+                    defaultMonth={returnDateMonth || formData.returnDate || formData.departureDate || today}
                     initialFocus
                   />
                 </PopoverContent>
