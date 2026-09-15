@@ -56,6 +56,8 @@ const vietnameseAirports = [
 ];
 
 export const FlightSearchForm: React.FC<FlightSearchFormProps> = ({ onSearch, loading }) => {
+  const today = startOfDay(new Date());
+
   const [formData, setFormData] = useState<SearchFormData>({
     from: 'ICN', // Default to ICN
     to: 'HAN', // Default to HAN
