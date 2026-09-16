@@ -252,7 +252,13 @@ const SunPQTicketModal: React.FC<Props> = ({ isOpen, onClose, initialPNR }) => {
                 Tổng: {fmtKRW.format(totalPrice)} KRW
               </span>
               {data?.hanhly === '2PC' && (
-                <div className="w-full text-sm font-semibold text-blue-700 bg-blue-50 border border-blue-200 rounded px-2 py-1">
+                <div
+                  className={`w-full text-sm font-semibold rounded px-2 py-1 border ${
+                    repriceInfo?.doituong === 'VFR'
+                      ? 'text-green-700 bg-green-50 border-green-200'
+                      : 'text-red-700 bg-red-50 border-red-200'
+                  }`}
+                >
                   {repriceInfo?.doituong === 'VFR'
                     ? 'Vé đã áp dụng 46kg hành lý thành công'
                     : 'Vé đủ điều kiện áp dụng 46kg hành lý, cần reprice lại nếu chưa áp dụng'}
