@@ -94,6 +94,11 @@ const SegmentCard: React.FC<{ seg: any; hanhly?: string }> = ({ seg, hanhly }) =
           <div>Thời gian: <span className="font-semibold">{fmtFlightTime(seg.duration || seg.elapse_flying_time)}</span></div>
           {aircraft && <div>Máy bay: {aircraft}</div>}
           {seg.booking_class && <div>Hạng: {seg.booking_class}</div>}
+          {hanhly && (
+            <div className="font-semibold text-green-700">
+              Hành lý: {hanhly === '2PC' ? '46kg' : hanhly === '1PC' ? '23kg' : hanhly}
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -114,6 +119,7 @@ const SunPQTicketModal: React.FC<Props> = ({ isOpen, onClose, initialPNR }) => {
       setData(null);
       setErrorMsg('');
       setPnr('');
+      setRepriceInfo(null);
       hasAutoSubmittedRef.current = false;
     }
   }, [isOpen]);
