@@ -52,7 +52,11 @@ const fmtFlightTime = (raw?: string) => {
   return `${s.slice(0, 2)}h${s.slice(2, 4)}m`;
 };
 
-const SegmentCard: React.FC<{ seg: any; hanhly?: string }> = ({ seg, hanhly }) => {
+const SegmentCard: React.FC<{ seg: any; hanhly?: string; baggageApplied?: boolean }> = ({
+  seg,
+  hanhly,
+  baggageApplied,
+}) => {
   const dep = parseDateTime(
     seg?.departure_info?.datetime || seg.departure_datetime || seg.departure_time
   );
