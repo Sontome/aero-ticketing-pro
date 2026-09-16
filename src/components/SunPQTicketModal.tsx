@@ -69,10 +69,17 @@ const SegmentCard: React.FC<{ seg: any; hanhly?: string }> = ({ seg, hanhly }) =
     <div className="border border-orange-200 rounded-lg overflow-hidden mb-2">
       <div className="bg-orange-50 px-3 py-2 flex items-center gap-2">
         <img src="/icon/sunpq-logo.png" alt="SunPQ" width={28} height={28} className="rounded" />
-        <div className="font-semibold text-sm">
-          {(AIRPORT_NAMES[depCode] || depCode)} → {(AIRPORT_NAMES[arrCode] || arrCode)}
+        <div className="min-w-0">
+          <div className="font-semibold text-sm">
+            {(AIRPORT_NAMES[depCode] || depCode)} → {(AIRPORT_NAMES[arrCode] || arrCode)}
+          </div>
+          {hanhly && (
+            <div className="text-xs font-semibold text-green-700 leading-tight">
+              Hành lý: {hanhly === '2PC' ? '46kg' : hanhly === '1PC' ? '23kg' : hanhly}
+            </div>
+          )}
+          <div className="text-xs text-gray-600">{dep.date}</div>
         </div>
-        <div className="ml-auto text-xs text-gray-600">{dep.date}</div>
       </div>
       <div className="p-3 grid grid-cols-3 gap-3 text-sm">
         <div>
@@ -94,11 +101,6 @@ const SegmentCard: React.FC<{ seg: any; hanhly?: string }> = ({ seg, hanhly }) =
           <div>Thời gian: <span className="font-semibold">{fmtFlightTime(seg.duration || seg.elapse_flying_time)}</span></div>
           {aircraft && <div>Máy bay: {aircraft}</div>}
           {seg.booking_class && <div>Hạng: {seg.booking_class}</div>}
-          {hanhly && (
-            <div className="font-semibold text-green-700">
-              Hành lý: {hanhly === '2PC' ? '46kg' : hanhly === '1PC' ? '23kg' : hanhly}
-            </div>
-          )}
         </div>
       </div>
     </div>
