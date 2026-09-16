@@ -52,7 +52,7 @@ const fmtFlightTime = (raw?: string) => {
   return `${s.slice(0, 2)}h${s.slice(2, 4)}m`;
 };
 
-const SegmentCard: React.FC<{ seg: any }> = ({ seg }) => {
+const SegmentCard: React.FC<{ seg: any; hanhly?: string }> = ({ seg, hanhly }) => {
   const dep = parseDateTime(
     seg?.departure_info?.datetime || seg.departure_datetime || seg.departure_time
   );
@@ -94,6 +94,11 @@ const SegmentCard: React.FC<{ seg: any }> = ({ seg }) => {
           <div>Thời gian: <span className="font-semibold">{fmtFlightTime(seg.duration || seg.elapse_flying_time)}</span></div>
           {aircraft && <div>Máy bay: {aircraft}</div>}
           {seg.booking_class && <div>Hạng: {seg.booking_class}</div>}
+          {hanhly && (
+            <div className="font-semibold text-green-700">
+              Hành lý: {hanhly === '2PC' ? '46kg' : hanhly === '1PC' ? '23kg' : hanhly}
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -105,6 +110,7 @@ const SunPQTicketModal: React.FC<Props> = ({ isOpen, onClose, initialPNR }) => {
   const [data, setData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [repriceInfo, setRepriceInfo] = useState<any>(null);
   const captureRef = useRef<HTMLDivElement>(null);
   const hasAutoSubmittedRef = useRef(false);
 
@@ -113,6 +119,7 @@ const SunPQTicketModal: React.FC<Props> = ({ isOpen, onClose, initialPNR }) => {
       setData(null);
       setErrorMsg('');
       setPnr('');
+      setRepriceInfo(null);
       hasAutoSubmittedRef.current = false;
     }
   }, [isOpen]);
@@ -122,11 +129,21 @@ const SunPQTicketModal: React.FC<Props> = ({ isOpen, onClose, initialPNR }) => {
     if (!code) return;
     setIsLoading(true);
     setErrorMsg('');
+    setRepriceInfo(null);
     try {
       const res = await checkSunPQPnr(code);
       const body = res?.data ?? res?.body ?? res;
       setData(body);
       syncHeldTicketFromCheck(code, body);
+      if (body?.hanhly === '2PC') {
+        try {
+          const r = await fetch(`https://apilive.hanvietair.com/spa/beginReprice?pnr=${code}`, {
+            headers: { accept: 'application/json' },
+          });
+          const rj = await r.json().catch(() => null);
+          if (rj?.status === 'OK') setRepriceInfo(rj);
+        } catch {}
+      }
     } catch (e: any) {
       setErrorMsg(e?.message || 'Không tra cứu được PNR');
     } finally {
@@ -220,6 +237,13 @@ const SunPQTicketModal: React.FC<Props> = ({ isOpen, onClose, initialPNR }) => {
               >
                 Tổng: {fmtKRW.format(totalPrice)} KRW
               </span>
+              {data?.hanhly === '2PC' && (
+                <div className="w-full text-sm font-semibold text-blue-700 bg-blue-50 border border-blue-200 rounded px-2 py-1">
+                  {repriceInfo?.doituong === 'VFR'
+                    ? 'Vé đã áp dụng 46kg hành lý thành công'
+                    : 'Vé đủ điều kiện áp dụng 46kg hành lý, cần reprice lại nếu chưa áp dụng'}
+                </div>
+              )}
               {!paid && deadline && (
                 <span className="bg-yellow-500 text-white px-2 py-1 rounded text-sm font-bold">
                   Hạn TT: {deadline}
@@ -261,14 +285,14 @@ const SunPQTicketModal: React.FC<Props> = ({ isOpen, onClose, initialPNR }) => {
               {chieudi.length > 0 && (
                 <div>
                   <div className="font-semibold text-orange-600 mb-1">Chiều đi</div>
-                  {chieudi.map((seg, i) => <SegmentCard key={`o-${i}`} seg={seg} />)}
+                  {chieudi.map((seg, i) => <SegmentCard key={`o-${i}`} seg={seg} hanhly={data?.hanhly} />)}
                 </div>
               )}
 
               {chieuve.length > 0 && (
                 <div>
                   <div className="font-semibold text-orange-600 mb-1">Chiều về</div>
-                  {chieuve.map((seg, i) => <SegmentCard key={`r-${i}`} seg={seg} />)}
+                  {chieuve.map((seg, i) => <SegmentCard key={`r-${i}`} seg={seg} hanhly={data?.hanhly} />)}
                 </div>
               )}
             </div>
