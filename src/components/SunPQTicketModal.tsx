@@ -237,6 +237,13 @@ const SunPQTicketModal: React.FC<Props> = ({ isOpen, onClose, initialPNR }) => {
               >
                 Tổng: {fmtKRW.format(totalPrice)} KRW
               </span>
+              {data?.hanhly === '2PC' && (
+                <div className="w-full text-sm font-semibold text-blue-700 bg-blue-50 border border-blue-200 rounded px-2 py-1">
+                  {repriceInfo?.doituong === 'VFR'
+                    ? 'Vé đã áp dụng 46kg hành lý thành công'
+                    : 'Vé đủ điều kiện áp dụng 46kg hành lý, cần reprice lại nếu chưa áp dụng'}
+                </div>
+              )}
               {!paid && deadline && (
                 <span className="bg-yellow-500 text-white px-2 py-1 rounded text-sm font-bold">
                   Hạn TT: {deadline}
@@ -278,14 +285,14 @@ const SunPQTicketModal: React.FC<Props> = ({ isOpen, onClose, initialPNR }) => {
               {chieudi.length > 0 && (
                 <div>
                   <div className="font-semibold text-orange-600 mb-1">Chiều đi</div>
-                  {chieudi.map((seg, i) => <SegmentCard key={`o-${i}`} seg={seg} />)}
+                  {chieudi.map((seg, i) => <SegmentCard key={`o-${i}`} seg={seg} hanhly={data?.hanhly} />)}
                 </div>
               )}
 
               {chieuve.length > 0 && (
                 <div>
                   <div className="font-semibold text-orange-600 mb-1">Chiều về</div>
-                  {chieuve.map((seg, i) => <SegmentCard key={`r-${i}`} seg={seg} />)}
+                  {chieuve.map((seg, i) => <SegmentCard key={`r-${i}`} seg={seg} hanhly={data?.hanhly} />)}
                 </div>
               )}
             </div>
