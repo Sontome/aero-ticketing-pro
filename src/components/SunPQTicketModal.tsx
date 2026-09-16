@@ -52,7 +52,11 @@ const fmtFlightTime = (raw?: string) => {
   return `${s.slice(0, 2)}h${s.slice(2, 4)}m`;
 };
 
-const SegmentCard: React.FC<{ seg: any; hanhly?: string }> = ({ seg, hanhly }) => {
+const SegmentCard: React.FC<{ seg: any; hanhly?: string; baggageApplied?: boolean }> = ({
+  seg,
+  hanhly,
+  baggageApplied,
+}) => {
   const dep = parseDateTime(
     seg?.departure_info?.datetime || seg.departure_datetime || seg.departure_time
   );
@@ -67,18 +71,26 @@ const SegmentCard: React.FC<{ seg: any; hanhly?: string }> = ({ seg, hanhly }) =
 
   return (
     <div className="border border-orange-200 rounded-lg overflow-hidden mb-2">
-      <div className="bg-orange-50 px-3 py-2 flex items-center gap-2">
-        <img src="/icon/sunpq-logo.png" alt="SunPQ" width={28} height={28} className="rounded" />
-        <div className="min-w-0">
-          <div className="font-semibold text-sm">
+      <div className="bg-orange-50 px-3 py-2 flex items-center gap-3">
+        <img src="/icon/sunpq-logo.png" alt="SunPQ" width={28} height={28} className="rounded shrink-0" />
+        <div className="flex-1 min-w-0 flex flex-wrap items-center justify-between gap-x-4 gap-y-0.5">
+          <div className="font-semibold text-sm whitespace-nowrap">
             {(AIRPORT_NAMES[depCode] || depCode)} → {(AIRPORT_NAMES[arrCode] || arrCode)}
           </div>
           {hanhly && (
-            <div className="text-xs font-semibold text-green-700 leading-tight">
+            <div
+              className={`text-xs font-semibold leading-tight whitespace-nowrap ${
+                hanhly === '2PC'
+                  ? baggageApplied
+                    ? 'text-green-700'
+                    : 'text-red-600'
+                  : 'text-gray-700'
+              }`}
+            >
               Hành lý: {hanhly === '2PC' ? '46kg' : hanhly === '1PC' ? '23kg' : hanhly}
             </div>
           )}
-          <div className="text-xs text-gray-600">{dep.date}</div>
+          <div className="text-xs text-gray-600 whitespace-nowrap">{dep.date}</div>
         </div>
       </div>
       <div className="p-3 grid grid-cols-3 gap-3 text-sm">
@@ -240,7 +252,13 @@ const SunPQTicketModal: React.FC<Props> = ({ isOpen, onClose, initialPNR }) => {
                 Tổng: {fmtKRW.format(totalPrice)} KRW
               </span>
               {data?.hanhly === '2PC' && (
-                <div className="w-full text-sm font-semibold text-blue-700 bg-blue-50 border border-blue-200 rounded px-2 py-1">
+                <div
+                  className={`w-full text-sm font-semibold rounded px-2 py-1 border ${
+                    repriceInfo?.doituong === 'VFR'
+                      ? 'text-green-700 bg-green-50 border-green-200'
+                      : 'text-red-700 bg-red-50 border-red-200'
+                  }`}
+                >
                   {repriceInfo?.doituong === 'VFR'
                     ? 'Vé đã áp dụng 46kg hành lý thành công'
                     : 'Vé đủ điều kiện áp dụng 46kg hành lý, cần reprice lại nếu chưa áp dụng'}
@@ -287,14 +305,28 @@ const SunPQTicketModal: React.FC<Props> = ({ isOpen, onClose, initialPNR }) => {
               {chieudi.length > 0 && (
                 <div>
                   <div className="font-semibold text-orange-600 mb-1">Chiều đi</div>
-                  {chieudi.map((seg, i) => <SegmentCard key={`o-${i}`} seg={seg} hanhly={data?.hanhly} />)}
+                  {chieudi.map((seg, i) => (
+                    <SegmentCard
+                      key={`o-${i}`}
+                      seg={seg}
+                      hanhly={data?.hanhly}
+                      baggageApplied={repriceInfo?.doituong === 'VFR'}
+                    />
+                  ))}
                 </div>
               )}
 
               {chieuve.length > 0 && (
                 <div>
                   <div className="font-semibold text-orange-600 mb-1">Chiều về</div>
-                  {chieuve.map((seg, i) => <SegmentCard key={`r-${i}`} seg={seg} hanhly={data?.hanhly} />)}
+                  {chieuve.map((seg, i) => (
+                    <SegmentCard
+                      key={`r-${i}`}
+                      seg={seg}
+                      hanhly={data?.hanhly}
+                      baggageApplied={repriceInfo?.doituong === 'VFR'}
+                    />
+                  ))}
                 </div>
               )}
             </div>
