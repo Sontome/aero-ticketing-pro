@@ -52,7 +52,7 @@ const fmtFlightTime = (raw?: string) => {
   return `${s.slice(0, 2)}h${s.slice(2, 4)}m`;
 };
 
-const SegmentCard: React.FC<{ seg: any }> = ({ seg }) => {
+const SegmentCard: React.FC<{ seg: any; hanhly?: string }> = ({ seg, hanhly }) => {
   const dep = parseDateTime(
     seg?.departure_info?.datetime || seg.departure_datetime || seg.departure_time
   );
@@ -105,6 +105,7 @@ const SunPQTicketModal: React.FC<Props> = ({ isOpen, onClose, initialPNR }) => {
   const [data, setData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [repriceInfo, setRepriceInfo] = useState<any>(null);
   const captureRef = useRef<HTMLDivElement>(null);
   const hasAutoSubmittedRef = useRef(false);
 
