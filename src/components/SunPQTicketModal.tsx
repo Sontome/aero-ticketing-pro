@@ -319,7 +319,14 @@ const SunPQTicketModal: React.FC<Props> = ({ isOpen, onClose, initialPNR }) => {
               {chieuve.length > 0 && (
                 <div>
                   <div className="font-semibold text-orange-600 mb-1">Chiều về</div>
-                  {chieuve.map((seg, i) => <SegmentCard key={`r-${i}`} seg={seg} hanhly={data?.hanhly} />)}
+                  {chieuve.map((seg, i) => (
+                    <SegmentCard
+                      key={`r-${i}`}
+                      seg={seg}
+                      hanhly={data?.hanhly}
+                      baggageApplied={repriceInfo?.doituong === 'VFR'}
+                    />
+                  ))}
                 </div>
               )}
             </div>
