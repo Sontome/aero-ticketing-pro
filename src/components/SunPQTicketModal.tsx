@@ -122,11 +122,21 @@ const SunPQTicketModal: React.FC<Props> = ({ isOpen, onClose, initialPNR }) => {
     if (!code) return;
     setIsLoading(true);
     setErrorMsg('');
+    setRepriceInfo(null);
     try {
       const res = await checkSunPQPnr(code);
       const body = res?.data ?? res?.body ?? res;
       setData(body);
       syncHeldTicketFromCheck(code, body);
+      if (body?.hanhly === '2PC') {
+        try {
+          const r = await fetch(`https://apilive.hanvietair.com/spa/beginReprice?pnr=${code}`, {
+            headers: { accept: 'application/json' },
+          });
+          const rj = await r.json().catch(() => null);
+          if (rj?.status === 'OK') setRepriceInfo(rj);
+        } catch {}
+      }
     } catch (e: any) {
       setErrorMsg(e?.message || 'Không tra cứu được PNR');
     } finally {
