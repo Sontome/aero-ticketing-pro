@@ -71,18 +71,26 @@ const SegmentCard: React.FC<{ seg: any; hanhly?: string; baggageApplied?: boolea
 
   return (
     <div className="border border-orange-200 rounded-lg overflow-hidden mb-2">
-      <div className="bg-orange-50 px-3 py-2 flex items-center gap-2">
-        <img src="/icon/sunpq-logo.png" alt="SunPQ" width={28} height={28} className="rounded" />
-        <div className="min-w-0">
-          <div className="font-semibold text-sm">
+      <div className="bg-orange-50 px-3 py-2 flex items-center gap-3">
+        <img src="/icon/sunpq-logo.png" alt="SunPQ" width={28} height={28} className="rounded shrink-0" />
+        <div className="flex-1 min-w-0 flex flex-wrap items-center justify-between gap-x-4 gap-y-0.5">
+          <div className="font-semibold text-sm whitespace-nowrap">
             {(AIRPORT_NAMES[depCode] || depCode)} → {(AIRPORT_NAMES[arrCode] || arrCode)}
           </div>
           {hanhly && (
-            <div className="text-xs font-semibold text-green-700 leading-tight">
+            <div
+              className={`text-xs font-semibold leading-tight whitespace-nowrap ${
+                hanhly === '2PC'
+                  ? baggageApplied
+                    ? 'text-green-700'
+                    : 'text-red-600'
+                  : 'text-gray-700'
+              }`}
+            >
               Hành lý: {hanhly === '2PC' ? '46kg' : hanhly === '1PC' ? '23kg' : hanhly}
             </div>
           )}
-          <div className="text-xs text-gray-600">{dep.date}</div>
+          <div className="text-xs text-gray-600 whitespace-nowrap">{dep.date}</div>
         </div>
       </div>
       <div className="p-3 grid grid-cols-3 gap-3 text-sm">
