@@ -11,6 +11,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAuth } from '@/hooks/useAuth';
+import { SunRepricePanel } from '@/components/reprice/SunRepricePanel';
 
 interface RepriceModalProps {
   isOpen: boolean;
@@ -50,6 +52,9 @@ export const RepriceModal: React.FC<RepriceModalProps> = ({
   isOpen,
   onClose,
 }) => {
+  const { profile } = useAuth();
+  const canSun = !!(profile as any)?.perm_reprice_sun;
+  const [airline, setAirline] = useState<'VNA' | 'SUN' | null>(null);
   const [pnrInput, setPnrInput] = useState('');
   const [customerTypes, setCustomerTypes] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
