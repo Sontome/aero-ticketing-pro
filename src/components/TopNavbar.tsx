@@ -119,7 +119,7 @@ export const TopNavbar = ({
                   )}
                   {(profile as any)?.perm_reprice && onShowRepriceModal && (
                     <DropdownMenuItem onClick={onShowRepriceModal}>
-                      Reprice VNA
+                      Reprice
                     </DropdownMenuItem>
                   )}
                 </DropdownMenuContent>
