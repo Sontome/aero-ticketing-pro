@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS perm_reprice_sun boolean NOT NULL DEFAULT false;
