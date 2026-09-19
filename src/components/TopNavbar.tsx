@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { TrendingDown, ShoppingBasket, Wrench, Home } from "lucide-react";
+import { TrendingDown, ShoppingBasket, Wrench, Home, FileEdit } from "lucide-react";
+import { UpdatePnrModal } from "@/components/update-pnr/UpdatePnrModal";
 import {
   DropdownMenu,
   DropdownMenuContent,
