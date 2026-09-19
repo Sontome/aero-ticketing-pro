@@ -143,10 +143,11 @@ export const SunUpdatePnrPanel: React.FC<{ onBack?: () => void }> = ({ onBack })
   };
 
   const handleSubmit = async () => {
-    for (const p of pax) {
+    for (let i = 0; i < pax.length; i++) {
+      const p = pax[i];
       const missing = (Object.keys(p.doc) as (keyof DocForm)[]).filter((k) => !p.doc[k]);
       if (missing.length) {
-        toast.error(`Hành khách ${p.last_nameLabel()} chưa đủ thông tin`);
+        toast.error(`Hành khách ${i + 1} (${p.doc.last_name} ${p.doc.first_name}) chưa đủ thông tin`);
         return;
       }
     }
