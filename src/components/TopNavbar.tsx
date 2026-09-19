@@ -34,6 +34,7 @@ export const TopNavbar = ({
 }: TopNavbarProps) => {
   const navigate = useNavigate();
   const { profile } = useAuth();
+  const [showUpdatePnr, setShowUpdatePnr] = useState(false);
 
   return (
     <header className="sticky top-0 z-50 bg-gradient-to-r from-teal-700 to-teal-600 dark:from-teal-800 dark:to-teal-700 shadow-lg backdrop-blur-sm transition-all duration-100">
