@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { SunUpdatePnrPanel } from '@/components/update-pnr/SunUpdatePnrPanel';
+import { Plane } from 'lucide-react';
 
 interface Props {
   isOpen: boolean;
@@ -27,9 +28,13 @@ export const UpdatePnrModal: React.FC<Props> = ({ isOpen, onClose }) => {
         {!airline ? (
           <div className="space-y-3">
             <p className="text-sm text-muted-foreground">Chọn hãng cần cập nhật thông tin PNR:</p>
-            <Button variant="outline" className="w-full justify-start" onClick={() => setAirline('SUN')}>
-              <img src="/icon/sunpq-logo.png" alt="SunPQ" className="w-6 h-6 mr-2 rounded" />
-              SunPQ (9G)
+            <Button
+              variant="outline"
+              className="h-24 w-24 flex-col gap-2"
+              onClick={() => setAirline('SUN')}
+            >
+              <Plane className="h-6 w-6" />
+              <span className="font-semibold">SUN</span>
             </Button>
           </div>
         ) : (

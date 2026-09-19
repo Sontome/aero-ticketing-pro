@@ -36,6 +36,12 @@ const COUNTRIES = [
   { code: 'KR', label: 'Hàn Quốc (KR)' },
 ];
 
+const PASSENGER_TYPE_LABELS: Record<string, string> = {
+  ADULT: 'Người Lớn',
+  CHILD: 'Trẻ Em',
+  INFANT: 'Em Bé',
+};
+
 const toDate = (s?: string): Date | undefined => {
   if (!s) return undefined;
   const d = parse(s, 'yyyy-MM-dd', new Date());
@@ -97,12 +103,13 @@ export const SunUpdatePnrPanel: React.FC<{ onBack?: () => void }> = ({ onBack })
 
       const list: PaxState[] = (data.passengers || []).map((p: any) => {
         const d = p.document || {};
+        const title = String(p.title || '').toUpperCase();
         const doc: DocForm = {
           type: 'P',
           number: d.number || '',
           nationality: d.nationality || '',
           country: d.country || '',
-          gender: d.gender || '',
+          gender: d.gender || (title === 'MISS' || title === 'MRS' ? 'F' : 'M'),
           date_of_birth: d.date_of_birth || '',
           expiry_date: d.expiry_date || '',
           first_name: d.first_name || p.first_name || '',
@@ -223,7 +230,9 @@ export const SunUpdatePnrPanel: React.FC<{ onBack?: () => void }> = ({ onBack })
           <div className="flex items-center gap-2 font-semibold text-sm">
             <User className="w-4 h-4" />
             {idx + 1}. {p.title || ''} {p.doc.last_name} {p.doc.first_name}
-            <span className="ml-auto text-xs text-muted-foreground">{p.type}</span>
+            <span className="ml-auto text-xs text-muted-foreground">
+              {PASSENGER_TYPE_LABELS[p.type] || p.type}
+            </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
