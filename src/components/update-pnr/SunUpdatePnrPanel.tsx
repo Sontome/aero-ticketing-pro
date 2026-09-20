@@ -117,9 +117,9 @@ export const SunUpdatePnrPanel: React.FC<{ onBack?: () => void }> = ({ onBack })
         };
         const locked = {
           type: true,
-          number: false,
-          nationality: false,
-          country: false,
+          number: !!d.number,
+          nationality: !!d.nationality,
+          country: !!d.country,
           gender: !!d.gender,
           date_of_birth: !!d.date_of_birth,
           expiry_date: !!d.expiry_date,
