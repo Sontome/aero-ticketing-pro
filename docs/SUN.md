@@ -1,6 +1,6 @@
 # SUN Airways (SunPQ) API
 
-Nguồn: `src/services/sunpqService.ts`, `src/types/sunpq.ts`, `src/components/SunPQModal.tsx`
+
 
 Flow: gọi **Check Vé V3** để lấy hành trình, sau đó lấy mảng `list_itinerary` của `chiều_đi` (và `chiều_về` nếu khứ hồi), nối lại và gửi nguyên vẹn sang **Booking** kèm danh sách hành khách và thông tin liên hệ.
 
