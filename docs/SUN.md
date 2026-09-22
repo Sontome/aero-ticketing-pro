@@ -162,7 +162,7 @@ Cấu trúc lỗi do server trả về: Chưa xác định từ source code hi�
 
 ---
 
-## 2. Booking / Hold Booking
+## 2. Booking 
 
 ### Endpoint
 
