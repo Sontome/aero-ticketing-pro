@@ -1,6 +1,6 @@
 # Air Premia API
 
-Nguồn: `src/services/premiaService.ts`
+
 
 ## Check Vé V3
 
