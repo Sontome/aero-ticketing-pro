@@ -1,6 +1,6 @@
 # Vietjet API
 
-Nguồn: `src/services/lowfareService.ts`
+
 
 ## Low Fare V2
 
