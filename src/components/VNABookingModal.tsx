@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Trash2, Copy } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { loadProfile as loadCachedProfile, patchProfileCache } from "@/lib/appDataCache";
 import { format, differenceInYears, differenceInDays } from 'date-fns';
 import { DateInput } from './DateInput';
 
