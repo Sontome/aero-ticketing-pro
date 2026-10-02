@@ -118,6 +118,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signOut = async () => {
+    if (currentUserIdRef.current) clearUserCache(currentUserIdRef.current);
+    currentUserIdRef.current = null;
     // Clear all local storage related to auth
     localStorage.removeItem('sb-imxesrkdgciojihloufi-auth-token');
     localStorage.clear();
@@ -161,6 +163,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     signOut,
     resetPassword,
     updatePassword,
+    refreshProfile,
+    patchProfile,
   };
 
   return (
