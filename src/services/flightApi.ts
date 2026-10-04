@@ -5,6 +5,7 @@ interface SearchFormData {
   returnDate: Date | undefined;
   passengers: number;
   tripType: 'one_way' | 'round_trip';
+  ptcCode?: 'VFR' | 'ADT' | 'STU';
 }
 
 interface VNAFlightResponse {
