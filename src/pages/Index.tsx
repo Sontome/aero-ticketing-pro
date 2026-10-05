@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FlightSearchForm, SearchFormData } from '@/components/FlightSearchForm';
+import { FlightSearchForm, SearchFormData, isKoreanDeparture, type FlightSearchFormHandle } from '@/components/FlightSearchForm';
 import { FlightCard } from '@/components/FlightCard';
 import { FlightFilters, FilterOptions } from '@/components/FlightFilters';
 import { fetchVietJetFlights, fetchVietnamAirlinesFlights, fetchVNAFlightsV4, Flight, OtherAirlineFlight } from '@/services/flightApi';
@@ -57,6 +57,7 @@ export default function Index() {
   const [reverseInkSplash, setReverseInkSplash] = useState({ active: false, x: 0, y: 0 });
   const [showContent, setShowContent] = useState(false);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const searchFormRef = useRef<FlightSearchFormHandle>(null);
   const [showPNRModal, setShowPNRModal] = useState(false);
   const [showVJTicketModal, setShowVJTicketModal] = useState(false);
   const [showVNATicketModal, setShowVNATicketModal] = useState(false);
