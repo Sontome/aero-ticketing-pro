@@ -37,7 +37,6 @@ const validateMultiCity = (legs: MultiCityLegInput[]): string | null => {
   if (legs.length < MIN_LEGS) return 'Hành trình nhiều chặng cần tối thiểu 2 chặng.';
   if (legs.length > MAX_LEGS) return 'Hành trình nhiều chặng tối đa 4 chặng.';
   const isKR = (c: string) => koreanAirports.some((a) => a.code === c);
-  const isVN = (c: string) => vietnameseAirports.some((a) => a.code === c);
   for (let i = 0; i < legs.length; i++) {
     const l = legs[i];
     if (!l.origin) return `Chặng ${i + 1}: thiếu nơi đi.`;
