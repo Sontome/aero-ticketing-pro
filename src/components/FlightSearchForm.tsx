@@ -281,15 +281,15 @@ export const FlightSearchForm = React.forwardRef<FlightSearchFormHandle, FlightS
           <div className="space-y-1.5">
             <Label className="text-xs text-gray-600 font-medium">Type</Label>
             <Select
-              value={isFromKorean ? (formData.ptcCode || 'VFR') : 'ADT'}
+              value={typeKorean ? (formData.ptcCode || 'VFR') : 'ADT'}
               onValueChange={(v) => setFormData(prev => ({ ...prev, ptcCode: v as 'VFR' | 'ADT' | 'STU' }))}
-              disabled={!isFromKorean}
+              disabled={!typeKorean}
             >
               <SelectTrigger className="h-10 text-sm border-gray-300 focus:border-blue-500 focus:ring-blue-500">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {(isFromKorean ? ['VFR', 'ADT', 'STU'] : ['ADT']).map(t => (
+                {(typeKorean ? ['VFR', 'ADT', 'STU'] : ['ADT']).map(t => (
                   <SelectItem key={t} value={t}>{t}</SelectItem>
                 ))}
               </SelectContent>
@@ -297,6 +297,7 @@ export const FlightSearchForm = React.forwardRef<FlightSearchFormHandle, FlightS
           </div>
         </div>
 
+        {!isMulti && (<>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* From Airport */}
           <div className="space-y-1.5">
@@ -440,6 +441,34 @@ export const FlightSearchForm = React.forwardRef<FlightSearchFormHandle, FlightS
             </div>
           </div>
         )}
+        </>)}
+
+        {isMulti && (
+          <div className="space-y-4">
+            <MultiCityLegsEditor
+              legs={legs}
+              onChange={(next) => { setLegs(next); setMultiError(null); }}
+              koreanAirports={koreanAirports}
+              vietnameseAirports={vietnameseAirports}
+            />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="passengers-md" className="text-xs text-gray-600 font-medium">Số hành khách</Label>
+                <Input
+                  id="passengers-md"
+                  type="number"
+                  min="1"
+                  max="9"
+                  value={formData.passengers}
+                  onChange={(e) => setFormData(prev => ({ ...prev, passengers: parseInt(e.target.value) || 1 }))}
+                  className="h-10 text-sm border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+            {multiError && <p className="text-sm text-destructive font-medium">{multiError}</p>}
+          </div>
+        )}
+
 
         <Button 
           type="submit" 
