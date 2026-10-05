@@ -23,7 +23,7 @@ interface FlightCardProps {
   onHoldTicket?: (flight: Flight) => void;
 }
 
-export const FlightCard: React.FC<FlightCardProps> = ({ flight, priceMode, onHoldTicket }) => {
+export const FlightCard: React.FC<FlightCardProps> = ({ flight, priceMode, onHoldTicket, showStuCheck, onCheckStu }) => {
   const { profile } = useAuth();
   const { toast } = useToast();
   const { playClickSound } = useHoverSound();
@@ -305,10 +305,8 @@ ${ruleEffects.baggage ?? getBaggageInfo()}, giá vé = ${formatPrice(ruleEffects
                   flight={flight}
                   currentPrice={adjustedPrice}
                   passengerCount={1}
-                  onApplyStuPrice={(p) => {
-                    setAdjustedPrice(Math.round(p / 100) * 100);
-                    setStuApplied(true);
-                  }}
+                  showStuCheck={showStuCheck}
+                  onCheckStu={onCheckStu}
                 />
               )}
             
