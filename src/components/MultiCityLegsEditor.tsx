@@ -103,22 +103,18 @@ export const MultiCityLegsEditor: React.FC<Props> = ({ legs, onChange, koreanAir
                 <Label className="text-xs text-gray-600 font-medium flex items-center gap-1.5">
                   <Plane className="w-3.5 h-3.5 text-blue-600" /> Nơi đi
                 </Label>
-                {i === 0 ? (
-                  <Select value={leg.origin} onValueChange={(v) => setLeg(0, { origin: v })}>
-                    <SelectTrigger className="h-10 text-sm border-gray-300">
-                      <SelectValue placeholder="Chọn sân bay đi" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {koreanAirports.map((a) => (
+                <Select value={leg.origin} onValueChange={(v) => setLeg(i, { origin: v })}>
+                  <SelectTrigger className="h-10 text-sm border-gray-300">
+                    <SelectValue placeholder="Chọn sân bay đi" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(i === 0 ? koreanAirports : allAirports)
+                      .filter((a) => a.code !== leg.destination)
+                      .map((a) => (
                         <SelectItem key={a.code} value={a.code}>{a.code} - {a.name}</SelectItem>
                       ))}
-                    </SelectContent>
-                  </Select>
-                ) : (
-                  <div className="h-10 px-3 flex items-center rounded-md border border-gray-300 bg-gray-50 text-sm text-gray-700">
-                    {label(allAirports, leg.origin) || '—'}
-                  </div>
-                )}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs text-gray-600 font-medium flex items-center gap-1.5">
