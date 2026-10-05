@@ -88,6 +88,16 @@ export const FlightSearchForm = React.forwardRef<FlightSearchFormHandle, FlightS
     onSearch(formData);
   };
 
+  // Expose imperative API: update ptcCode in form state AND search with it
+  // synchronously (avoids React async state reading the old value).
+  React.useImperativeHandle(ref, () => ({
+    searchWithPtc: (ptc) => {
+      const next = { ...formData, ptcCode: ptc };
+      setFormData(next);
+      onSearch(next);
+    },
+  }));
+
   const handleDepartureDateSelect = (date: Date | undefined) => {
     setFormData(prev => ({ ...prev, departureDate: date }));
     setDepartureDateOpen(false);
