@@ -65,7 +65,7 @@ const vietnameseAirports = [
   { code: 'VDO', name: 'Vân Đồn (Quảng Ninh)', city: 'Vân Đồn' },
 ];
 
-export const FlightSearchForm: React.FC<FlightSearchFormProps> = ({ onSearch, loading }) => {
+export const FlightSearchForm = React.forwardRef<FlightSearchFormHandle, FlightSearchFormProps>(({ onSearch, loading }, ref) => {
   const today = startOfDay(new Date());
 
   const [formData, setFormData] = useState<SearchFormData>({
