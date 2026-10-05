@@ -746,7 +746,7 @@ export default function Index() {
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/20"></div>
             <div className="container mx-auto px-4 h-full flex items-start sm:items-center justify-center relative z-10 pt-24 sm:pt-0 pb-6">
               <div className="w-full max-w-5xl">
-                <FlightSearchForm onSearch={handleSearch} loading={loading} />
+                <FlightSearchForm ref={searchFormRef} onSearch={handleSearch} loading={loading} />
               </div>
             </div>
           </div>
@@ -915,7 +915,20 @@ export default function Index() {
                       Vietnam Airlines ({vnaFlights.length} chuyến bay)
                     </h3>
                     <div className="space-y-4">
-                      {vnaFlights.map(flight => <FlightCard key={flight.id} flight={flight} priceMode="Page" onHoldTicket={profile?.perm_hold_ticket === true ? handleHoldTicket : undefined} />)}
+                      {vnaFlights.map(flight => (
+                        <FlightCard
+                          key={flight.id}
+                          flight={flight}
+                          priceMode="Page"
+                          onHoldTicket={profile?.perm_hold_ticket === true ? handleHoldTicket : undefined}
+                          showStuCheck={
+                            !!lastSearchData &&
+                            lastSearchData.ptcCode !== 'STU' &&
+                            isKoreanDeparture(lastSearchData.from)
+                          }
+                          onCheckStu={() => searchFormRef.current?.searchWithPtc('STU')}
+                        />
+                      ))}
                     </div>
                   </div>}
               </div>
