@@ -28,7 +28,6 @@ export const FlightCard: React.FC<FlightCardProps> = ({ flight, priceMode, onHol
   const { toast } = useToast();
   const { playClickSound } = useHoverSound();
   const [adjustedPrice, setAdjustedPrice] = useState(flight.price);
-  const [stuApplied, setStuApplied] = useState(false);
 
   useEffect(() => {
     // Apply airline-specific markup
