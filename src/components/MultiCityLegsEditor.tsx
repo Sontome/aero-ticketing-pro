@@ -29,7 +29,7 @@ export const destinationOptionsFor = (
   vn: AirportOption[],
 ) => (i === total - 1 && total >= 3 ? kr : vn);
 
-/** Default legs[i+1].origin to legs[i].destination when empty (user can still change it), validate destinations and date ordering. */
+/** Clear destinations that are not allowed for their position and dates that break ordering. Never auto-fills values. */
 export const normalizeLegs = (
   legs: MultiCityLegInput[],
   kr: AirportOption[],
@@ -37,17 +37,9 @@ export const normalizeLegs = (
 ): MultiCityLegInput[] => {
   const out: MultiCityLegInput[] = [];
   legs.forEach((leg, i) => {
-    const all = [...kr, ...vn];
-    const origin =
-      i === 0
-        ? leg.origin
-        : leg.origin && all.some((a) => a.code === leg.origin)
-          ? leg.origin
-          : out[i - 1].destination;
+    const origin = i === 0 && leg.origin && !kr.some((a) => a.code === leg.origin) ? '' : leg.origin;
     const allowed = destinationOptionsFor(i, legs.length, kr, vn).filter((a) => a.code !== origin);
-    const destination = allowed.some((a) => a.code === leg.destination)
-      ? leg.destination
-      : allowed[0]?.code ?? '';
+    const destination = allowed.some((a) => a.code === leg.destination) ? leg.destination : '';
     const prevDate = i > 0 ? out[i - 1].date : undefined;
     const date = leg.date && prevDate && startOfDay(leg.date) < startOfDay(prevDate) ? undefined : leg.date;
     out.push({ origin, destination, date });
@@ -62,11 +54,28 @@ export const MultiCityLegsEditor: React.FC<Props> = ({ legs, onChange, koreanAir
   const update = (next: MultiCityLegInput[]) => onChange(normalizeLegs(next, koreanAirports, vietnameseAirports));
 
   const setLeg = (i: number, patch: Partial<MultiCityLegInput>) =>
-    update(legs.map((l, idx) => (idx === i ? { ...l, ...patch } : l)));
+    update(
+      legs.map((l, idx) => {
+        if (idx === i) return { ...l, ...patch };
+        // Choosing a destination pre-fills the next leg's origin (user can still change it afterwards)
+        if (patch.destination !== undefined && idx === i + 1) return { ...l, origin: patch.destination };
+        return l;
+      }),
+    );
+
+  const isKR = (c: string) => koreanAirports.some((a) => a.code === c);
 
   const addLeg = () => {
     if (legs.length >= MAX_LEGS) return;
-    update([...legs, { origin: '', destination: '', date: undefined }]);
+    const last = legs[legs.length - 1];
+    if (last && last.destination && isKR(last.destination)) {
+      // Trip currently returns to Korea: move that return to the new last leg,
+      // leave the previous leg's destination and the new leg's origin empty.
+      const next = legs.map((l, idx) => (idx === legs.length - 1 ? { ...l, destination: '' } : l));
+      update([...next, { origin: '', destination: last.destination, date: undefined }]);
+    } else {
+      update([...legs, { origin: last?.destination ?? '', destination: '', date: undefined }]);
+    }
   };
 
   const removeLeg = (i: number) => {
