@@ -74,10 +74,6 @@ export const MultiCityLegsEditor: React.FC<Props> = ({ legs, onChange, koreanAir
     update(legs.filter((_, idx) => idx !== i));
   };
 
-  const label = (list: AirportOption[], code: string) => {
-    const a = list.find((x) => x.code === code);
-    return a ? `${a.code} - ${a.name}` : code;
-  };
   const allAirports = [...koreanAirports, ...vietnameseAirports];
 
   return (
