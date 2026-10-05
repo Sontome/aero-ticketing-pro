@@ -383,4 +383,6 @@ export const FlightSearchForm = React.forwardRef<FlightSearchFormHandle, FlightS
       </form>
     </div>
   );
-};
+});
+
+FlightSearchForm.displayName = 'FlightSearchForm';
