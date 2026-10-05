@@ -4,6 +4,8 @@ import { FlightSearchForm, SearchFormData, isKoreanDeparture, type FlightSearchF
 import { FlightCard } from '@/components/FlightCard';
 import { FlightFilters, FilterOptions } from '@/components/FlightFilters';
 import { fetchVietJetFlights, fetchVietnamAirlinesFlights, fetchVNAFlightsV4, Flight, OtherAirlineFlight } from '@/services/flightApi';
+import { fetchVNAMultiCity, type MultiCityFlight, type MultiCitySearchData } from '@/services/vnaMultiCityApi';
+import { VnaMultiCityCard } from '@/components/VnaMultiCityCard';
 import { searchLowFare, LowFareDay } from '../services/lowfareService';
 import { Button } from '@/components/ui/button';
 import { UserProfileDropdown } from '@/components/UserProfileDropdown';
@@ -73,6 +75,9 @@ export default function Index() {
   const [lowFareReturn, setLowFareReturn] = useState<LowFareDay[]>([]);
   const [isLoadingLowFare, setIsLoadingLowFare] = useState(false);
   const [lastSearchData, setLastSearchData] = useState<SearchFormData | null>(null);
+  const [mdMode, setMdMode] = useState(false);
+  const [mdFlights, setMdFlights] = useState<MultiCityFlight[]>([]);
+  const [mdSearch, setMdSearch] = useState<MultiCitySearchData | null>(null);
   const [sunpqOpen, setSunpqOpen] = useState(false);
   const [sunpqFlights, setSunpqFlights] = useState<SunPQTrip[]>([]);
   const [sunpqLoading, setSunpqLoading] = useState(false);
@@ -248,7 +253,40 @@ export default function Index() {
 
 
 
+  // Multi-city: VNA only, separate from the normal multi-airline flow
+  const handleMultiSearch = async (data: MultiCitySearchData) => {
+    if (profile?.perm_check_vna !== true) {
+      setError('Tính năng tìm kiếm chuyến bay VNA đã bị khóa.');
+      toast({ title: 'Thông báo', description: 'Bạn chưa được cấp quyền kiểm tra vé VNA', variant: 'destructive' });
+      return;
+    }
+    setMdMode(true);
+    setMdSearch(data);
+    setMdFlights([]);
+    setFlights([]);
+    setOtherFlights([]);
+    setRawOtherFlights([]);
+    setSunpqFlights([]);
+    setPremiaFlights([]);
+    setSearchPerformed(false);
+    setHasSearched(false);
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await fetchVNAMultiCity(data);
+      setMdFlights(res);
+      if (res.length > 0) setTimeout(() => playNotificationSound(), 200);
+    } catch (err: any) {
+      console.error('VNA multi-city error:', err);
+      setError(err.message || 'Đã xảy ra lỗi khi tìm kiếm chuyến bay.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSearch = async (searchData: SearchFormData) => {
+    setMdMode(false);
+    setMdFlights([]);
     console.log('=== FLIGHT SEARCH DEBUG ===');
     console.log('Profile:', profile);
     console.log('perm_check_vj:', profile?.perm_check_vj);
