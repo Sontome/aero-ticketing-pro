@@ -14,6 +14,10 @@ import { applyTicketRules, formatNotesLine } from '@/utils/ticketRuleEngine';
 import type { RuleSegmentInput, RuleTicketInput } from '@/types/ticketRules';
 
 interface FlightCardProps {
+  /** Show the "Check giá STU" button on VNA cards (type != STU and Korean departure) */
+  showStuCheck?: boolean;
+  /** Called when user clicks "Check giá STU" — re-runs the current search with type STU */
+  onCheckStu?: () => void;
   flight: Flight;
   priceMode: 'Page' | 'Live';
   onHoldTicket?: (flight: Flight) => void;
