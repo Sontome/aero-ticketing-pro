@@ -48,7 +48,6 @@ const validateMultiCity = (legs: MultiCityLegInput[]): string | null => {
   }
   if (!isKR(legs[0].origin)) return 'Chặng 1 phải khởi hành từ Hàn Quốc (ICN/PUS).';
   const last = legs[legs.length - 1].destination;
-  if (legs.length === 2 && !isVN(last)) return 'Hành trình 2 chặng phải kết thúc tại Việt Nam.';
   if (legs.length >= 3 && !isKR(last)) return 'Hành trình từ 3 chặng phải kết thúc tại Hàn Quốc.';
   return null;
 };
