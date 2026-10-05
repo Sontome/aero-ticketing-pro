@@ -176,6 +176,8 @@ export const FlightSearchForm = React.forwardRef<FlightSearchFormHandle, FlightS
 
   // Check if departure airport is Korean
   const isFromKorean = koreanAirports.some(airport => airport.code === formData.from);
+  // Multi-city always departs from Korea → all types allowed
+  const typeKorean = isMulti || isFromKorean;
   
   // Get available destination airports based on departure selection
   const getAvailableDestinations = () => {
