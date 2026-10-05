@@ -8,6 +8,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { CalendarIcon, Plane, RefreshCw } from 'lucide-react';
 import { format, startOfDay } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { MultiCityLegsEditor, MIN_LEGS, MAX_LEGS, normalizeLegs } from '@/components/MultiCityLegsEditor';
+import type { MultiCityLegInput, MultiCitySearchData } from '@/services/vnaMultiCityApi';
 
 export interface SearchFormData {
   from: string;
@@ -21,6 +23,8 @@ export interface SearchFormData {
 
 interface FlightSearchFormProps {
   onSearch: (data: SearchFormData) => void;
+  /** Multi-city (VNA only) search */
+  onMultiSearch?: (data: MultiCitySearchData) => void;
   loading: boolean;
 }
 
@@ -28,6 +32,28 @@ export interface FlightSearchFormHandle {
   /** Set passenger type (ptcCode) on the form state and re-run the current search with it */
   searchWithPtc: (ptc: 'VFR' | 'ADT' | 'STU') => void;
 }
+
+const validateMultiCity = (legs: MultiCityLegInput[]): string | null => {
+  if (legs.length < MIN_LEGS) return 'Hành trình nhiều chặng cần tối thiểu 2 chặng.';
+  if (legs.length > MAX_LEGS) return 'Hành trình nhiều chặng tối đa 4 chặng.';
+  const isKR = (c: string) => koreanAirports.some((a) => a.code === c);
+  const isVN = (c: string) => vietnameseAirports.some((a) => a.code === c);
+  for (let i = 0; i < legs.length; i++) {
+    const l = legs[i];
+    if (!l.origin) return `Chặng ${i + 1}: thiếu nơi đi.`;
+    if (!l.destination) return `Chặng ${i + 1}: thiếu nơi đến.`;
+    if (!l.date) return `Chặng ${i + 1}: thiếu ngày đi.`;
+    if (i > 0 && l.origin !== legs[i - 1].destination)
+      return `Chặng ${i + 1} phải khởi hành từ nơi đến của chặng ${i}.`;
+    if (i > 0 && startOfDay(l.date) < startOfDay(legs[i - 1].date as Date))
+      return `Ngày chặng ${i + 1} không được trước ngày chặng ${i}.`;
+  }
+  if (!isKR(legs[0].origin)) return 'Chặng 1 phải khởi hành từ Hàn Quốc (ICN/PUS).';
+  const last = legs[legs.length - 1].destination;
+  if (legs.length === 2 && !isVN(last)) return 'Hành trình 2 chặng phải kết thúc tại Việt Nam.';
+  if (legs.length >= 3 && !isKR(last)) return 'Hành trình từ 3 chặng phải kết thúc tại Hàn Quốc.';
+  return null;
+};
 
 /** Check if an airport code belongs to Korea */
 export const isKoreanDeparture = (code: string) =>
