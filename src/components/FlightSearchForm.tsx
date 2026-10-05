@@ -24,6 +24,15 @@ interface FlightSearchFormProps {
   loading: boolean;
 }
 
+export interface FlightSearchFormHandle {
+  /** Set passenger type (ptcCode) on the form state and re-run the current search with it */
+  searchWithPtc: (ptc: 'VFR' | 'ADT' | 'STU') => void;
+}
+
+/** Check if an airport code belongs to Korea */
+export const isKoreanDeparture = (code: string) =>
+  koreanAirports.some((a) => a.code === code);
+
 // Korean airports
 const koreanAirports = [
   { code: 'ICN', name: 'Incheon', city: 'Seoul' },
