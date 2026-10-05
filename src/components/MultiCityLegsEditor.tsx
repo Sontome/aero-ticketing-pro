@@ -29,7 +29,7 @@ export const destinationOptionsFor = (
   vn: AirportOption[],
 ) => (i === total - 1 && total >= 3 ? kr : vn);
 
-/** Enforce legs[i+1].origin = legs[i].destination, valid destinations and date ordering. */
+/** Default legs[i+1].origin to legs[i].destination when empty (user can still change it), validate destinations and date ordering. */
 export const normalizeLegs = (
   legs: MultiCityLegInput[],
   kr: AirportOption[],
@@ -37,7 +37,13 @@ export const normalizeLegs = (
 ): MultiCityLegInput[] => {
   const out: MultiCityLegInput[] = [];
   legs.forEach((leg, i) => {
-    const origin = i === 0 ? leg.origin : out[i - 1].destination;
+    const all = [...kr, ...vn];
+    const origin =
+      i === 0
+        ? leg.origin
+        : leg.origin && all.some((a) => a.code === leg.origin)
+          ? leg.origin
+          : out[i - 1].destination;
     const allowed = destinationOptionsFor(i, legs.length, kr, vn).filter((a) => a.code !== origin);
     const destination = allowed.some((a) => a.code === leg.destination)
       ? leg.destination
