@@ -784,7 +784,7 @@ export default function Index() {
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/20"></div>
             <div className="container mx-auto px-4 h-full flex items-start sm:items-center justify-center relative z-10 pt-24 sm:pt-0 pb-6">
               <div className="w-full max-w-5xl">
-                <FlightSearchForm ref={searchFormRef} onSearch={handleSearch} loading={loading} />
+                <FlightSearchForm ref={searchFormRef} onSearch={handleSearch} onMultiSearch={handleMultiSearch} loading={loading} />
               </div>
             </div>
           </div>
@@ -929,6 +929,29 @@ export default function Index() {
                   )}
                 </div>
               ))}
+          </div>
+        )}
+
+        {mdMode && mdFlights.length > 0 && (
+          <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg animate-fade-in max-w-3xl mx-auto">
+            <h3 className="text-lg font-semibold text-blue-600 dark:text-blue-400 mb-3">
+              Vietnam Airlines - Nhiều chặng ({mdFlights.length} kết quả)
+            </h3>
+            <div className="space-y-4">
+              {mdFlights.map(f => (
+                <VnaMultiCityCard
+                  key={f.id}
+                  flight={f}
+                  showStuCheck={!!mdSearch && mdSearch.ptcCode !== 'STU'}
+                  onCheckStu={() => searchFormRef.current?.searchWithPtc('STU')}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+        {mdMode && !loading && mdFlights.length === 0 && !error && (
+          <div className="text-center py-12 animate-fade-in">
+            <p className="text-gray-500 dark:text-gray-400">Không tìm thấy chuyến bay nào phù hợp với yêu cầu của bạn.</p>
           </div>
         )}
 
