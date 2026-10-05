@@ -29,7 +29,7 @@ export const destinationOptionsFor = (
   vn: AirportOption[],
 ) => (i === total - 1 && total >= 3 ? kr : vn);
 
-/** Enforce legs[i+1].origin = legs[i].destination, valid destinations and date ordering. */
+/** Default legs[i+1].origin to legs[i].destination when empty (user can still change it), validate destinations and date ordering. */
 export const normalizeLegs = (
   legs: MultiCityLegInput[],
   kr: AirportOption[],
@@ -37,7 +37,13 @@ export const normalizeLegs = (
 ): MultiCityLegInput[] => {
   const out: MultiCityLegInput[] = [];
   legs.forEach((leg, i) => {
-    const origin = i === 0 ? leg.origin : out[i - 1].destination;
+    const all = [...kr, ...vn];
+    const origin =
+      i === 0
+        ? leg.origin
+        : leg.origin && all.some((a) => a.code === leg.origin)
+          ? leg.origin
+          : out[i - 1].destination;
     const allowed = destinationOptionsFor(i, legs.length, kr, vn).filter((a) => a.code !== origin);
     const destination = allowed.some((a) => a.code === leg.destination)
       ? leg.destination
@@ -68,10 +74,6 @@ export const MultiCityLegsEditor: React.FC<Props> = ({ legs, onChange, koreanAir
     update(legs.filter((_, idx) => idx !== i));
   };
 
-  const label = (list: AirportOption[], code: string) => {
-    const a = list.find((x) => x.code === code);
-    return a ? `${a.code} - ${a.name}` : code;
-  };
   const allAirports = [...koreanAirports, ...vietnameseAirports];
 
   return (
@@ -97,22 +99,18 @@ export const MultiCityLegsEditor: React.FC<Props> = ({ legs, onChange, koreanAir
                 <Label className="text-xs text-gray-600 font-medium flex items-center gap-1.5">
                   <Plane className="w-3.5 h-3.5 text-blue-600" /> Nơi đi
                 </Label>
-                {i === 0 ? (
-                  <Select value={leg.origin} onValueChange={(v) => setLeg(0, { origin: v })}>
-                    <SelectTrigger className="h-10 text-sm border-gray-300">
-                      <SelectValue placeholder="Chọn sân bay đi" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {koreanAirports.map((a) => (
+                <Select value={leg.origin} onValueChange={(v) => setLeg(i, { origin: v })}>
+                  <SelectTrigger className="h-10 text-sm border-gray-300">
+                    <SelectValue placeholder="Chọn sân bay đi" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(i === 0 ? koreanAirports : allAirports)
+                      .filter((a) => a.code !== leg.destination)
+                      .map((a) => (
                         <SelectItem key={a.code} value={a.code}>{a.code} - {a.name}</SelectItem>
                       ))}
-                    </SelectContent>
-                  </Select>
-                ) : (
-                  <div className="h-10 px-3 flex items-center rounded-md border border-gray-300 bg-gray-50 text-sm text-gray-700">
-                    {label(allAirports, leg.origin) || '—'}
-                  </div>
-                )}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs text-gray-600 font-medium flex items-center gap-1.5">
