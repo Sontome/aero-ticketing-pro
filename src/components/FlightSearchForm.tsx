@@ -109,8 +109,36 @@ export const FlightSearchForm = React.forwardRef<FlightSearchFormHandle, FlightS
   const [departureDateMonth, setDepartureDateMonth] = useState<Date | undefined>(undefined);
   const [returnDateMonth, setReturnDateMonth] = useState<Date | undefined>(undefined);
 
+  // Multi-city (VNA only) — independent from normal one-way/round-trip state
+  const [isMulti, setIsMulti] = useState(false);
+  const [multiError, setMultiError] = useState<string | null>(null);
+  const [legs, setLegs] = useState<MultiCityLegInput[]>(() =>
+    normalizeLegs(
+      [
+        { origin: 'ICN', destination: 'HAN', date: undefined },
+        { origin: 'HAN', destination: 'SGN', date: undefined },
+        { origin: 'SGN', destination: 'ICN', date: undefined },
+      ],
+      koreanAirports,
+      vietnameseAirports,
+    ),
+  );
+
+  const multiPtc = (formData.ptcCode || 'VFR') as 'VFR' | 'ADT' | 'STU';
+
+  const runMultiSearch = (ptc: 'VFR' | 'ADT' | 'STU') => {
+    const err = validateMultiCity(legs);
+    setMultiError(err);
+    if (err || !onMultiSearch) return;
+    onMultiSearch({ legs, passengers: formData.passengers, ptcCode: ptc });
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isMulti) {
+      runMultiSearch(multiPtc);
+      return;
+    }
     onSearch(formData);
   };
 
@@ -120,6 +148,10 @@ export const FlightSearchForm = React.forwardRef<FlightSearchFormHandle, FlightS
     searchWithPtc: (ptc) => {
       const next = { ...formData, ptcCode: ptc };
       setFormData(next);
+      if (isMulti) {
+        runMultiSearch(ptc);
+        return;
+      }
       onSearch(next);
     },
   }));
@@ -214,8 +246,8 @@ export const FlightSearchForm = React.forwardRef<FlightSearchFormHandle, FlightS
               type="radio"
               name="tripType"
               value="round_trip"
-              checked={formData.tripType === 'round_trip'}
-              onChange={(e) => setFormData(prev => ({ ...prev, tripType: e.target.value as 'round_trip' }))}
+              checked={!isMulti && formData.tripType === 'round_trip'}
+              onChange={(e) => { setIsMulti(false); setMultiError(null); setFormData(prev => ({ ...prev, tripType: e.target.value as 'round_trip' })); }}
               className="text-blue-600 w-4 h-4 shrink-0"
             />
             <span className="text-gray-700 text-sm font-medium group-hover:text-blue-600 transition-colors whitespace-nowrap">Khứ hồi</span>
@@ -225,11 +257,22 @@ export const FlightSearchForm = React.forwardRef<FlightSearchFormHandle, FlightS
               type="radio"
               name="tripType"
               value="one_way"
-              checked={formData.tripType === 'one_way'}
-              onChange={(e) => setFormData(prev => ({ ...prev, tripType: e.target.value as 'one_way' }))}
+              checked={!isMulti && formData.tripType === 'one_way'}
+              onChange={(e) => { setIsMulti(false); setMultiError(null); setFormData(prev => ({ ...prev, tripType: e.target.value as 'one_way' })); }}
               className="text-blue-600 w-4 h-4 shrink-0"
             />
             <span className="text-gray-700 text-sm font-medium group-hover:text-blue-600 transition-colors whitespace-nowrap">Một chiều</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer group min-w-fit">
+            <input
+              type="radio"
+              name="tripType"
+              value="multi_city"
+              checked={isMulti}
+              onChange={() => setIsMulti(true)}
+              className="text-blue-600 w-4 h-4 shrink-0"
+            />
+            <span className="text-gray-700 text-sm font-medium group-hover:text-blue-600 transition-colors whitespace-nowrap">Nhiều chặng</span>
           </label>
         </div>
 
