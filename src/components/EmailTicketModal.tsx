@@ -143,8 +143,12 @@ export const EmailTicketModal = ({ isOpen, onClose }: EmailTicketModalProps) => 
 
       const result = await response.json();
 
-      // Response thành công: server trả lại đúng payload đã tạo (email + pnrs)
-      if (response.ok && result && (result.email || Array.isArray(result.pnrs))) {
+      // Response thành công: {"success": true, "created": true, "message": "...", "data": {...}}
+      // hoặc server trả lại đúng payload đã tạo (email + pnrs)
+      const isSuccess =
+        (result && (result.success === true || result.created === true)) ||
+        (response.ok && result && (result.email || Array.isArray(result.pnrs)));
+      if (isSuccess) {
         // Save banner to user profile for future use
         if (user && formData.banner) {
           await supabase
