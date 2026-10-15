@@ -23,7 +23,8 @@ interface Row {
   from_email: string | null; ts: string | null;
 }
 
-const rpc = supabase.rpc as unknown as (fn: string, args?: Record<string, unknown>, opts?: any) => any;
+const rpc = (fn: string, args?: Record<string, unknown>) =>
+  (supabase.rpc as any)(fn, args) as Promise<{ data: any; error: any }>;
 
 const STATUS_LABEL: Record<string, string> = {
   WAITING: 'Chờ đủ vé', READY: 'Sẵn sàng gửi', PROCESSING: 'Đang gửi', RETRY: 'Chờ thử lại',
@@ -116,8 +117,8 @@ export default function MailCenter() {
     placeholderData: keepPreviousData,
     refetchInterval: autoRefresh && tab !== 'log' ? 60e3 : false,
     refetchIntervalInBackground: false,
-    queryFn: async ({ signal }) => {
-      const { data, error } = await rpc('mail_center_list', params).abortSignal(signal);
+    queryFn: async () => {
+      const { data, error } = await rpc('mail_center_list', params);
       if (error) throw error;
       return data as { total: number; rows: Row[] };
     },
