@@ -117,8 +117,8 @@ export default function MailCenter() {
     placeholderData: keepPreviousData,
     refetchInterval: autoRefresh && tab !== 'log' ? 60e3 : false,
     refetchIntervalInBackground: false,
-    queryFn: async ({ signal }) => {
-      const { data, error } = await rpc('mail_center_list', params).abortSignal(signal);
+    queryFn: async () => {
+      const { data, error } = await rpc('mail_center_list', params);
       if (error) throw error;
       return data as { total: number; rows: Row[] };
     },
