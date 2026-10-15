@@ -23,7 +23,8 @@ interface Row {
   from_email: string | null; ts: string | null;
 }
 
-const rpc = supabase.rpc as unknown as (fn: string, args?: Record<string, unknown>, opts?: any) => any;
+const rpc = (fn: string, args?: Record<string, unknown>) =>
+  (supabase.rpc as any)(fn, args) as Promise<{ data: any; error: any }>;
 
 const STATUS_LABEL: Record<string, string> = {
   WAITING: 'Chờ đủ vé', READY: 'Sẵn sàng gửi', PROCESSING: 'Đang gửi', RETRY: 'Chờ thử lại',
