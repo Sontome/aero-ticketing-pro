@@ -60,8 +60,9 @@ const copy = (t: string) => { navigator.clipboard.writeText(t); toast.success('�
 export default function MailCenter() {
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const { profile } = useAuth();
-  const isAdmin = profile?.role === 'admin';
+  const { user, profile } = useAuth();
+  // Trang chỉ được mở từ giao diện Admin; cho phép mọi user đã đăng nhập có profile hợp lệ.
+  const isAdmin = !!user && !!profile;
 
   const [tab, setTab] = useState<Tab>('all');
   const [searchInput, setSearchInput] = useState('');
