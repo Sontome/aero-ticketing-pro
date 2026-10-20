@@ -1,0 +1,3 @@
+REVOKE EXECUTE ON FUNCTION public.customer_flights_list(text,text,text,text,timestamptz,timestamptz,date,date,text,integer,integer) FROM anon;
+REVOKE EXECUTE ON FUNCTION public.customer_flights_list(text,text,text,text,timestamptz,timestamptz,date,date,text,integer,integer) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.customer_flights_list(text,text,text,text,timestamptz,timestamptz,date,date,text,integer,integer) TO authenticated;
