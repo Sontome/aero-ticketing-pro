@@ -688,6 +688,7 @@ export type Database = {
           day4: string | null
           email: string
           first_sent_at: string | null
+          hang: string | null
           id: number
           last_sent_at: string | null
           mail_queue_id: string | null
@@ -714,6 +715,7 @@ export type Database = {
           day4?: string | null
           email: string
           first_sent_at?: string | null
+          hang?: string | null
           id?: number
           last_sent_at?: string | null
           mail_queue_id?: string | null
@@ -740,6 +742,7 @@ export type Database = {
           day4?: string | null
           email?: string
           first_sent_at?: string | null
+          hang?: string | null
           id?: number
           last_sent_at?: string | null
           mail_queue_id?: string | null
@@ -1397,6 +1400,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      lookup_ticket_hang: { Args: { p_pnr: string }; Returns: string }
       mail_archive: {
         Args: {
           p_error?: string
