@@ -112,6 +112,7 @@ export default function CustomerFlights() {
     p_sent_to: filters.sentTo ? vnDateToIso(filters.sentTo) : null,
     p_fly_from: filters.flyFrom || null,
     p_fly_to: filters.flyTo || null,
+    p_hang: filters.hang || null,
     p_sort: sort,
     p_page: page,
     p_page_size: pageSize,
