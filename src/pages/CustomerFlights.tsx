@@ -233,6 +233,13 @@ export default function CustomerFlights() {
                   <Button variant="ghost" onClick={clearFilters}>
                     <X className="w-4 h-4 mr-1" /> Xóa bộ lọc
                   </Button>
+                  <Select value={filters.hang || 'all'} onValueChange={setHang}>
+                    <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tất cả hãng</SelectItem>
+                      {HANG_OPTIONS.map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
                   <Select value={sort} onValueChange={v => setSort(v as 'desc' | 'asc')}>
                     <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
                     <SelectContent>
