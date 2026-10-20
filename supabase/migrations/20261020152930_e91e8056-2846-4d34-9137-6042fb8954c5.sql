@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.customer_flights_list(text,text,text,text,timestamp with time zone,timestamp with time zone,date,date,text,integer,integer,text) FROM anon, public;
