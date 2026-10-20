@@ -35,12 +35,16 @@ interface FlightRow {
 interface Filters {
   pnr: string; email: string; customerName: string; phone: string;
   sentFrom: string; sentTo: string; flyFrom: string; flyTo: string;
+  hang: string;
 }
 
 const EMPTY_FILTERS: Filters = {
   pnr: '', email: '', customerName: '', phone: '',
   sentFrom: '', sentTo: '', flyFrom: '', flyTo: '',
+  hang: '',
 };
+
+const HANG_OPTIONS = ['VNA', 'VJ', 'PRE', 'SUN'] as const;
 
 const rpc = (fn: string, args?: Record<string, unknown>) =>
   (supabase.rpc as any)(fn, args) as Promise<{ data: any; error: any }>;
