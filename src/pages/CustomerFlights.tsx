@@ -137,7 +137,13 @@ export default function CustomerFlights() {
       customerName: inputs.customerName.trim(), phone: inputs.phone.trim(),
       sentFrom: inputs.sentFrom, sentTo: inputs.sentTo,
       flyFrom: inputs.flyFrom, flyTo: inputs.flyTo,
+      hang: inputs.hang,
     });
+  };
+  const setHang = (v: string) => {
+    const hang = v === 'all' ? '' : v;
+    setInputs(i => ({ ...i, hang }));
+    setFilters(f => ({ ...f, hang }));
   };
   const clearFilters = () => { setInputs(EMPTY_FILTERS); setFilters(EMPTY_FILTERS); };
   const refresh = () => qc.invalidateQueries({ queryKey: ['customer-flights', 'list'] });
