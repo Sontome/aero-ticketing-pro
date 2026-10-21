@@ -77,7 +77,7 @@ export function useSunChangeTicket() {
       const { ok, json } = await sunCheckPnr(code, ctrl.signal);
       if (sid !== sessionRef.current) return;
       const parsed = parseCheckResponse(ok, json, code);
-      if (!parsed.ok) {
+      if (parsed.ok === false) {
         setError(parsed.error);
         toast.error(parsed.error);
         return;
@@ -110,7 +110,7 @@ export function useSunChangeTicket() {
       if (sid !== sessionRef.current) return;
       if (ok && json === null) throw new SunNetworkError('network', 'non-json');
       const parsed = parseChangeResponse(ok, json, checkedPnr);
-      if (!parsed.ok) {
+      if (parsed.ok === false) {
         setError(parsed.error);
         toast.error(parsed.error);
         return;

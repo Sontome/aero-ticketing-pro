@@ -112,7 +112,7 @@ const FeeLine: React.FC<{
             size="sm"
             onClick={() => {
               const r = validateFeeEdit(text, original);
-              if (!r.ok) return setErr(r.error);
+              if (r.ok === false) return setErr(r.error);
               onSave(r.value);
               setEditing(false);
             }}
