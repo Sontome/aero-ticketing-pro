@@ -168,7 +168,7 @@ export const FEE_KEYS: FeeKey[] = ['chenhlech_giagoc', 'chenhlech_thuephi', 'phi
 
 /** Validate a user edit: must be a finite number not below the API's original value. */
 export function validateFeeEdit(input: string, original: number): { ok: true; value: number } | { ok: false; error: string } {
-  const s = input.replace(/[\s,.]/g, (c) => (c === '.' ? '.' : '')).trim();
+  const s = input.replace(/[\s,]/g, '');
   if (!/^-?\d+(\.\d+)?$/.test(s)) return { ok: false, error: 'Giá trị không hợp lệ' };
   const v = Number(s);
   if (!Number.isFinite(v)) return { ok: false, error: 'Giá trị không hợp lệ' };
