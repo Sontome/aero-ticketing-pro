@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test';
 import {
   adjustedTotal, buildChangePayload, newSegmentsFromTrip, parseChangeResponse, parseCheckResponse,
   parseSunDateTime, validateFeeEdit, segView,
+  pairSunSegments, toggleSunSelection,
 } from '../src/lib/sunChangeTicket';
 
 const oldSeg = { trip_id: 1, segment_id: 11, departure: 'ICN', arrival: 'PQC', flight_status: 'NN', booking_class: 'Y', fare_basis: 'YOW', nested: { a: 1 } };
@@ -22,7 +23,7 @@ describe('dates', () => {
 
 describe('payload', () => {
   test('arrays length 1, objects untouched incl NN', () => {
-    const p = buildChangePayload('ABCDEF', oldSeg, newSeg);
+    const p = buildChangePayload('ABCDEF', [oldSeg], [newSeg]);
     expect(p.old_itinerary).toHaveLength(1);
     expect(p.new_itinerary).toHaveLength(1);
     expect(p.old_itinerary[0]).toBe(oldSeg);
