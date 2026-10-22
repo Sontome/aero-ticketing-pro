@@ -363,7 +363,7 @@ export const SunChangeTicketModal: React.FC<Props> = ({ isOpen, onClose, trip })
                       ))}
                     </div>
                   ) : (
-                    <span className="text-gray-600">{h.pairing.reason === 'direction'
+                    <span className="text-gray-600">{h.pairing.ok === false && h.pairing.reason === 'direction'
                       ? 'Hai cặp phải cùng chiều đi với chiều đi, chiều về với chiều về'
                       : 'Chọn 1 hoặc 2 chặng hiện tại và cùng số chặng mới'}</span>
                   )}
