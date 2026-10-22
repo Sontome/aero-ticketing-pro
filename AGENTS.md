@@ -1,1 +1,2 @@
 - Reads of profiles/user_roles (current user) and ticket_rules/ticket_campaigns go through src/lib/appDataCache.ts (localStorage TTL cache keyed per user_id + in-flight dedupe); patch or invalidate the cache after writes. Why: cut duplicate Supabase REST calls.
+- SUN selection pairing is centralized in pure helpers in sunChangeTicket; the hook validates paired source objects before building the payload. Why: keep direction/source ordering identical in confirmation and API requests.
