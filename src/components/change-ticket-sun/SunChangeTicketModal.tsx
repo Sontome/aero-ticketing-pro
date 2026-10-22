@@ -42,7 +42,7 @@ const SegRow: React.FC<{
     <div className="flex items-start gap-2 w-full">
       {onSelect && (
         <span
-          className={`mt-1 h-4 w-4 shrink-0 rounded-full border-2 ${selected ? 'border-orange-500 bg-orange-500' : 'border-gray-300'}`}
+          className={`mt-1 h-4 w-4 shrink-0 rounded-sm border-2 ${selected ? 'border-orange-500 bg-orange-500' : 'border-gray-300'}`}
         />
       )}
       <div className="flex-1 min-w-0 text-sm">
