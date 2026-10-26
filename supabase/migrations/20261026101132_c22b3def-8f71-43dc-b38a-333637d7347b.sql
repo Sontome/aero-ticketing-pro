@@ -1,0 +1,12 @@
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.airline_promo_codes TO authenticated;
+GRANT ALL ON public.airline_promo_codes TO service_role;
+REVOKE ALL ON public.airline_promo_codes FROM anon;
+ALTER TABLE public.airline_promo_codes ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS promocodes_admin_select ON public.airline_promo_codes;
+CREATE POLICY promocodes_admin_select ON public.airline_promo_codes FOR SELECT TO authenticated USING (public.has_role(auth.uid(), 'admin'::public.app_role));
+DROP POLICY IF EXISTS promocodes_admin_insert ON public.airline_promo_codes;
+CREATE POLICY promocodes_admin_insert ON public.airline_promo_codes FOR INSERT TO authenticated WITH CHECK (public.has_role(auth.uid(), 'admin'::public.app_role));
+DROP POLICY IF EXISTS promocodes_admin_update ON public.airline_promo_codes;
+CREATE POLICY promocodes_admin_update ON public.airline_promo_codes FOR UPDATE TO authenticated USING (public.has_role(auth.uid(), 'admin'::public.app_role)) WITH CHECK (public.has_role(auth.uid(), 'admin'::public.app_role));
+DROP POLICY IF EXISTS promocodes_admin_delete ON public.airline_promo_codes;
+CREATE POLICY promocodes_admin_delete ON public.airline_promo_codes FOR DELETE TO authenticated USING (public.has_role(auth.uid(), 'admin'::public.app_role));
