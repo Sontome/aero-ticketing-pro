@@ -722,9 +722,7 @@ export const AdminDashboard = () => {
               </Dialog>
             </CardContent>
           </Card>
-        </div>
-
-        {profile?.role === 'admin' && <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {profile?.role === 'admin' && <>
           <Button asChild variant="ghost" className="h-auto p-0 text-left whitespace-normal hover:bg-transparent">
             <a href="/admin/promocodes" onClick={event => { event.preventDefault(); navigate('/admin/promocodes'); }} className="block w-full">
               <Card className="w-full cursor-pointer hover:shadow-lg transition-shadow">
@@ -736,7 +734,8 @@ export const AdminDashboard = () => {
               </Card>
             </a>
           </Button>
-        </div>}
+          </>}
+        </div>
 
         {/* Search Statistics */}
         <div className="mb-8">
