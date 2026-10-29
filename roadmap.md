@@ -3,3 +3,8 @@
 - [x] Apply Admin-only grants and RLS to existing promo table.
 - [x] Implement Dashboard card, list/filter/pagination and CRUD dialogs.
 - [x] Run 14 promo mock tests and 21 SUN regression tests; verify policies and grants. Authenticated live CRUD cannot be tested with external unmanaged Supabase session.
+
+# VNA multi-city holds
+- [x] Reuse VNA booking form and connect multi-city hold action.
+- [x] Build booking-v3 payload, retain all selected segments and delivery contacts.
+- [x] Verify mock UI form-to-PNR flow and 42 regression/contract tests without creating a real PNR; external unmanaged Supabase prevents authenticated live verification.
