@@ -247,10 +247,13 @@ export const FlightCard: React.FC<FlightCardProps> = ({ flight, priceMode, onHol
   const handleCopyFlight = () => {
     const outboundLine = formatFlightWithStops(false);
     const returnLine = flight.return ? formatFlightWithStops(true) : '';
+    const copyPrice = flight.vnaItinerary && (flight.vnaItinerary.chiều_đi.length > 1 || (flight.vnaItinerary.chiều_về?.length ?? 0) > 1)
+      ? new Intl.NumberFormat('vi-VN').format(ruleEffects.priceOverride ?? adjustedPrice)
+      : formatPrice(ruleEffects.priceOverride ?? adjustedPrice);
     
     const copyText = `${outboundLine}${returnLine ? `\n\n${returnLine}` : ''}
 
-${ruleEffects.baggage ?? getBaggageInfo()}, giá vé = ${formatPrice(ruleEffects.priceOverride ?? adjustedPrice)}w${notesLine ? `\n${notesLine}` : ''}`;
+${ruleEffects.baggage ?? getBaggageInfo()}, giá vé = ${copyPrice}w${notesLine ? `\n${notesLine}` : ''}`;
 
     navigator.clipboard.writeText(copyText).then(() => {
       toast({
