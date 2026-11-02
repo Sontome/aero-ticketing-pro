@@ -10,6 +10,6 @@
 - [x] Verify mock UI form-to-PNR flow and 42 regression/contract tests without creating a real PNR; external unmanaged Supabase prevents authenticated live verification.
 
 # VNA V5
-- [ ] Switch OW/RT/MD searches to V5 and preserve all direction segments.
-- [ ] Use booking-v3 for selected OW/RT itineraries with delivery contacts and id_f2.
-- [ ] Update segment display/copy and run mocked regression checks without real booking.
+- [x] Switch OW/RT/MD searches to V5 and preserve all direction segments.
+- [x] Use booking-v3 for selected OW/RT itineraries with delivery contacts and id_f2.
+- [x] Update segment display/copy; 49 contract/regression tests passed and mocked browser form-to-PNR/copy flow verified with no runtime errors. No real booking created; real authenticated/provider flow remains unverified.
